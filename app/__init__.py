@@ -1,5 +1,13 @@
 from flask import Flask
+from flask_restful import Api
 
-app = Flask(__name__)
-from app import yetiapi
-from app import yeticam
+flask = Flask(__name__)
+api = Api(flask)
+
+from app import apis
+from app import content
+
+api.add_resource(apis.ImageApi, '/api/image')
+api.add_resource(apis.ConfigAPi, '/api/config')
+
+

@@ -1,5 +1,5 @@
-from app import app
+from app import flask
 
-@app.route('/')
+@flask.route('/')
 def index():
     return "Hello, World!"
