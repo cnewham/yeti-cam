@@ -1,0 +1,14 @@
+<html>
+	<head>
+		<title>YETI Cam</title>
+		{{ JSGlue.include() }}
+        <script type=text/javascript src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
+        <script type=text/javascript src="{{ url_for('static', filename='app.js') }}"></script>
+	<head>
+
+	<body>
+		<img id="current" src="{{ url_for('static', filename='current.jpg') }}" />
+	</body>
+
+	<div id="currentTime">test</div>
+</html>
