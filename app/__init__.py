@@ -13,6 +13,6 @@ flask.config['UPLOAD_FOLDER'] = '/var/www/yeti-cam/uploads'
 flask.config['ALLOWED_EXTENSIONS'] = set(['jpg', 'jpeg'])
 
 api.add_resource(apis.ImageApi, '/api/image')
-api.add_resource(apis.ConfigAPi, '/api/config')
+api.add_resource(apis.ConfigApi, '/api/config')
 
 

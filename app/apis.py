@@ -30,6 +30,11 @@ class ImageApi(Resource):
         return '.' in filename and filename.rsplit('.', 1)[1] in flask.config['ALLOWED_EXTENSIONS']
 
 
-class ConfigAPi(Resource):
+class ConfigApi(Resource):
     def get(self):
-        return {'hello': 'world'}
+        try:
+            return flask.send_static_file("config.txt")
+        except Exception as ex:
+            print type(ex)
+            print ex
+            abort(500)
