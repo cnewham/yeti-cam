@@ -6,7 +6,7 @@ from app import flask
 class ImageApi(Resource):
     def get(self):
         try:
-            return url_for("static", filename="current.jpg")
+            return url_for("upload_folder", filename="current.jpg")
         except Exception as ex:
             print type(ex)
             print ex
@@ -17,7 +17,7 @@ class ImageApi(Resource):
             upload = request.files['userfile']
             if upload and self.allowed_file(upload.filename):
                 filename = upload.filename
-                upload.save(os.path.join("app", flask.config['UPLOAD_FOLDER'], filename))
+                upload.save(os.path.join(flask.config['UPLOAD_FOLDER'], filename))
                 return 201
             else:
                 abort(400)

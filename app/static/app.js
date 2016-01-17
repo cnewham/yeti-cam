@@ -1,6 +1,6 @@
 
 function updateCurrent() {
-	current = Flask.url_for("static", {"filename": "current.jpg"});
+	current = Flask.url_for("upload_folder", {"filename": "current.jpg"});
 
 	newImage = $("#current");
 	newImage.attr("src", current + "?" + new Date().getTime());
@@ -22,4 +22,3 @@ $(function(){
 	}, 10000);
 
 });
-
