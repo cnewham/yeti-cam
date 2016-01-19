@@ -1,16 +1,25 @@
 import os
-from flask_restful import Resource, abort, request
-from flask import url_for, send_from_directory
+from flask_restful import Resource, abort, request, reqparse
+from flask import url_for
 from app import flask
+from app import db
+
+parser = reqparse.RequestParser()
 
 class ImageApi(Resource):
     def get(self):
         try:
-            return url_for("upload_folder", filename="current.jpg")
+            parser.add_argument('cam', type=str, required=False)
+            args = parser.parse_args()
+            if args and args['cam']:
+                current = args.get('cam') + "-current.jpg"
+            else:
+                current = "current.jpg"
+            return url_for("upload_folder", filename=current)
         except Exception as ex:
             print type(ex)
             print ex
-            abort(500)
+            abort(400)
 
     def post(self):
         try:
@@ -34,6 +43,26 @@ class ConfigApi(Resource):
     def get(self):
         try:
             return flask.send_static_file("config.txt")
+        except Exception as ex:
+            print type(ex)
+            print ex
+            abort(500)
+
+class StatusApi(Resource):
+    def get(self):
+        try:
+            return db.dgetall('status')
+        except Exception as ex:
+            print type(ex)
+            print ex
+            abort(500)
+
+    def post(self):
+        try:
+            #TODO: implement post request
+            db.dadd('status', ('temp',20))
+            db.dadd('status', ('temp',21))
+            db.dadd('status', ('humidity',30))
         except Exception as ex:
             print type(ex)
             print ex
