@@ -36,10 +36,17 @@
   <!-- Primary Page Layout
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <div class="container">
+    <div class="row" style="margin-top: 10%">
+      <h4>YETI CAM</h4>
+    </div>
     <div class="row">
-      <div class="two-thirds-column" style="margin-top: 10%">
-        <h4>YETI CAM</h4>
+      <div>
     	<img id="current" src="{{ url_for('upload_folder', filename='current.jpg') }}" />
+      </div>
+    </div>
+    <div class="row">
+      <div id="status">
+        <h5>Loading status...</h5>  	
       </div>
     </div>
   </div>

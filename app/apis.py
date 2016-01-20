@@ -1,16 +1,21 @@
 import os
+import datetime
 from flask_restful import Resource, abort, request, reqparse
 from flask import url_for
 from app import flask
 from app import db
 
-parser = reqparse.RequestParser()
-
 class ImageApi(Resource):
+    def __init__(self):
+        self.parser = reqparse.RequestParser()
+        self.parser.add_argument('cam', type=str, required=False)
+        self.parser.add_argument('battery', type=str, location='form', required=False)
+        self.parser.add_argument('event', type=str, location='form', required=False)
+        self.parser.add_argument('time', type=str, location='form', required=False)
+
     def get(self):
         try:
-            parser.add_argument('cam', type=str, required=False)
-            args = parser.parse_args()
+            args = self.parser.parse_args()
             if args and args['cam']:
                 current = args.get('cam') + "-current.jpg"
             else:
@@ -24,9 +29,13 @@ class ImageApi(Resource):
     def post(self):
         try:
             upload = request.files['userfile']
+            args = self.parser.parse_args()
             if upload and self.allowed_file(upload.filename):
                 filename = upload.filename
                 upload.save(os.path.join(flask.config['UPLOAD_FOLDER'], filename))
+                db.dadd('status', ('Last Updated', args.get('time')))
+                db.dadd('status', ('Battery', args.get('battery')))
+                db.dadd('status', ('Event', args.get('event')))
                 return 201
             else:
                 abort(400)

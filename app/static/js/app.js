@@ -1,5 +1,5 @@
 
-function updateCurrent() {
+function updateImage() {
 	current = Flask.url_for("upload_folder", {"filename": "current.jpg"});
 
 	newImage = $("#current");
@@ -8,17 +8,32 @@ function updateCurrent() {
 	$("#currentTime").text('success!');
 }
 
+function updateStatus() {
+	$.ajax({
+        type: "GET",
+        url: "api/status",
+        dataType: "json",
+        error: function (error) {
+        	$("#status").text("An error occured: " + error.status + " " + error.statusText);
+        },
+        success: function (result) {
+    		status = "<table>";
+    		$.each(result, function(key, value) {
+    			status += "<tr><td>" + key + "</td><td>" + value + "</td></tr>";
+    		});
+    		status += "</table>";
 
-$("#current").click(function(){
-
-	updateCurrent();
-
-});
+    		$("#status").html(status);
+		}
+	});
+}
 
 $(function(){
+	updateStatus();
 
 	setInterval(function(){
-		updateCurrent();
+		updateImage();
+		updateStatus();
 	}, 10000);
 
 });
