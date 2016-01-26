@@ -1,9 +1,8 @@
 import os
-import datetime
 from flask_restful import Resource, abort, request, reqparse
 from flask import url_for
-from app import flask
-from app import db
+from yeti.server import flask
+from yeti.server import db
 
 class ImageApi(Resource):
     def __init__(self):

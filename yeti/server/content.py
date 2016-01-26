@@ -1,5 +1,5 @@
 import os
-from app import flask
+from yeti.server import flask
 from flask import render_template, send_from_directory
 
 @flask.route('/')

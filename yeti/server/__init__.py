@@ -7,7 +7,7 @@ flask = Flask(__name__, static_folder='static', static_url_path='')
 api = Api(flask)
 jsglue = JSGlue(flask)
 
-db = pickledb.load('yeti.db', True)
+db = pickledb.load('yeti-server.db', True)
 
 # set default configuration
 if not db.get('UPLOAD_FOLDER'):
@@ -19,8 +19,8 @@ if not db.get('ALLOWED_EXTENSIONS'):
 if not db.get('status'):
     db.dcreate('status')
 
-from app import apis
-from app import content
+from yeti.server import apis
+from yeti.server import content
 
 flask.config['UPLOAD_FOLDER'] = db.get('UPLOAD_FOLDER')
 flask.config['ALLOWED_EXTENSIONS'] = db.get('ALLOWED_EXTENSIONS')
