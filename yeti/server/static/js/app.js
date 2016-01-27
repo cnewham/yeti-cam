@@ -28,12 +28,15 @@ function updateStatus() {
 	});
 }
 
+function refresh() {
+    updateImage();
+    updateStatus();
+}
+
 $(function(){
-	updateStatus();
+	refresh();
 
 	setInterval(function(){
-		updateImage();
-		updateStatus();
+        refresh();
 	}, 10000);
-
 });
