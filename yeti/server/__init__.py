@@ -2,6 +2,7 @@ import pickledb
 from flask import Flask
 from flask_restful import Api
 from flask_jsglue import JSGlue
+from yeti.common import constants
 
 flask = Flask(__name__, static_folder='static', static_url_path='')
 api = Api(flask)
@@ -16,8 +17,8 @@ if not db.get('UPLOAD_FOLDER'):
 if not db.get('ALLOWED_EXTENSIONS'):
     db.set('ALLOWED_EXTENSIONS', ['jpg', 'jpeg'])
 
-if not db.get('status'):
-    db.dcreate('status')
+if not db.get(constants.STATUS):
+    db.dcreate(constants.STATUS)
 
 from yeti.server import apis
 from yeti.server import content
