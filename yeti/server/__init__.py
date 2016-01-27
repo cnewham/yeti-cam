@@ -7,7 +7,7 @@ flask = Flask(__name__, static_folder='static', static_url_path='')
 api = Api(flask)
 jsglue = JSGlue(flask)
 
-db = pickledb.load('yeti-server.db', True)
+db = pickledb.load('db/server.db', True)
 
 # set default configuration
 if not db.get('UPLOAD_FOLDER'):
