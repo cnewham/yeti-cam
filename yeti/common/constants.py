@@ -2,7 +2,6 @@ __author__ = 'chris'
 
 #STATUS CONSTANTS
 
-STATUS = 'status'
 STATUS_CAM = 'cam'
 STATUS_BATTERY = 'battery'
 STATUS_EVENT = 'event'
@@ -15,6 +14,9 @@ STATUS_MOTION_EVENTS_24H = 'motion_events_24h'
 
 #CONFIG CONSTANTS
 
-CONFIG = 'config'
 CONFIG_VERSION = 'version'
-CONFIG_SENSORS = 'sensors'
+CONFIG_SERVER = "server"
+
+#SENSOR CONSTANTS
+
+SENSORS_TEMP = 'temp'
