@@ -1,6 +1,6 @@
 __author__ = 'chris'
 import pickledb
-import constants
+from yeti.common import constants
 
 db = pickledb.load('db/config.db', True)
 
@@ -9,11 +9,11 @@ if not db.get(constants.CONFIG_VERSION):
 if not db.get(constants.CONFIG_SERVER):
     db.set(constants.CONFIG_SERVER, "http://localhost:5000/api/")
 
-def get(key):
-    return db.get(key)
+def get(key = None):
+    if key is None:
+        return db.getall()
+    else:
+        return db.get(key)
 
-def getall():
-    return db.dump()
-
-def set(key, value):
-    db.set(key, value)
+def update(configs):
+    print "update configs: " + configs

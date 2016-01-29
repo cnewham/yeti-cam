@@ -1,14 +1,29 @@
 __author__ = 'chris'
 from yeti.common import constants
-from yeti.common import config
-from yeti.common import statuses
+from yeti.common import log
 
-import sensors
+import config
 import service
-import camera
+import sensors
+#import camera
 
 temp = sensors.Temperature()
 server = service.YetiService(config.get(constants.CONFIG_SERVER))
-cam = camera.YetiCam()
 
-cam.Start()
+#temp.read()
+#camera.motion_detect(lambda: send)
+
+def send(image, event):
+    status = {}
+    #TODO: build status object to send with image
+
+    server.post_image(image, status)
+    log.LogInfo(__name__, "Sending image with event %s" % event)
+
+def check_config_updates():
+    log.LogInfo(__name__, "Checking for config updates")
+    configs = server.get_config()
+
+    if configs[constants.CONFIG_VERSION] > config.get(constants.CONFIG_VERSION):
+        config.update(configs)
+
