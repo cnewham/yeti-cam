@@ -15,4 +15,6 @@ STATUS_MOTION_EVENTS_24H = 'motion_events_24h'
 
 #CONFIG CONSTANTS
 
-CONFIG_VERSION = 'config_version'
+CONFIG = 'config'
+CONFIG_VERSION = 'version'
+CONFIG_SENSORS = 'sensors'
