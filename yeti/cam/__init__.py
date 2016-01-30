@@ -1,11 +1,11 @@
 __author__ = 'chris'
+import threading, time
 from yeti.common import constants, config, log
 from datetime import datetime
 import service
 import sensors
 #import camera
 
-motion_events = 0
 temp = sensors.Temperature()
 server = service.YetiService(config.get(constants.CONFIG_SERVER))
 
@@ -43,6 +43,11 @@ def check_config_updates():
     except Exception as ex:
         log.LogError(__name__, "Could not update configs from the server", ex)
 
-check_config_updates()
-send("%s/capture.jpg" % config.get(constants.CONFIG_IMAGE_DIR), constants.EVENT_TIMER)
+
+#config_update_thread = threading.Thread(target=check_config_updates)
+#config_update_thread.daemon = True
+#config_update_thread.start()
+
+#send("%s/capture.jpg" % config.get(constants.CONFIG_IMAGE_DIR), constants.EVENT_TIMER)
+
 

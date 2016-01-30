@@ -7,6 +7,8 @@ db = pickledb.load('db/config.db', True)
 
 if not db.get(constants.CONFIG_VERSION):
     db.set(constants.CONFIG_VERSION, 1)
+if not db.get(constants.CONFIG_CHECK_UPDATES_MIN):
+    db.set(constants.CONFIG_CHECK_UPDATES_MIN, 60)
 if not db.get(constants.CONFIG_SERVER):
     db.set(constants.CONFIG_SERVER, "http://localhost:5000/api/")
 if not db.get(constants.CONFIG_IMAGE_DIR):

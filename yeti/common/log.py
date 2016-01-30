@@ -1,18 +1,22 @@
 __author__ = 'chris'
 import datetime
 
+def Log(module, level, message):
+    print "%s: [%s] [%s] %s" % (datetime.datetime.now().strftime("%x %X.%f"), level, module, message)
+
 def LogVerbose(module, message):
-    print "%s: [VERBOSE] %s: %s" % (datetime.datetime.now().strftime("%x %X.%f"), module, message)
+    Log(module, "VERBOSE", message)
 
 def LogInfo(module, message):
-    print "%s: [INFO] %s: %s" % (datetime.datetime.now().strftime("%x %X.%f"), module, message)
+    Log(module, "INFO", message)
 
 def LogWarn(module, message):
-    print "%s: [WARN] %s: %s" % (datetime.datetime.now().strftime("%x %X.%f"), module, message)
+    Log(module, "WARN", message)
 
 def LogError(module, message, ex = None):
-    print "%s: [ERROR] %s: %s" % (datetime.datetime.now().strftime("%x %X.%f"), module, message)
+    Log(module, "ERROR", message)
 
     if ex is not None:
-        print "%s: [EXCEPTION] %s: %s %s" % (datetime.datetime.now().strftime("%x %X.%f"), module, type(ex), ex)
+        details = "%s %s" % (type(ex), ex)
+        Log(module, "EXCEPTION", details)
 

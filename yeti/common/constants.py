@@ -4,6 +4,7 @@ __author__ = 'chris'
 
 EVENT_TIMER = 'timer'
 EVENT_MOTION = 'motion'
+EVENT_MANUAL = 'manual'
 
 #STATUS CONSTANTS
 
@@ -21,6 +22,7 @@ STATUS_MOTION_EVENTS_24H = 'motion_events_24h'
 #CONFIG CONSTANTS
 
 CONFIG_VERSION = 'version'
+CONFIG_CHECK_UPDATES_MIN = 'check_updates_min'
 CONFIG_SERVER = 'server'
 CONFIG_IMAGE_DIR = "image_dir"
 CONFIG_IMAGE_PREFIX = 'image_prefix'
