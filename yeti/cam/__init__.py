@@ -5,6 +5,7 @@ import service
 import sensors
 #import camera
 
+motion_events = 0
 temp = sensors.Temperature()
 server = service.YetiService(config.get(constants.CONFIG_SERVER))
 
@@ -17,7 +18,11 @@ def send(image, event):
     status[constants.STATUS_INDOOR_TEMP] = temp.read(constants.STATUS_INDOOR_TEMP)
     status[constants.STATUS_OUTDOOR_TEMP] = temp.read(constants.STATUS_OUTDOOR_TEMP)
     status[constants.STATUS_TIME] = datetime.now().isoformat()
-    status[constants.STATUS_MOTION_EVENTS_24H] = 2
+
+    #if event == constants.EVENT_MOTION:
+    #    camera.motion_events += 1
+
+    #status[constants.STATUS_MOTION_EVENTS_24H] = camera.motion_events
 
     server.post_image(image)
     server.post_status(status)

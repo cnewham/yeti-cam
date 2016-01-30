@@ -20,11 +20,20 @@ STATUS_MOTION_EVENTS_24H = 'motion_events_24h'
 
 #CONFIG CONSTANTS
 
-CONFIG_CAM_CONFIG = 'cam_config'
 CONFIG_VERSION = 'version'
 CONFIG_SERVER = 'server'
 CONFIG_IMAGE_DIR = "image_dir"
-CONFIG_CAPTURE_INTERVAL_MIN = 'capture_interval_min'
+CONFIG_IMAGE_PREFIX = 'image_prefix'
+CONFIG_IMAGE_WIDTH = 'image_width'
+CONFIG_IMAGE_HEIGHT = 'image_height'
+CONFIG_IMAGE_VFLIP = 'image_vflip'
+CONFIG_IMAGE_HFLIP = 'image_hflip'
+CONFIG_MOTION_THRESHOLD = 'motion_threshold'
+CONFIG_MOTION_SENSITIVITY = 'motion_sensitivity'
+CONFIG_TIMER_INTERVAL_MIN = 'timer_interval_min'
+CONFIG_NIGHT_ISO = 'night_iso'
+CONFIG_NIGHT_SHUTTER_SEC = 'night_shutter_sec'
+
 
 #SENSOR CONSTANTS
 

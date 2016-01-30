@@ -11,8 +11,27 @@ if not db.get(constants.CONFIG_SERVER):
     db.set(constants.CONFIG_SERVER, "http://localhost:5000/api/")
 if not db.get(constants.CONFIG_IMAGE_DIR):
     db.set(constants.CONFIG_IMAGE_DIR, "/home/pi/yeti/images")
-if not db.get(constants.CONFIG_CAPTURE_INTERVAL_MIN):
-    db.set(constants.CONFIG_CAPTURE_INTERVAL_MIN, 30)
+if not db.get(constants.CONFIG_IMAGE_PREFIX):
+    db.set(constants.CONFIG_IMAGE_PREFIX, "capture-")
+if not db.get(constants.CONFIG_IMAGE_WIDTH):
+    db.set(constants.CONFIG_IMAGE_WIDTH, 1980)
+if not db.get(constants.CONFIG_IMAGE_HEIGHT):
+    db.set(constants.CONFIG_IMAGE_HEIGHT, 1080)
+if not db.get(constants.CONFIG_IMAGE_VFLIP):
+    db.set(constants.CONFIG_IMAGE_VFLIP, False)
+if not db.get(constants.CONFIG_IMAGE_HFLIP):
+    db.set(constants.CONFIG_IMAGE_HFLIP, False)
+if not db.get(constants.CONFIG_MOTION_THRESHOLD):
+    db.set(constants.CONFIG_MOTION_THRESHOLD, 10)
+if not db.get(constants.CONFIG_MOTION_SENSITIVITY):
+    db.set(constants.CONFIG_MOTION_SENSITIVITY, 100)
+if not db.get(constants.CONFIG_NIGHT_ISO):
+    db.set(constants.CONFIG_NIGHT_ISO, 800)
+if not db.get(constants.CONFIG_NIGHT_SHUTTER_SEC):
+    db.set(constants.CONFIG_NIGHT_SHUTTER_SEC, 6)
+if not db.get(constants.CONFIG_TIMER_INTERVAL_MIN):
+    db.set(constants.CONFIG_TIMER_INTERVAL_MIN, 30)
+
 
 def get(key = None):
     if key is None:
