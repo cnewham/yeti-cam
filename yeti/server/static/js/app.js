@@ -17,7 +17,7 @@ function updateStatus() {
         	$("#status").text("An error occured: " + error.status + " " + error.statusText);
         },
         success: function (result) {
-    		status = "<table>";
+    		status = "<table style='width:100%'>";
     		$.each(result, function(key, value) {
     			status += "<tr><td>" + key + "</td><td>" + value + "</td></tr>";
     		});

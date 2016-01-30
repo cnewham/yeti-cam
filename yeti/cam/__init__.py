@@ -17,6 +17,7 @@ def send(image, event):
     status[constants.STATUS_INDOOR_TEMP] = temp.read(constants.STATUS_INDOOR_TEMP)
     status[constants.STATUS_OUTDOOR_TEMP] = temp.read(constants.STATUS_OUTDOOR_TEMP)
     status[constants.STATUS_TIME] = datetime.now().isoformat()
+    status[constants.STATUS_MOTION_EVENTS_24H] = 2
 
     server.post_image(image)
     server.post_status(status)
@@ -38,5 +39,5 @@ def check_config_updates():
         log.LogError(__name__, "Could not update configs from the server", ex)
 
 check_config_updates()
-send("%s/capture.jpg" % config.get(constants.CONFIG_IMAGE_DIR), "timer")
+send("%s/capture.jpg" % config.get(constants.CONFIG_IMAGE_DIR), constants.EVENT_TIMER)
 

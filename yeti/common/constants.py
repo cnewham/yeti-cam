@@ -1,5 +1,10 @@
 __author__ = 'chris'
 
+#EVENT CONSTANTS
+
+EVENT_TIMER = 'timer'
+EVENT_MOTION = 'motion'
+
 #STATUS CONSTANTS
 
 STATUS = 'status'
