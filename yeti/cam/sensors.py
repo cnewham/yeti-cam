@@ -12,8 +12,14 @@ if not (db.get(constants.SENSORS_TEMP)):
     db.dadd(constants.SENSORS_TEMP, (constants.STATUS_INDOOR_TEMP, 1))
     db.dadd(constants.SENSORS_TEMP, (constants.STATUS_OUTDOOR_TEMP, 2))
 
+if not (db.get(constants.SENSORS_READ_INTERVAL_SEC)):
+    db.set(constants.SENSORS_READ_INTERVAL_SEC, constants.SENSORS_READ_INTERVAL_SEC_DEFAULT)
+
+
 class Temperature:
     readings = {}
+    readings[constants.STATUS_INDOOR_TEMP] = {constants.STATUS_TEMP:12, constants.STATUS_HUMIDITY:20}
+    readings[constants.STATUS_OUTDOOR_TEMP] = {constants.STATUS_TEMP:3, constants.STATUS_HUMIDITY:22}
 
     def __init__(self):
         self.pins = db.dgetall(constants.SENSORS_TEMP)

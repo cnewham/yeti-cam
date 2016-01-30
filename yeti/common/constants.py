@@ -2,21 +2,26 @@ __author__ = 'chris'
 
 #STATUS CONSTANTS
 
+STATUS = 'status'
 STATUS_CAM = 'cam'
 STATUS_BATTERY = 'battery'
 STATUS_EVENT = 'event'
 STATUS_TIME = 'time'
 STATUS_INDOOR_TEMP = 'indoor_temp'
-STATUS_INDOOR_HUMIDITY = 'indoor_humidity'
 STATUS_OUTDOOR_TEMP = 'outdoor_temp'
-STATUS_OUTDOOR_HUMIDITY = 'outdoor_humidity'
+STATUS_TEMP = 'temp'
+STATUS_HUMIDITY = 'humidity'
 STATUS_MOTION_EVENTS_24H = 'motion_events_24h'
 
 #CONFIG CONSTANTS
 
 CONFIG_VERSION = 'version'
 CONFIG_SERVER = "server"
+CONFIG_CAPTURE_INTERVAL_MIN = "capture_interval_min"
+CONFIG_CAPTURE_INTERVAL_MIN_DEFAULT = 30
 
 #SENSOR CONSTANTS
 
 SENSORS_TEMP = 'temp'
+SENSORS_READ_INTERVAL_SEC = "read_interval_sec"
+SENSORS_READ_INTERVAL_SEC_DEFAULT = 30

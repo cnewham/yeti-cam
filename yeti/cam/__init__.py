@@ -1,8 +1,6 @@
 __author__ = 'chris'
-from yeti.common import constants
-from yeti.common import log
-
-import config
+from yeti.common import constants, config, log
+from datetime import datetime
 import service
 import sensors
 #import camera
@@ -10,15 +8,19 @@ import sensors
 temp = sensors.Temperature()
 server = service.YetiService(config.get(constants.CONFIG_SERVER))
 
-#temp.read()
 #camera.motion_detect(lambda: send)
 
 def send(image, event):
+    log.LogInfo(__name__, "Sending image with event %s" % event)
     status = {}
-    #TODO: build status object to send with image
+    status[constants.STATUS_EVENT] = event
+    status[constants.STATUS_INDOOR_TEMP] = temp.read(constants.STATUS_INDOOR_TEMP)
+    status[constants.STATUS_OUTDOOR_TEMP] = temp.read(constants.STATUS_OUTDOOR_TEMP)
+    status[constants.STATUS_TIME] = datetime.now().isoformat()
+    status[constants.STATUS_MOTION_EVENTS_24H] = 2
 
     server.post_image(image, status)
-    log.LogInfo(__name__, "Sending image with event %s" % event)
+
 
 def check_config_updates():
     log.LogInfo(__name__, "Checking for config updates")
@@ -26,4 +28,6 @@ def check_config_updates():
 
     if configs[constants.CONFIG_VERSION] > config.get(constants.CONFIG_VERSION):
         config.update(configs)
+
+send("test", "timer")
 

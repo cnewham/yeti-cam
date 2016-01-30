@@ -3,7 +3,7 @@ from flask_restful import Resource, abort, request, reqparse
 from flask import url_for
 from yeti.server import flask
 from yeti.server import db
-from yeti.common import constants
+from yeti.common import constants, config
 
 class ImageApi(Resource):
     def __init__(self):
@@ -49,9 +49,16 @@ class ImageApi(Resource):
 
 
 class ConfigApi(Resource):
+    def post(self):
+        try:
+            config.update(request.data)
+        except Exception as ex:
+            print type(ex)
+            print ex
+            abort(500)
     def get(self):
         try:
-            return flask.send_static_file("config.txt")
+            return config.get()
         except Exception as ex:
             print type(ex)
             print ex
@@ -61,17 +68,6 @@ class StatusApi(Resource):
     def get(self):
         try:
             return db.dgetall(constants.STATUS)
-        except Exception as ex:
-            print type(ex)
-            print ex
-            abort(500)
-
-    def post(self):
-        try:
-            #TODO: implement post request
-            db.dadd('status', ('temp',20))
-            db.dadd('status', ('temp',21))
-            db.dadd('status', ('humidity',30))
         except Exception as ex:
             print type(ex)
             print ex
