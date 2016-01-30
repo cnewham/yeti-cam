@@ -28,14 +28,17 @@ class YetiService:
             print ex
 
     def get_config(self):
-        log.LogInfo(__name__, "Getting Config")
-        r = requests.get(self.baseUrl + "config")
-        log.LogInfo(__name__, "StatusCode: %s" % r.status_code)
-        configs = json.loads(r.text)
+        try:
+            log.LogInfo(__name__, "Getting Config")
+            r = requests.get(self.baseUrl + "config")
+            log.LogInfo(__name__, "StatusCode: %s" % r.status_code)
+            configs = json.loads(r.text)
+            return configs
+        except ValueError as ex:
+            log.LogError(__name__, "Could not parse response from server", ex)
+            raise ex
 
-        if not configs or configs is None:
-            log.LogInfo(__name__, "Updating server configs")
-            r = requests.put(self.baseUrl + "config", json=config.get())
-            log.LogInfo(__name__, "StatusCode: %s, Text: %s" % (r.status_code, r.text))
-
-        return configs
+    def send_config(self):
+        log.LogInfo(__name__, "Updating server configs")
+        r = requests.put(self.baseUrl + "config", json=config.get())
+        log.LogInfo(__name__, "StatusCode: %s, Text: %s" % (r.status_code, r.text))

@@ -23,11 +23,20 @@ def send(image, event):
 
 def check_config_updates():
     log.LogInfo(__name__, "Checking for config updates")
-    configs = server.get_config()
+    try:
+        server_configs = server.get_config()
 
-    if configs[constants.CONFIG_VERSION] > config.get(constants.CONFIG_VERSION):
-        config.update(configs)
+        if server_configs is None or server_configs[constants.CONFIG_VERSION] < config.get(constants.CONFIG_VERSION):
+            log.LogInfo(__name__, "Server config out of date, sending updated cam config")
+            server.send_config()
+        elif server_configs[constants.CONFIG_VERSION] > config.get(constants.CONFIG_VERSION):
+            log.LogInfo(__name__, "Cam config updating from server")
+            config.update(server_configs)
+    except ValueError:
+        return
+    except Exception as ex:
+        log.LogError(__name__, "Could not update configs from the server", ex)
 
 check_config_updates()
-#send("%s/capture.jpg" % config.get(constants.CONFIG_IMAGE_DIR), "timer")
+send("%s/capture.jpg" % config.get(constants.CONFIG_IMAGE_DIR), "timer")
 

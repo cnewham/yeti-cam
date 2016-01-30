@@ -30,7 +30,7 @@ class ImageApi(Resource):
             if upload and self.allowed_file(upload.filename):
                 filename = upload.filename
                 upload.save(os.path.join(flask.config['UPLOAD_FOLDER'], filename))
-                return 201
+                return {}, 201
             else:
                 abort(400)
         except Exception as ex:
@@ -46,7 +46,7 @@ class ConfigApi(Resource):
     def put(self):
         try:
             config.update(request.json)
-            return 201
+            return {}, 201
         except Exception as ex:
             print type(ex)
             print ex
@@ -65,7 +65,7 @@ class StatusApi(Resource):
         try:
             status = request.json
             print json.dumps(status)
-            return 201
+            return {}, 201
         except Exception as ex:
             print type(ex)
             print ex
