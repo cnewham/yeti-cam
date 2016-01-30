@@ -17,10 +17,9 @@ def send(image, event):
     status[constants.STATUS_INDOOR_TEMP] = temp.read(constants.STATUS_INDOOR_TEMP)
     status[constants.STATUS_OUTDOOR_TEMP] = temp.read(constants.STATUS_OUTDOOR_TEMP)
     status[constants.STATUS_TIME] = datetime.now().isoformat()
-    status[constants.STATUS_MOTION_EVENTS_24H] = 2
 
-    server.post_image(image, status)
-
+    server.post_image(image)
+    server.post_status(status)
 
 def check_config_updates():
     log.LogInfo(__name__, "Checking for config updates")
@@ -29,5 +28,6 @@ def check_config_updates():
     if configs[constants.CONFIG_VERSION] > config.get(constants.CONFIG_VERSION):
         config.update(configs)
 
-send("test", "timer")
+check_config_updates()
+#send("%s/capture.jpg" % config.get(constants.CONFIG_IMAGE_DIR), "timer")
 

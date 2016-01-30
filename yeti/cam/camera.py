@@ -24,7 +24,6 @@ from fractions import Fraction
 import picamera
 import picamera.array
 
-
 #Constants
 SECONDS2MICRO = 1000000  # Constant for converting Shutter Speed in Seconds to Microseconds
 
