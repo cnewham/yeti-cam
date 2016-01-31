@@ -7,9 +7,7 @@ import sensors
 import camera
 
 temp = sensors.Temperature()
-#server = service.YetiService(config.get(constants.CONFIG_SERVER))
-
-camera.motion_detect()
+server = service.YetiService(config.get(constants.CONFIG_SERVER))
 
 def send(image, event):
     log.LogInfo(__name__, "Sending image with event %s" % event)
@@ -27,7 +25,7 @@ def send(image, event):
     server.post_image(image)
     server.post_status(status)
 
-def check_config_updates():
+def config_update():
     log.LogInfo(__name__, "Checking for config updates")
     try:
         server_configs = server.get_config()
@@ -43,11 +41,39 @@ def check_config_updates():
     except Exception as ex:
         log.LogError(__name__, "Could not update configs from the server", ex)
 
+def check_config_updates():
+    while True:
+        config_update()
+        time.sleep(constants.CONFIG_CHECK_UPDATES_MIN)
+
+def capture_timer_image():
+    while True:
+        image = camera.timer_capture()
+        #send(image, constants.EVENT_TIMER)
+        time.sleep(constants.CONFIG_TIMER_INTERVAL_MIN)
+
+def scan_motion_image():
+    while True:
+        if camera.scanMotion():
+            image = camera.motion_capture()
+            #send(image, constants.EVENT_MOTION)
+
+
+scan_motion_image()
 
 #config_update_thread = threading.Thread(target=check_config_updates)
 #config_update_thread.daemon = True
 #config_update_thread.start()
 
-#send("%s/capture.jpg" % config.get(constants.CONFIG_IMAGE_DIR), constants.EVENT_TIMER)
+#timer_capture_thread = threading.Thread(target=capture_timer_image)
+#timer_capture_thread.daemon = True
+#timer_capture_thread.start()
+
+#motion_capture_thread = threading.Thread(target=scan_motion_image)
+#motion_capture_thread.daemon = True
+#motion_capture_thread.start()
+
+
+
 
 
