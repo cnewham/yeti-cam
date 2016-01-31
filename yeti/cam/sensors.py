@@ -2,9 +2,11 @@ __author__ = 'chris'
 import threading, time
 import json
 import pickledb
-from yeti.common import log
 from yeti.common import constants
 import Adafruit_DHT
+
+import logging
+logger = logging.getLogger(__name__)
 
 db = pickledb.load('db/sensors.db', True)
 
@@ -23,16 +25,16 @@ class Temperature:
 
     def __init__(self):
         self.pins = db.dgetall(constants.SENSORS_TEMP)
-        log.LogInfo(__name__, "Temperature: " + json.dumps(self.pins))
+        logger.info("Temperature: " + json.dumps(self.pins))
         self.t = threading.Thread(target=self.start)
         self.t.daemon = True
-        #self.t.start()
+        self.t.start()
 
     def read(self, sensor):
         return self.readings[sensor]
 
     def start(self):
-        log.LogInfo(__name__, "Reading temperature/humidity")
+        logger.info("Reading temperature/humidity")
         sensor = 22
 
         #Initialize readings with -1 value
@@ -41,7 +43,7 @@ class Temperature:
 
         while True:
             for name, pin in db.dgetall(constants.SENSORS_TEMP).iteritems():
-                log.LogVerbose(__name__, "Getting temp reading for %s from pin %s" % (name, pin))
+                logger.debug("Getting temp reading for %s from pin %s" % (name, pin))
 
                 # Try to grab a sensor reading.  Use the read_retry method which will retry up
                 # to 15 times to get a sensor reading (waiting 2 seconds between each retry).
@@ -56,14 +58,14 @@ class Temperature:
                 # If this happens try again!
 
                 if humidity is None or temperature is None:
-                    log.LogError(__name__, "Failed to get temperature reading for %s" % name)
+                    logger.error("Failed to get temperature reading for %s" % name)
                 else:
-                    log.LogVerbose(__name__, "Success: Temp %i Humidity %i" % (temperature, humidity))
+                    logger.debug("Success: Temp %i Humidity %i" % (temperature, humidity))
                     self.readings[name] = {constants.STATUS_TEMP:temperature, constants.STATUS_HUMIDITY:humidity}
 
             time.sleep(db.get(constants.SENSORS_READ_INTERVAL_SEC))
 
     def stop(self):
-        log.LogInfo(__name__, "Stopping...")
+        logger.info("Stopping...")
         self.t.join(3)
 

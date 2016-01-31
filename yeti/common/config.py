@@ -1,7 +1,9 @@
 __author__ = 'chris'
 import pickledb
 import json
-from yeti.common import constants, log
+from yeti.common import constants
+import logging
+logger = logging.getLogger(__name__)
 
 db = pickledb.load('db/config.db', True)
 
@@ -23,6 +25,8 @@ if not db.get(constants.CONFIG_IMAGE_VFLIP):
     db.set(constants.CONFIG_IMAGE_VFLIP, False)
 if not db.get(constants.CONFIG_IMAGE_HFLIP):
     db.set(constants.CONFIG_IMAGE_HFLIP, False)
+if not db.get(constants.CONFIG_MOTION_ENABLED):
+    db.set(constants.CONFIG_MOTION_ENABLED, True)
 if not db.get(constants.CONFIG_MOTION_THRESHOLD):
     db.set(constants.CONFIG_MOTION_THRESHOLD, 10)
 if not db.get(constants.CONFIG_MOTION_SENSITIVITY):
@@ -43,10 +47,10 @@ def get(key = None):
         return db.get(key)
 
 def update(configs):
-    log.LogInfo(__name__, "Updating configs")
+    logger.info("Updating configs")
 
     if not configs or configs is None:
-        log.LogInfo(__name__, "No configs to update")
+        logger.info("No configs to update")
         return
 
     for key, value in configs.iteritems():

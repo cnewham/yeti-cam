@@ -10,12 +10,14 @@ __author__ = 'chris'
 
 # This is sample code that can be used for further development
 
-log.LogInfo(__name__, "Starting camera")
-
 import datetime
 import time
+from yeti.common import config, constants
 
-from yeti.common import config, constants, log
+import logging
+logger = logging.getLogger(__name__)
+
+logger.info("Starting camera")
 
 import picamera
 import picamera.array
@@ -35,7 +37,7 @@ testHeight = 75
 currentCount = 1000
 
 def captureImage(filename):
-    log.LogInfo(__name__, "Capturing Image - Working .....")
+    logger.info("Capturing Image - Working .....")
     with picamera.PiCamera() as camera:
         camera.resolution = (config.get(constants.CONFIG_IMAGE_WIDTH), config.get(constants.CONFIG_IMAGE_HEIGHT))
         camera.vflip = config.get(constants.CONFIG_IMAGE_VFLIP)
@@ -44,7 +46,7 @@ def captureImage(filename):
         camera.exposure_mode = 'auto'
         camera.awb_mode = 'auto'
         camera.capture(filename)
-    log.LogInfo(__name__, "takeDayImage - Captured %s" % filename)
+    logger.info("Capture Image - Captured %s" % filename)
     return filename
 
 def takeMotionImage(width, height):

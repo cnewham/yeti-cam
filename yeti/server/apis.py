@@ -4,7 +4,10 @@ from flask_restful import Resource, abort, request, reqparse
 from flask import url_for, jsonify
 from yeti.server import flask
 from yeti.server import db
-from yeti.common import constants, config, log
+from yeti.common import constants, config
+
+import logging
+logger = logging.getLogger(__name__)
 
 class ImageApi(Resource):
     def __init__(self):
@@ -20,7 +23,7 @@ class ImageApi(Resource):
                 current = "current.jpg"
             return url_for("upload_folder", filename=current)
         except Exception as ex:
-            log.LogError(__name__, "An error occurred while attempting to send image", ex)
+            logger.exception("An error occurred while attempting to send image")
             abort(400)
 
     def post(self):
@@ -33,10 +36,10 @@ class ImageApi(Resource):
             else:
                 abort(400)
         except ValueError as ex:
-            log.LogError(__name__, "Could not parse status request from cam client", ex)
+            logger.exception("Could not parse status request from cam client")
             abort(400)
         except Exception as ex:
-            log.LogError(__name__, "An error occurred while attempting to receive uploaded image", ex)
+            logger.exception("An error occurred while attempting to receive uploaded image")
             abort(500)
 
     def allowed_file(self,filename):
@@ -49,17 +52,17 @@ class ConfigApi(Resource):
             config.update(request.json)
             return {}, 201
         except ValueError as ex:
-            log.LogError(__name__, "Could not parse status request from cam client", ex)
+            logger.exception("Could not parse status request from cam client")
             abort(400)
         except Exception as ex:
-            log.LogError(__name__, "An error occurred while attempting to update config from cam client", ex)
+            logger.exception("An error occurred while attempting to update config from cam client")
             abort(500)
 
     def get(self):
         try:
             return jsonify(config.get())
         except Exception as ex:
-            log.LogError(__name__, "An error occurred while attempting to send configs", ex)
+            logger.exception("An error occurred while attempting to send configs")
             abort(500)
 
 class StatusApi(Resource):
@@ -67,7 +70,7 @@ class StatusApi(Resource):
         try:
             status = request.json
 
-            log.LogInfo(__name__, "Updating status from cam client")
+            logger.info("Updating status from cam client")
             db.drem(constants.STATUS)
             db.dcreate(constants.STATUS)
 
@@ -87,15 +90,15 @@ class StatusApi(Resource):
                     db.dadd(constants.STATUS, (key, value))
             return {}, 201
         except ValueError as ex:
-            log.LogError(__name__, "Could not parse status request from cam client", ex)
+            logger.exception("Could not parse status request from cam client")
             abort(400)
         except Exception as ex:
-            log.LogError(__name__, "An error occurred while attempting to update status from cam client", ex)
+            logger.exception("An error occurred while attempting to update status from cam client")
             abort(500)
 
     def get(self):
         try:
             return jsonify(db.dgetall(constants.STATUS))
         except Exception as ex:
-            log.LogError(__name__, "An error occurred while attempting to send status", ex)
+            logger.exception("An error occurred while attempting to send status")
             abort(500)
