@@ -44,18 +44,23 @@ def config_update():
 def check_config_updates():
     while True:
         config_update()
-        time.sleep(constants.CONFIG_CHECK_UPDATES_MIN)
+        time.sleep(constants.CONFIG_CHECK_INTERVAL_MIN)
 
 def capture_timer_image():
     while True:
-        image = camera.timer_capture()
+        log.LogInfo(__name__, "Capturing timer image %i min" % config.get(constants.CONFIG_TIMER_INTERVAL_MIN) )
+        image = camera.capture_image()
         #send(image, constants.EVENT_TIMER)
         time.sleep(constants.CONFIG_TIMER_INTERVAL_MIN)
 
 def scan_motion_image():
     while True:
-        if camera.scanMotion():
-            image = camera.motion_capture()
+        sensitivity = config.get(constants.CONFIG_MOTION_SENSITIVITY)
+        threshold = config.get(constants.CONFIG_MOTION_THRESHOLD)
+
+        if camera.scanMotion(sensitivity, threshold):
+            log.LogInfo(__name__, "Capturing motion image threshold=%i sensitivity=%i ......"  % (threshold, sensitivity))
+            image = camera.capture_image()
             #send(image, constants.EVENT_MOTION)
 
 

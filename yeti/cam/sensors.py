@@ -58,7 +58,7 @@ class Temperature:
                 if humidity is None or temperature is None:
                     log.LogError(__name__, "Failed to get temperature reading for %s" % name)
                 else:
-                    log.LogVerbose(__name__, "Success: Temp %s Humidity %s" % (temperature, humidity))
+                    log.LogVerbose(__name__, "Success: Temp %i Humidity %i" % (temperature, humidity))
                     self.readings[name] = {constants.STATUS_TEMP:temperature, constants.STATUS_HUMIDITY:humidity}
 
             time.sleep(db.get(constants.SENSORS_READ_INTERVAL_SEC))

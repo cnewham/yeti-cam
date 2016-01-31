@@ -22,7 +22,7 @@ STATUS_MOTION_EVENTS_24H = 'motion_events_24h'
 #CONFIG CONSTANTS
 
 CONFIG_VERSION = 'version'
-CONFIG_CHECK_UPDATES_MIN = 'check_updates_min'
+CONFIG_CHECK_INTERVAL_MIN = 'config_check_interval'
 CONFIG_SERVER = 'server'
 CONFIG_IMAGE_DIR = "image_dir"
 CONFIG_IMAGE_PREFIX = 'image_prefix'
@@ -32,10 +32,8 @@ CONFIG_IMAGE_VFLIP = 'image_vflip'
 CONFIG_IMAGE_HFLIP = 'image_hflip'
 CONFIG_MOTION_THRESHOLD = 'motion_threshold'
 CONFIG_MOTION_SENSITIVITY = 'motion_sensitivity'
-CONFIG_TIMER_INTERVAL_MIN = 'timer_interval_min'
-CONFIG_NIGHT_ISO = 'night_iso'
-CONFIG_NIGHT_SHUTTER_SEC = 'night_shutter_sec'
-
+CONFIG_MOTION_DELAY_SEC = 'motion_delay'
+CONFIG_TIMER_INTERVAL_MIN = 'timer_interval'
 
 #SENSOR CONSTANTS
 

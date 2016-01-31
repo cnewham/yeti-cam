@@ -27,27 +27,19 @@ SECONDS2MICRO = 1000000  # Constant for converting Shutter Speed in Seconds to M
 imageDir = config.get(constants.CONFIG_IMAGE_DIR)
 imagePath = config.get(constants.CONFIG_IMAGE_DIR)
 imageNamePrefix = config.get(constants.CONFIG_IMAGE_PREFIX)  # Prefix for all image file names. Eg front-
-imageWidth = config.get(constants.CONFIG_IMAGE_WIDTH)
-imageHeight = config.get(constants.CONFIG_IMAGE_HEIGHT)
-imageVFlip = config.get(constants.CONFIG_IMAGE_VFLIP)   # Flip image Vertically
-imageHFlip = config.get(constants.CONFIG_IMAGE_HFLIP)   # Flip image Horizontally
-
-threshold = config.get(constants.CONFIG_MOTION_THRESHOLD)  # How Much pixel changes
-sensitivity = config.get(constants.CONFIG_MOTION_SENSITIVITY)  # How many pixels change
 
 # Advanced Settings not normally changed
 testWidth = 100
 testHeight = 75
 
 currentCount = 1000
-motionCount = 0
 
-def captureImage(imageWidth, imageHeight, filename):
+def captureImage(filename):
     log.LogInfo(__name__, "Capturing Image - Working .....")
     with picamera.PiCamera() as camera:
-        camera.resolution = (imageWidth, imageHeight)
-        camera.vflip = imageVFlip
-        camera.hflip = imageHFlip
+        camera.resolution = (config.get(constants.CONFIG_IMAGE_WIDTH), config.get(constants.CONFIG_IMAGE_HEIGHT))
+        camera.vflip = config.get(constants.CONFIG_IMAGE_VFLIP)
+        camera.hflip = config.get(constants.CONFIG_IMAGE_HFLIP)
         # Day Automatic Mode
         camera.exposure_mode = 'auto'
         camera.awb_mode = 'auto'
@@ -64,7 +56,7 @@ def takeMotionImage(width, height):
             camera.capture(stream, format='rgb')
             return stream.array
 
-def scanMotion():
+def scanMotion(sensitivity, threshold):
     width = testWidth
     height = testHeight
     data1 = takeMotionImage(width, height)
@@ -89,14 +81,8 @@ def getFileName(imagePath, imageNamePrefix):
     rightNow = datetime.datetime.now()
     return "%s/%s%04d%02d%02d-%02d%02d%02d.jpg" % ( imagePath, imageNamePrefix ,rightNow.year, rightNow.month, rightNow.day, rightNow.hour, rightNow.minute, rightNow.second)
 
-def motion_capture():
-    log.LogInfo(__name__, "Capturing motion image threshold=%i sensitivity=%i ......"  % (threshold, sensitivity))
+def capture_image():
     filename = getFileName(imagePath, imageNamePrefix)
-    return captureImage(imageWidth, imageHeight, filename)
-
-def timer_capture():
-    log.LogInfo(__name__, "Capturing timer image %i min" % config.get(constants.CONFIG_TIMER_INTERVAL_MIN) )
-    filename = getFileName(imagePath, imageNamePrefix)
-    return captureImage(imageWidth, imageHeight, filename)
+    return captureImage(filename)
 
 
