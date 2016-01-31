@@ -12,7 +12,7 @@ if not db.get(constants.CONFIG_CHECK_UPDATES_MIN):
 if not db.get(constants.CONFIG_SERVER):
     db.set(constants.CONFIG_SERVER, "http://localhost:5000/api/")
 if not db.get(constants.CONFIG_IMAGE_DIR):
-    db.set(constants.CONFIG_IMAGE_DIR, "/home/pi/yeti/images")
+    db.set(constants.CONFIG_IMAGE_DIR, "/home/yeti/cam/images")
 if not db.get(constants.CONFIG_IMAGE_PREFIX):
     db.set(constants.CONFIG_IMAGE_PREFIX, "capture-")
 if not db.get(constants.CONFIG_IMAGE_WIDTH):

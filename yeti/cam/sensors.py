@@ -26,7 +26,7 @@ class Temperature:
         log.LogInfo(__name__, "Temperature: " + json.dumps(self.pins))
         self.t = threading.Thread(target=self.start)
         self.t.daemon = True
-        self.t.start()
+        #self.t.start()
 
     def read(self, sensor):
         return self.readings[sensor]

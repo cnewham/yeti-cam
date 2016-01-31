@@ -4,12 +4,12 @@ from yeti.common import constants, config, log
 from datetime import datetime
 import service
 import sensors
-#import camera
+import camera
 
 temp = sensors.Temperature()
-server = service.YetiService(config.get(constants.CONFIG_SERVER))
+#server = service.YetiService(config.get(constants.CONFIG_SERVER))
 
-#camera.motion_detect(lambda: send)
+camera.motion_detect()
 
 def send(image, event):
     log.LogInfo(__name__, "Sending image with event %s" % event)
