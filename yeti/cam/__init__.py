@@ -16,8 +16,11 @@ def send(image, event):
     logger.info("Sending image with event %s" % event)
     status = {}
     status[constants.STATUS_EVENT] = event
-    status[constants.STATUS_INDOOR_TEMP] = temp.read(constants.STATUS_INDOOR_TEMP)
-    status[constants.STATUS_OUTDOOR_TEMP] = temp.read(constants.STATUS_OUTDOOR_TEMP)
+
+    #read temperature/humidity values
+    for key, value in temp.read().iteritems():
+        status[key] = value
+
     status[constants.STATUS_TIME] = datetime.now().isoformat()
 
     #if event == constants.EVENT_MOTION:
@@ -47,14 +50,15 @@ def config_update():
 def check_config_updates():
     while True:
         config_update()
-        time.sleep(constants.CONFIG_CHECK_INTERVAL_MIN)
+        time.sleep(config.get(constants.CONFIG_CHECK_INTERVAL_MIN))
 
 def capture_timer_image():
+    time.sleep(10)
     while True:
         logger.info("Capturing timer image: %i min" % config.get(constants.CONFIG_TIMER_INTERVAL_MIN) )
         image = camera.capture_image()
         send(image, constants.EVENT_TIMER)
-        time.sleep(constants.CONFIG_TIMER_INTERVAL_MIN)
+        time.sleep(config.get(constants.CONFIG_TIMER_INTERVAL_MIN))
 
 def scan_motion_image():
     while True:
@@ -64,21 +68,19 @@ def scan_motion_image():
         if camera.scanMotion(sensitivity, threshold):
             logger.info("Capturing motion image: threshold=%i sensitivity=%i ......"  % (threshold, sensitivity))
             image = camera.capture_image()
-            #send(image, constants.EVENT_MOTION)
+            send(image, constants.EVENT_MOTION)
 
-if config.get(constants.CONFIG_MOTION_ENABLED) is True:
-    scan_motion_image()
 
-#config_update_thread = threading.Thread(target=check_config_updates)
-#config_update_thread.daemon = True
+config_update_thread = threading.Thread(target=check_config_updates)
+config_update_thread.daemon = True
 #config_update_thread.start()
 
-#timer_capture_thread = threading.Thread(target=capture_timer_image)
-#timer_capture_thread.daemon = True
-#timer_capture_thread.start()
+timer_capture_thread = threading.Thread(target=capture_timer_image)
+timer_capture_thread.daemon = True
+timer_capture_thread.start()
 
-#motion_capture_thread = threading.Thread(target=scan_motion_image)
-#motion_capture_thread.daemon = True
+motion_capture_thread = threading.Thread(target=scan_motion_image)
+motion_capture_thread.daemon = True
 #motion_capture_thread.start()
 
 

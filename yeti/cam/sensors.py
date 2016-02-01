@@ -25,16 +25,19 @@ class Temperature:
 
     def __init__(self):
         self.pins = db.dgetall(constants.SENSORS_TEMP)
-        logger.info("Temperature: " + json.dumps(self.pins))
+        logger.debug("Temperature: " + json.dumps(self.pins))
         self.t = threading.Thread(target=self.start)
         self.t.daemon = True
         self.t.start()
 
-    def read(self, sensor):
-        return self.readings[sensor]
+    def read(self, sensor = None):
+        if sensor is None:
+            return self.readings
+        else:
+            return self.readings[sensor]
 
     def start(self):
-        logger.info("Reading temperature/humidity")
+        logger.info("Starting temperature/humidity sensors")
         sensor = 22
 
         #Initialize readings with -1 value

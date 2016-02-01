@@ -3,6 +3,8 @@ from flask import Flask
 from flask_restful import Api
 from flask_jsglue import JSGlue
 from yeti.common import constants
+import logging
+logger = logging.getLogger(__name__)
 
 flask = Flask(__name__, static_folder='static', static_url_path='')
 api = Api(flask)

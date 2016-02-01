@@ -1,4 +1,4 @@
-import os
+import os, shutil
 import datetime
 from flask_restful import Resource, abort, request, reqparse
 from flask import url_for, jsonify
@@ -30,8 +30,9 @@ class ImageApi(Resource):
         try:
             upload = request.files['images']
             if upload and self.allowed_file(upload.filename):
-                filename = upload.filename
-                upload.save(os.path.join(flask.config['UPLOAD_FOLDER'], filename))
+                filename = os.path.basename(upload.filename)
+                upload.save(os.path.join(flask.config['UPLOAD_FOLDER'], "current.jpg"))
+                shutil.copy(os.path.join(flask.config['UPLOAD_FOLDER'], "current.jpg"), os.path.join(flask.config['UPLOAD_FOLDER'], filename))
                 return {}, 201
             else:
                 abort(400)

@@ -14,7 +14,7 @@ class YetiService:
     def post_image(self, image):
         logger.info("Posting Image: %s" % image)
         try:
-            multiple_files = [('images', ('capture.jpg', open(image, 'rb'), 'image/jpg'))]
+            multiple_files = [('images', (image, open(image, 'rb'), 'image/jpg'))]
             r = requests.post(self.baseUrl + "image", files=multiple_files)
             logger.info("StatusCode: %s, Text: %s" % (r.status_code, r.text))
         except Exception as ex:
