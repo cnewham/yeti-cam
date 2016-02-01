@@ -1,8 +1,8 @@
-import os, shutil
+import os
 import datetime
 from flask_restful import Resource, abort, request, reqparse
 from flask import url_for, jsonify
-from yeti.server import flask
+import processor
 from yeti.server import db
 from yeti.common import constants, config
 
@@ -13,6 +13,7 @@ class ImageApi(Resource):
     def __init__(self):
         self.parser = reqparse.RequestParser()
         self.parser.add_argument(constants.STATUS_CAM, type=str, required=False)
+        self.processor = processor.UploadProcessor()
 
     def get(self):
         try:
@@ -31,8 +32,8 @@ class ImageApi(Resource):
             upload = request.files['images']
             if upload and self.allowed_file(upload.filename):
                 filename = os.path.basename(upload.filename)
-                upload.save(os.path.join(flask.config['UPLOAD_FOLDER'], "current.jpg"))
-                shutil.copy(os.path.join(flask.config['UPLOAD_FOLDER'], "current.jpg"), os.path.join(flask.config['UPLOAD_FOLDER'], filename))
+                upload.save(os.path.join(db.get('UPLOAD_FOLDER'), "current.jpg"))
+                self.processor.process("test", filename)
                 return {}, 201
             else:
                 abort(400)
@@ -44,7 +45,7 @@ class ImageApi(Resource):
             abort(500)
 
     def allowed_file(self,filename):
-        return '.' in filename and filename.rsplit('.', 1)[1] in flask.config['ALLOWED_EXTENSIONS']
+        return '.' in filename and filename.rsplit('.', 1)[1] in db.get('ALLOWED_EXTENSIONS')
 
 
 class ConfigApi(Resource):

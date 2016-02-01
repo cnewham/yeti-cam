@@ -3,6 +3,7 @@ import json
 import requests
 from yeti.common import config
 
+
 import logging
 logger = logging.getLogger(__name__)
 
