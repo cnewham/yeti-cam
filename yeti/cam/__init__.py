@@ -1,5 +1,5 @@
 __author__ = 'chris'
-import threading, time
+import threading, time, os
 from yeti.common import constants, config
 from datetime import datetime
 import service
@@ -13,23 +13,31 @@ temp = sensors.Temperature()
 server = service.YetiService(config.get(constants.CONFIG_SERVER))
 
 def send(image, event):
-    logger.info("Sending image with event %s" % event)
-    status = {}
-    status[constants.STATUS_EVENT] = event
 
-    #read temperature/humidity values
-    for key, value in temp.read().iteritems():
-        status[key] = value
+    try:
+        logger.info("Sending image with event %s" % event)
+        status = {}
+        status[constants.STATUS_EVENT] = event
 
-    status[constants.STATUS_TIME] = datetime.now().isoformat()
+        #read temperature/humidity values
+        for key, value in temp.read().iteritems():
+            status[key] = value
 
-    #if event == constants.EVENT_MOTION:
-    #    camera.motion_events += 1
+        status[constants.STATUS_TIME] = datetime.now().isoformat()
 
-    #status[constants.STATUS_MOTION_EVENTS_24H] = camera.motion_events
+        #if event == constants.EVENT_MOTION:
+        #    camera.motion_events += 1
 
-    server.post_image(image)
-    server.post_status(status)
+        #status[constants.STATUS_MOTION_EVENTS_24H] = camera.motion_events
+    except Exception:
+        logger.exception("An error occurred while attempting to get current status")
+
+    try:
+        server.post_image(image)
+        server.post_status(status)
+        os.remove(image)
+    except Exception:
+        logger.exception("An error occurred while attempting to upload to server")
 
 def config_update():
     logger.info( "Checking for config updates")
@@ -43,7 +51,7 @@ def config_update():
             logger.info("Cam config updating from server")
             config.update(server_configs)
     except ValueError:
-        return
+        logger.exception("Could not parse response from server")
     except Exception as ex:
         logger.exception("Could not update configs from the server")
 
@@ -55,20 +63,26 @@ def check_config_updates():
 def capture_timer_image():
     time.sleep(10)
     while True:
-        logger.info("Capturing timer image: %i min" % config.get(constants.CONFIG_TIMER_INTERVAL_MIN) )
-        image = camera.capture_image()
-        send(image, constants.EVENT_TIMER)
+        logger.info("Capturing timer image: %i min" % config.get(constants.CONFIG_TIMER_INTERVAL_MIN))
+        try:
+            image = camera.capture_image()
+            send(image, constants.EVENT_TIMER)
+        except Exception:
+            logger.exception("An error occurred when attempting to capture timer image")
+
         time.sleep(config.get(constants.CONFIG_TIMER_INTERVAL_MIN))
 
 def scan_motion_image():
     while True:
         sensitivity = config.get(constants.CONFIG_MOTION_SENSITIVITY)
         threshold = config.get(constants.CONFIG_MOTION_THRESHOLD)
-
-        if camera.scanMotion(sensitivity, threshold):
-            logger.info("Capturing motion image: threshold=%i sensitivity=%i ......"  % (threshold, sensitivity))
-            image = camera.capture_image()
-            send(image, constants.EVENT_MOTION)
+        try:
+            if camera.scanMotion(sensitivity, threshold):
+                logger.info("Capturing motion image: threshold=%i sensitivity=%i ......"  % (threshold, sensitivity))
+                image = camera.capture_image()
+                send(image, constants.EVENT_MOTION)
+        except Exception:
+            logger.exception("An error occurred when attempting to capture motion image")
 
 
 config_update_thread = threading.Thread(target=check_config_updates)

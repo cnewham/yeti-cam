@@ -44,27 +44,34 @@ class Temperature:
         for name in db.dkeys(constants.SENSORS_TEMP):
             self.readings[name] = {constants.STATUS_TEMP:-1, constants.STATUS_HUMIDITY:-1}
 
+        if self.readings == {}:
+            logger.warning("No temperature sensors have been initialized")
+            return
+
         while True:
             for name, pin in db.dgetall(constants.SENSORS_TEMP).iteritems():
-                logger.debug("Getting temp reading for %s from pin %s" % (name, pin))
+                try:
+                    logger.debug("Getting temp reading for %s from pin %s" % (name, pin))
 
-                # Try to grab a sensor reading.  Use the read_retry method which will retry up
-                # to 15 times to get a sensor reading (waiting 2 seconds between each retry).
-                humidity, temperature = Adafruit_DHT.read_retry(sensor, pin)
+                    # Try to grab a sensor reading.  Use the read_retry method which will retry up
+                    # to 15 times to get a sensor reading (waiting 2 seconds between each retry).
+                    humidity, temperature = Adafruit_DHT.read_retry(sensor, pin)
 
-                # Un-comment the line below to convert the temperature to Fahrenheit.
-                temperature = temperature * 9/5.0 + 32
+                    # Un-comment the line below to convert the temperature to Fahrenheit.
+                    temperature = temperature * 9/5.0 + 32
 
-                # Note that sometimes you won't get a reading and
-                # the results will be null (because Linux can't
-                # guarantee the timing of calls to read the sensor).
-                # If this happens try again!
+                    # Note that sometimes you won't get a reading and
+                    # the results will be null (because Linux can't
+                    # guarantee the timing of calls to read the sensor).
+                    # If this happens try again!
 
-                if humidity is None or temperature is None:
-                    logger.error("Failed to get temperature reading for %s" % name)
-                else:
-                    logger.debug("Success: Temp %i Humidity %i" % (temperature, humidity))
-                    self.readings[name] = {constants.STATUS_TEMP:temperature, constants.STATUS_HUMIDITY:humidity}
+                    if humidity is None or temperature is None:
+                        logger.error("Failed to get temperature reading for %s" % name)
+                    else:
+                        logger.debug("Success: Temp %i Humidity %i" % (temperature, humidity))
+                        self.readings[name] = {constants.STATUS_TEMP:temperature, constants.STATUS_HUMIDITY:humidity}
+                except Exception:
+                    logger.exception("An error occurred while attempting to read temperature sensors")
 
             time.sleep(db.get(constants.SENSORS_READ_INTERVAL_SEC))
 
