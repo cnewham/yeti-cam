@@ -14,8 +14,6 @@ server = service.YetiService(config.get(constants.CONFIG_SERVER))
 motion = camera.MotionEvents()
 
 motion_events_24h = 0
-processing = False
-lock = threading.Lock()
 
 def send(image, event):
 
@@ -61,21 +59,12 @@ def capture_timer_image():
     global processing
     time.sleep(10)
     while True:
-        if not processing:
-            with lock:
-                processing = True
-
-            logger.info("Capturing timer image: %i min" % config.get(constants.CONFIG_TIMER_INTERVAL_MIN))
-            try:
-                image = camera.capture_image()
-                send(image, constants.EVENT_TIMER)
-            except Exception:
-                logger.exception("An error occurred when attempting to capture timer image")
-            finally:
-                with lock:
-                    processing = False
-        else:
-            logger.warning("Timer image could not be captured. Camera already in use")
+        logger.info("Capturing timer image: %i min" % config.get(constants.CONFIG_TIMER_INTERVAL_MIN))
+        try:
+            image = camera.capture_image()
+            send(image, constants.EVENT_TIMER)
+        except Exception:
+            logger.exception("An error occurred when attempting to capture timer image")
 
         time.sleep(config.get(constants.CONFIG_TIMER_INTERVAL_MIN))
 
@@ -86,30 +75,19 @@ def scan_motion_image():
         threshold = config.get(constants.CONFIG_MOTION_THRESHOLD)
         capture_threshold = config.get(constants.CONFIG_MOTION_CAPTURE_THRESHOLD)
         motion_delay = config.get(constants.CONFIG_MOTION_DELAY_SEC)
+        motion_enabled = config.get(constants.CONFIG_MOTION_ENABLED)
 
         try:
             if camera.scanMotion(sensitivity, threshold):
                 if motion.enabled():
-                    if not processing:
-                        with lock:
-                            processing = True
-
-                        logger.info("Capturing motion image: threshold=%i sensitivity=%i ......"  % (threshold, sensitivity))
-                        image = camera.capture_image()
-                        send(image, constants.EVENT_MOTION)
-
-                        with lock:
-                            processing = False
-                    else:
-                        logger.warning("Motion image could not be captured. Camera already in use")
+                    logger.info("Capturing motion image: threshold=%i sensitivity=%i ......"  % (threshold, sensitivity))
+                    image = camera.capture_image()
+                    send(image, constants.EVENT_MOTION)
                 else:
                     logger.warning("Motion events disabled for %s seconds because threshold (%s) has been exceeded" % (motion_delay, capture_threshold))
                     time.sleep(motion_delay)
         except Exception:
             logger.exception("An error occurred when attempting to capture motion image")
-        finally:
-            with lock:
-                processing = False
 
 config_update_thread = threading.Thread(target=check_config_updates)
 config_update_thread.daemon = True
@@ -121,10 +99,7 @@ timer_capture_thread.start()
 
 motion_capture_thread = threading.Thread(target=scan_motion_image)
 motion_capture_thread.daemon = True
-
-if config.get(constants.CONFIG_MOTION_ENABLED):
-    motion_capture_thread.start()
-
+motion_capture_thread.start()
 
 
 

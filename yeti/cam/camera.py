@@ -11,7 +11,7 @@ __author__ = 'chris'
 # This is sample code that can be used for further development
 
 from datetime import datetime, timedelta
-import time
+import time, threading
 from yeti.common import config, constants
 
 import logging
@@ -34,29 +34,34 @@ imageNamePrefix = config.get(constants.CONFIG_IMAGE_PREFIX)  # Prefix for all im
 testWidth = 100
 testHeight = 75
 
+camera_lock = threading.Lock()
+
 currentCount = 1000
 
 def captureImage(filename):
     logger.info("Capturing Image - Working .....")
-    with picamera.PiCamera() as camera:
-        camera.resolution = (config.get(constants.CONFIG_IMAGE_WIDTH), config.get(constants.CONFIG_IMAGE_HEIGHT))
-        camera.vflip = config.get(constants.CONFIG_IMAGE_VFLIP)
-        camera.hflip = config.get(constants.CONFIG_IMAGE_HFLIP)
-        # Day Automatic Mode
-        camera.exposure_mode = 'auto'
-        camera.awb_mode = 'auto'
-        camera.capture(filename)
-    logger.info("Capture Image - Captured %s" % filename)
+    with camera_lock:
+        with picamera.PiCamera() as camera:
+            camera.resolution = (config.get(constants.CONFIG_IMAGE_WIDTH), config.get(constants.CONFIG_IMAGE_HEIGHT))
+            camera.vflip = config.get(constants.CONFIG_IMAGE_VFLIP)
+            camera.hflip = config.get(constants.CONFIG_IMAGE_HFLIP)
+            # Day Automatic Mode
+            camera.exposure_mode = 'auto'
+            camera.awb_mode = 'auto'
+            camera.capture(filename)
+        logger.info("Capture Image - Captured %s" % filename)
+
     return filename
 
 def takeMotionImage(width, height):
-    with picamera.PiCamera() as camera:
-        camera.resolution = (width, height)
-        with picamera.array.PiRGBArray(camera) as stream:
-            camera.exposure_mode = 'auto'
-            camera.awb_mode = 'auto'
-            camera.capture(stream, format='rgb')
-            return stream.array
+        with camera_lock:
+            with picamera.PiCamera() as camera:
+                camera.resolution = (width, height)
+                with picamera.array.PiRGBArray(camera) as stream:
+                    camera.exposure_mode = 'auto'
+                    camera.awb_mode = 'auto'
+                    camera.capture(stream, format='rgb')
+                    return stream.array
 
 def scanMotion(sensitivity, threshold):
     width = testWidth
@@ -64,7 +69,7 @@ def scanMotion(sensitivity, threshold):
     data1 = takeMotionImage(width, height)
     while True:
         data2 = takeMotionImage(width, height)
-        diffCount = 0L;
+        diffCount = 0L
         for w in range(0, width):
             for h in range(0, height):
                 # get the diff of the pixel. Conversion to int
@@ -73,7 +78,7 @@ def scanMotion(sensitivity, threshold):
                 if  diff > threshold:
                     diffCount += 1
             if diffCount > sensitivity:
-                break; #break outer loop.
+                break #break outer loop.
         if diffCount > sensitivity:
             return True
         else:
