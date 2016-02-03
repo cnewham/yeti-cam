@@ -7,12 +7,15 @@ logger = logging.getLogger(__name__)
 
 db = pickledb.load('db/config.db', True)
 
+#server/config
 if not db.get(constants.CONFIG_VERSION):
-    db.set(constants.CONFIG_VERSION, 1)
+    db.set(constants.CONFIG_VERSION, 0)
 if not db.get(constants.CONFIG_CHECK_INTERVAL_MIN):
     db.set(constants.CONFIG_CHECK_INTERVAL_MIN, 60)
 if not db.get(constants.CONFIG_SERVER):
     db.set(constants.CONFIG_SERVER, "http://localhost:5000/api/")
+
+#image
 if not db.get(constants.CONFIG_IMAGE_DIR):
     db.set(constants.CONFIG_IMAGE_DIR, "/home/yeti/cam/images")
 if not db.get(constants.CONFIG_IMAGE_PREFIX):
@@ -25,6 +28,8 @@ if not db.get(constants.CONFIG_IMAGE_VFLIP):
     db.set(constants.CONFIG_IMAGE_VFLIP, False)
 if not db.get(constants.CONFIG_IMAGE_HFLIP):
     db.set(constants.CONFIG_IMAGE_HFLIP, False)
+
+#motion
 if not db.get(constants.CONFIG_MOTION_ENABLED):
     db.set(constants.CONFIG_MOTION_ENABLED, True)
 if not db.get(constants.CONFIG_MOTION_THRESHOLD):
@@ -32,7 +37,13 @@ if not db.get(constants.CONFIG_MOTION_THRESHOLD):
 if not db.get(constants.CONFIG_MOTION_SENSITIVITY):
     db.set(constants.CONFIG_MOTION_SENSITIVITY, 100)
 if not db.get(constants.CONFIG_MOTION_DELAY_SEC):
-    db.set(constants.CONFIG_MOTION_DELAY_SEC, 800)
+    db.set(constants.CONFIG_MOTION_DELAY_SEC, 60)
+if not db.get(constants.CONFIG_MOTION_THRESHOLD):
+    db.set(constants.CONFIG_MOTION_THRESHOLD, 10)
+if not db.get(constants.CONFIG_MOTION_CAPTURE_THRESHOLD):
+    db.set(constants.CONFIG_MOTION_CAPTURE_THRESHOLD, 3)
+
+#capture timer
 if not db.get(constants.CONFIG_TIMER_INTERVAL_MIN):
     db.set(constants.CONFIG_TIMER_INTERVAL_MIN, 30)
 

@@ -12,10 +12,10 @@ class YetiService:
         self.baseUrl = url
         logger.info("YetiService starting: " + self.baseUrl)
 
-    def post_image(self, image):
+    def post_image(self, image, event):
         logger.info("Posting Image: %s" % image)
         multiple_files = [('images', (image, open(image, 'rb'), 'image/jpg'))]
-        r = requests.post(self.baseUrl + "image", files=multiple_files)
+        r = requests.post(self.baseUrl + "image", files=multiple_files, data={"event":event})
         logger.info("StatusCode: %s, Text: %s" % (r.status_code, r.text))
 
     def post_status(self, status):

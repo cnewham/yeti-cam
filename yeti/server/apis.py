@@ -9,11 +9,13 @@ from yeti.common import constants, config
 import logging
 logger = logging.getLogger(__name__)
 
+upload_processor = processor.UploadProcessor()
+
 class ImageApi(Resource):
     def __init__(self):
         self.parser = reqparse.RequestParser()
         self.parser.add_argument(constants.STATUS_CAM, type=str, required=False)
-        self.processor = processor.UploadProcessor()
+        self.parser.add_argument("event", type=str, required=True, location="form")
 
     def get(self):
         try:
@@ -29,11 +31,12 @@ class ImageApi(Resource):
 
     def post(self):
         try:
+            args = self.parser.parse_args(request)
             upload = request.files['images']
             if upload and self.allowed_file(upload.filename):
                 filename = os.path.basename(upload.filename)
                 upload.save(os.path.join(db.get('UPLOAD_FOLDER'), "current.jpg"))
-                self.processor.process("test", filename)
+                upload_processor.process(args["event"], filename)
                 return {}, 201
             else:
                 abort(400)
