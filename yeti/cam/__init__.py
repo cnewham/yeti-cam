@@ -78,7 +78,7 @@ def scan_motion_image():
         motion_enabled = config.get(constants.CONFIG_MOTION_ENABLED)
 
         try:
-            if camera.scanMotion(sensitivity, threshold):
+            if motion_enabled and camera.scanMotion(sensitivity, threshold):
                 if motion.enabled():
                     logger.info("Capturing motion image: threshold=%i sensitivity=%i ......"  % (threshold, sensitivity))
                     image = camera.capture_image()

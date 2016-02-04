@@ -40,9 +40,6 @@ class ImageApi(Resource):
                 return {}, 201
             else:
                 abort(400)
-        except ValueError as ex:
-            logger.exception("Could not parse status request from cam client")
-            abort(400)
         except Exception as ex:
             logger.exception("An error occurred while attempting to receive uploaded image")
             abort(500)
@@ -107,3 +104,20 @@ class StatusApi(Resource):
         except Exception as ex:
             logger.exception("An error occurred while attempting to send status")
             abort(500)
+
+class LogApi(Resource):
+    def post(self):
+        try:
+            upload = request.files['logs']
+            if upload and self.allowed_file(upload.filename):
+                filename = os.path.basename(upload.filename)
+                upload.save(os.path.join(db.get('CAM_LOG_FOLDER'), filename))
+                return {}, 201
+            else:
+                abort(400)
+        except Exception as ex:
+            logger.exception("An error occurred while attempting to receive logs")
+            abort(500)
+
+    def allowed_file(self,filename):
+        return '.' in filename and filename.rsplit('.', 1)[1] in db.get('ALLOWED_EXTENSIONS')
