@@ -53,7 +53,7 @@ def config_update():
 def check_config_updates():
     while True:
         config_update()
-        time.sleep(config.get(constants.CONFIG_CHECK_INTERVAL_MIN))
+        time.sleep(config.get(constants.CONFIG_CHECK_INTERVAL_MIN) * constants.SECONDS2MIN)
 
 def capture_timer_image():
     global processing
@@ -66,7 +66,7 @@ def capture_timer_image():
         except Exception:
             logger.exception("An error occurred when attempting to capture timer image")
 
-        time.sleep(config.get(constants.CONFIG_TIMER_INTERVAL_MIN))
+        time.sleep(config.get(constants.CONFIG_TIMER_INTERVAL_MIN) * constants.SECONDS2MIN)
 
 def scan_motion_image():
     global processing
@@ -83,6 +83,7 @@ def scan_motion_image():
                     logger.info("Capturing motion image: threshold=%i sensitivity=%i ......"  % (threshold, sensitivity))
                     image = camera.capture_image()
                     send(image, constants.EVENT_MOTION)
+                    time.sleep(3)
                 else:
                     logger.warning("Motion events disabled for %s seconds because threshold (%s) has been exceeded" % (motion_delay, capture_threshold))
                     time.sleep(motion_delay)

@@ -1,5 +1,9 @@
 __author__ = 'chris'
 
+#CONVERSION CONSTANTS
+
+SECONDS2MIN = 60
+
 #EVENT CONSTANTS
 
 EVENT_TIMER = 'timer'

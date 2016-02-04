@@ -57,17 +57,15 @@ class Temperature:
                     # to 15 times to get a sensor reading (waiting 2 seconds between each retry).
                     humidity, temperature = Adafruit_DHT.read_retry(sensor, pin)
 
-                    # Un-comment the line below to convert the temperature to Fahrenheit.
-                    temperature = temperature * 9/5.0 + 32
-
                     # Note that sometimes you won't get a reading and
                     # the results will be null (because Linux can't
                     # guarantee the timing of calls to read the sensor).
                     # If this happens try again!
 
                     if humidity is None or temperature is None:
-                        logger.error("Failed to get temperature reading for %s" % name)
+                        logger.error("Failed to get temperature reading for %s, pin %s" % (name, pin))
                     else:
+                        temperature = temperature * 9/5.0 + 32
                         logger.debug("Success: Temp %i Humidity %i" % (temperature, humidity))
                         self.readings[name] = {constants.STATUS_TEMP:temperature, constants.STATUS_HUMIDITY:humidity}
                 except Exception:
