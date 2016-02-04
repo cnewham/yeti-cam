@@ -1,4 +1,4 @@
-import os
+﻿import os
 import datetime
 from flask_restful import Resource, abort, request, reqparse
 from flask import url_for, jsonify
@@ -10,6 +10,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 upload_processor = processor.UploadProcessor()
+status_processor = processor.StatusProcessor()
+log_processor = processor.LogProcessor()
 
 class ImageApi(Resource):
     def __init__(self):
@@ -71,25 +73,7 @@ class StatusApi(Resource):
     def post(self):
         try:
             status = request.json
-
-            logger.info("Updating status from cam client")
-            db.drem(constants.STATUS)
-            db.dcreate(constants.STATUS)
-
-            for key, value in status.iteritems():
-                if key == constants.STATUS_EVENT:
-                    db.dadd(constants.STATUS, ("Event", value))
-                elif key == constants.STATUS_TIME:
-                    date = datetime.datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f")
-                    db.dadd(constants.STATUS, ("Time", date.strftime('%x %X %p')))
-                elif key == constants.STATUS_INDOOR_TEMP:
-                    db.dadd(constants.STATUS, ("Indoor Temp", "%s%sF %s%%" % (value[constants.STATUS_TEMP], unichr(176), value[constants.STATUS_HUMIDITY])))
-                elif key == constants.STATUS_OUTDOOR_TEMP:
-                    db.dadd(constants.STATUS, ("Outdoor Temp", "%s%sF %s%%" % (value[constants.STATUS_TEMP], unichr(176), value[constants.STATUS_HUMIDITY])))
-                elif key == constants.STATUS_MOTION_EVENTS_24H:
-                    db.dadd(constants.STATUS, ("Motion Events", value))
-                else:
-                    db.dadd(constants.STATUS, (key, value))
+            status_processor.process(status)
             return {}, 201
         except ValueError as ex:
             logger.exception("Could not parse status request from cam client")
@@ -112,6 +96,7 @@ class LogApi(Resource):
             if upload and self.allowed_file(upload.filename):
                 filename = os.path.basename(upload.filename)
                 upload.save(os.path.join(db.get('CAM_LOG_FOLDER'), filename))
+                log_processor.process(os.path.join(db.get('CAM_LOG_FOLDER'), filename))
                 return {}, 201
             else:
                 abort(400)
