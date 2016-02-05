@@ -1,4 +1,4 @@
-__author__ = 'chris'
+﻿__author__ = 'chris'
 
 #!/usr/bin/python
 #
@@ -91,33 +91,3 @@ def getFileName(imagePath, imageNamePrefix):
 def capture_image():
     filename = getFileName(imagePath, imageNamePrefix)
     return captureImage(filename)
-
-class MotionEvents:
-    def __init__(self):
-        self.motion_events = 0
-        self.last_motion_event = None
-
-    def enabled(self):
-        #logger.debug("MotionEvents: last_motion_event: %s, motion_events: %s" % (self.last_motion_event, self.motion_events))
-
-        if self.last_motion_event is None or self.exceeds_motion_capture_delay():
-            self.motion_events = 1
-            self.last_motion_event = datetime.now()
-            #logger.debug("MotionsEvents: enabled - doesn't exceed motion capture delay")
-            return True
-        elif self.motion_events + 1 <= config.get(constants.CONFIG_MOTION_CAPTURE_THRESHOLD):
-            self.motion_events += 1
-            self.last_motion_event = datetime.now()
-            #logger.debug("MotionsEvents: enabled - still within motion capture threshold")
-            return True
-        else:
-            #logger.debug("MotionsEvents: disabled")
-            return False
-
-    def exceeds_motion_capture_delay(self):
-        if self.last_motion_event is not None:
-            delta_date = datetime.now() - timedelta(seconds=config.get(constants.CONFIG_MOTION_DELAY_SEC))
-            #logger.debug("MotionEvents: delta_date: %s" % delta_date)
-            return delta_date > self.last_motion_event
-        else:
-            return True

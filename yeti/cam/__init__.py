@@ -1,6 +1,6 @@
-__author__ = 'chris'
+﻿__author__ = 'chris'
 import threading, time, os
-from yeti.common import constants, config
+from yeti.common import constants, config, motion
 from datetime import datetime
 import service
 import sensors
@@ -11,9 +11,7 @@ logger = logging.getLogger(__name__)
 
 temp = sensors.Temperature()
 server = service.YetiService(config.get(constants.CONFIG_SERVER))
-motion = camera.MotionEvents()
-
-motion_events_24h = 0
+motion = motion.MotionEvents()
 
 def send(image, event):
 
@@ -56,8 +54,7 @@ def check_config_updates():
         time.sleep(config.get(constants.CONFIG_CHECK_INTERVAL_MIN) * constants.SECONDS2MIN)
 
 def capture_timer_image():
-    global processing
-    time.sleep(10)
+    time.sleep(30) #Sleep for 30 seconds on startup then take the first picture
     while True:
         logger.info("Capturing timer image: %i min" % config.get(constants.CONFIG_TIMER_INTERVAL_MIN))
         try:
@@ -69,7 +66,6 @@ def capture_timer_image():
         time.sleep(config.get(constants.CONFIG_TIMER_INTERVAL_MIN) * constants.SECONDS2MIN)
 
 def scan_motion_image():
-    global processing
     while True:
         sensitivity = config.get(constants.CONFIG_MOTION_SENSITIVITY)
         threshold = config.get(constants.CONFIG_MOTION_THRESHOLD)

@@ -1,4 +1,4 @@
-__author__ = 'chris'
+﻿__author__ = 'chris'
 
 #CONVERSION CONSTANTS
 
@@ -45,3 +45,7 @@ CONFIG_TIMER_INTERVAL_MIN = 'timer_interval'
 
 SENSORS_TEMP = 'temp'
 SENSORS_READ_INTERVAL_SEC = 'read_interval_sec'
+
+#OTHER CONSTANTS
+
+MOTION_LOG = 'motion'
