@@ -1,4 +1,4 @@
-__author__ = 'chris'
+﻿__author__ = 'chris'
 import threading, time
 import json
 import pickledb
@@ -21,8 +21,6 @@ if not (db.get(constants.SENSORS_READ_INTERVAL_SEC)):
 
 
 class Temperature:
-    readings = {}
-
     def __init__(self):
         self.pins = db.dgetall(constants.SENSORS_TEMP)
         logger.debug("Temperature: " + json.dumps(self.pins))
@@ -42,9 +40,9 @@ class Temperature:
 
         #Initialize readings with -1 value
         for name in db.dkeys(constants.SENSORS_TEMP):
-            self.readings[name] = {constants.STATUS_TEMP:-1, constants.STATUS_HUMIDITY:-1}
+            self.readings[name] = {}
 
-        if self.readings == {}:
+        if self.readings is None:
             logger.warning("No temperature sensors have been initialized")
             return
 

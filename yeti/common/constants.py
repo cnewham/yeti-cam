@@ -48,4 +48,4 @@ SENSORS_READ_INTERVAL_SEC = 'read_interval_sec'
 
 #OTHER CONSTANTS
 
-MOTION_LOG = 'motion'
+MOTION_LOG = 'motion_log'

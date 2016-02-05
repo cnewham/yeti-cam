@@ -1,5 +1,6 @@
-__author__ = 'chris'
+﻿__author__ = 'chris'
 from datetime import datetime, timedelta
+from yeti.server import db
 from yeti.common import config, constants
 
 import logging

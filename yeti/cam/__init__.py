@@ -1,17 +1,15 @@
 ﻿__author__ = 'chris'
 import threading, time, os
-from yeti.common import constants, config, motion
 from datetime import datetime
-import service
-import sensors
-import camera
+from yeti.common import constants, config, motion
+from yeti.cam import service, sensors, camera
 
 import logging
 logger = logging.getLogger(__name__)
 
 temp = sensors.Temperature()
 server = service.YetiService(config.get(constants.CONFIG_SERVER))
-motion = motion.MotionEvents()
+motion_events = motion.MotionEvents()
 
 def send(image, event):
 
@@ -22,7 +20,8 @@ def send(image, event):
 
         #read temperature/humidity values
         for key, value in temp.read().iteritems():
-            status[key] = value
+            if value != {}:
+                status[key] = value
 
         status[constants.STATUS_TIME] = datetime.now().isoformat()
         status[constants.STATUS_MOTION_EVENTS_24H] = motion_events_24h
@@ -75,7 +74,7 @@ def scan_motion_image():
 
         try:
             if motion_enabled and camera.scanMotion(sensitivity, threshold):
-                if motion.enabled():
+                if motion_events.enabled():
                     logger.info("Capturing motion image: threshold=%i sensitivity=%i ......"  % (threshold, sensitivity))
                     image = camera.capture_image()
                     send(image, constants.EVENT_MOTION)

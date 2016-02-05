@@ -36,9 +36,9 @@ class StatusProcessor:
                 date = datetime.datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f")
                 db.dadd(constants.STATUS, ("Time", date.strftime('%m-%d-%Y %I:%M %p')))
             elif key == constants.STATUS_INDOOR_TEMP:
-                db.dadd(constants.STATUS, ("Indoor Temp", "%.2f%sF %.2f%%" % (value[constants.STATUS_TEMP], unichr(176), value[constants.STATUS_HUMIDITY])))
+                db.dadd(constants.STATUS, ("Indoor Temp", "%.2f%sF, %.2f%%" % (value[constants.STATUS_TEMP], unichr(176), value[constants.STATUS_HUMIDITY])))
             elif key == constants.STATUS_OUTDOOR_TEMP:
-                db.dadd(constants.STATUS, ("Outdoor Temp", "%.2f%sF %.2f%%" % (value[constants.STATUS_TEMP], unichr(176), value[constants.STATUS_HUMIDITY])))
+                db.dadd(constants.STATUS, ("Outdoor Temp", "%.2f%sF, %.2f%%" % (value[constants.STATUS_TEMP], unichr(176), value[constants.STATUS_HUMIDITY])))
             elif key == constants.STATUS_MOTION_EVENTS_24H:
                 db.dadd(constants.STATUS, ("Motion Events", motion_log.get_motion_events_from(24)))
             else:
