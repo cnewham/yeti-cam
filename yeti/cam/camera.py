@@ -10,7 +10,7 @@
 
 # This is sample code that can be used for further development
 
-from datetime import datetime, timedelta
+from datetime import datetime
 import time, threading
 from yeti.common import config, constants
 

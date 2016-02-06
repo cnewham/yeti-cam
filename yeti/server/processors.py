@@ -17,7 +17,7 @@ class UploadProcessor:
         shutil.copy(os.path.join(db.get('UPLOAD_FOLDER'), "current.jpg"), os.path.join(db.get('UPLOAD_FOLDER'), "%s-%s" % (event, filename)))
 
         if event == constants.EVENT_MOTION:
-            motion_log.add_motion_event(datetime.datetime.now())
+            motion_log.add_motion_event(datetime.datetime.now().isoformat())
 
 
 class StatusProcessor:
@@ -29,6 +29,8 @@ class StatusProcessor:
         db.drem(constants.STATUS)
         db.dcreate(constants.STATUS)
 
+        db.dadd(constants.STATUS, ("Motion Events", motion_log.get_motion_events_from(24)))
+
         for key, value in status.iteritems():
             if key == constants.STATUS_EVENT:
                 db.dadd(constants.STATUS, ("Event", value))
@@ -39,8 +41,6 @@ class StatusProcessor:
                 db.dadd(constants.STATUS, ("Indoor Temp", "%.2f%sF, %.2f%%" % (value[constants.STATUS_TEMP], unichr(176), value[constants.STATUS_HUMIDITY])))
             elif key == constants.STATUS_OUTDOOR_TEMP:
                 db.dadd(constants.STATUS, ("Outdoor Temp", "%.2f%sF, %.2f%%" % (value[constants.STATUS_TEMP], unichr(176), value[constants.STATUS_HUMIDITY])))
-            elif key == constants.STATUS_MOTION_EVENTS_24H:
-                db.dadd(constants.STATUS, ("Motion Events", motion_log.get_motion_events_from(24)))
             else:
                 db.dadd(constants.STATUS, (key, value))
 

@@ -21,6 +21,8 @@ if not (db.get(constants.SENSORS_READ_INTERVAL_SEC)):
 
 
 class Temperature:
+    readings = {}
+
     def __init__(self):
         self.pins = db.dgetall(constants.SENSORS_TEMP)
         logger.debug("Temperature: " + json.dumps(self.pins))

@@ -24,7 +24,6 @@ def send(image, event):
                 status[key] = value
 
         status[constants.STATUS_TIME] = datetime.now().isoformat()
-        status[constants.STATUS_MOTION_EVENTS_24H] = motion_events_24h
         server.post_image(image, event)
         server.post_status(status)
         os.remove(image)

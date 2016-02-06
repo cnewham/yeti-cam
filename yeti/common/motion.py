@@ -1,7 +1,8 @@
 ﻿__author__ = 'chris'
+import pickledb
 from datetime import datetime, timedelta
-from yeti.server import db
 from yeti.common import config, constants
+
 
 import logging
 logger = logging.getLogger(__name__)
@@ -9,20 +10,23 @@ logger = logging.getLogger(__name__)
 class MotionLog:
     def __init__(self):
         logger.info("Initializing MotionLog")
-        if not db.get(constants.MOTION_LOG):
-            db.lcreate(constants.MOTION_LOG, 0)
-    
-    def add_motion_event(event_time):
-        db.ladd(constants.MOTION_LOG, event_time);
+        self.db = pickledb.load('db/motion.db', True)
 
-    def get_motion_events_from(hours):
+        if not self.db.get(constants.MOTION_LOG):
+            self.db.lcreate(constants.MOTION_LOG)
+    
+    def add_motion_event(self, event_time):
+        self.db.ladd(constants.MOTION_LOG, event_time);
+
+    def get_motion_events_from(self, hours):
         total = 0
-        for event in db.lgetall(constants.MOTION_LOG):
+        for event in self.db.lgetall(constants.MOTION_LOG):
+            event_date = datetime.strptime(event, "%Y-%m-%dT%H:%M:%S.%f")
             delta_date = datetime.now() - timedelta(hours=hours)
-            if event >= delta_date:
+            if event_date >= delta_date:
                 total += 1
             else:
-                db.lpop(constants.MOTION_LOG, event)
+                self.db.lpop(constants.MOTION_LOG, event)
 
         return total
 

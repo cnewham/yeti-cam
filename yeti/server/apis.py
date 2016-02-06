@@ -2,16 +2,16 @@
 import datetime
 from flask_restful import Resource, abort, request, reqparse
 from flask import url_for, jsonify
-import processor
+import processors
 from yeti.server import db
 from yeti.common import constants, config
 
 import logging
 logger = logging.getLogger(__name__)
 
-upload_processor = processor.UploadProcessor()
-status_processor = processor.StatusProcessor()
-log_processor = processor.LogProcessor()
+upload_processor = processors.UploadProcessor()
+status_processor = processors.StatusProcessor()
+log_processor = processors.LogProcessor()
 
 class ImageApi(Resource):
     def __init__(self):
