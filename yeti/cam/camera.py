@@ -82,7 +82,7 @@ def scanMotion(sensitivity, threshold):
         if diffCount > sensitivity:
             return True
         else:
-            time.sleep(1)
+            time.sleep(0.5)
 
 def getFileName(imagePath, imageNamePrefix):
     rightNow = datetime.now()

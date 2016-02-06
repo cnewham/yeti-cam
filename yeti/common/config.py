@@ -55,7 +55,13 @@ def get(key = None):
 
         return json.loads(configs)
     else:
-        return db.get(key)
+        value = db.get(key)
+        if value == "true":
+            return True
+        elif value == "false":
+            return False
+        else:
+            return db.get(key)
 
 def update(configs):
     logger.info("Updating configs")

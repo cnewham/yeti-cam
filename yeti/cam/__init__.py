@@ -64,23 +64,23 @@ def capture_timer_image():
         time.sleep(config.get(constants.CONFIG_TIMER_INTERVAL_MIN) * constants.SECONDS2MIN)
 
 def scan_motion_image():
+    time.sleep(60) #Sleep for 60 seconds before checking for motion
     while True:
         sensitivity = config.get(constants.CONFIG_MOTION_SENSITIVITY)
         threshold = config.get(constants.CONFIG_MOTION_THRESHOLD)
         capture_threshold = config.get(constants.CONFIG_MOTION_CAPTURE_THRESHOLD)
         motion_delay = config.get(constants.CONFIG_MOTION_DELAY_SEC)
-        motion_enabled = config.get(constants.CONFIG_MOTION_ENABLED)
 
         try:
-            if motion_enabled and camera.scanMotion(sensitivity, threshold):
-                if motion_events.enabled():
+            if motion_events.enabled():
+                if camera.scanMotion(sensitivity, threshold):
                     logger.info("Capturing motion image: threshold=%i sensitivity=%i ......"  % (threshold, sensitivity))
                     image = camera.capture_image()
                     send(image, constants.EVENT_MOTION)
                     time.sleep(3)
-                else:
-                    logger.warning("Motion events disabled for %s seconds because threshold (%s) has been exceeded" % (motion_delay, capture_threshold))
-                    time.sleep(motion_delay)
+            else:
+                logger.warning("Motion events disabled for %s seconds because threshold (%s) has been exceeded" % (motion_delay, capture_threshold))
+                time.sleep(motion_delay)
         except Exception:
             logger.exception("An error occurred when attempting to capture motion image")
 

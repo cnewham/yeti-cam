@@ -29,14 +29,14 @@ class StatusProcessor:
         db.drem(constants.STATUS)
         db.dcreate(constants.STATUS)
 
-        db.dadd(constants.STATUS, ("Motion Events", motion_log.get_motion_events_from(24)))
+        db.dadd(constants.STATUS, ("Motion Events (24hr)", motion_log.get_motion_events_from(24)))
 
         for key, value in status.iteritems():
             if key == constants.STATUS_EVENT:
                 db.dadd(constants.STATUS, ("Event", value))
             elif key == constants.STATUS_TIME:
                 date = datetime.datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f")
-                db.dadd(constants.STATUS, ("Time", date.strftime('%m-%d-%Y %I:%M %p')))
+                db.dadd(constants.STATUS, ("Last Update", date.strftime('%m-%d-%Y %I:%M %p')))
             elif key == constants.STATUS_INDOOR_TEMP:
                 db.dadd(constants.STATUS, ("Indoor Temp", "%.2f%sF, %.2f%%" % (value[constants.STATUS_TEMP], unichr(176), value[constants.STATUS_HUMIDITY])))
             elif key == constants.STATUS_OUTDOOR_TEMP:
