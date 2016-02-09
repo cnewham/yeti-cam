@@ -3,7 +3,6 @@ import pickledb
 from datetime import datetime, timedelta
 from yeti.common import config, constants
 
-
 import logging
 logger = logging.getLogger(__name__)
 
@@ -15,8 +14,8 @@ class MotionLog:
         if not self.db.get(constants.MOTION_LOG):
             self.db.lcreate(constants.MOTION_LOG)
     
-    def add_motion_event(self, event_time):
-        self.db.ladd(constants.MOTION_LOG, event_time);
+    def add_motion_event(self, event_time, filename):
+        self.db.ladd(constants.MOTION_LOG, {filename : event_time}) #TODO: check if a kvp can be added to a pickledb list
 
     def get_motion_events_from(self, hours):
         total = 0
@@ -29,6 +28,9 @@ class MotionLog:
                 self.db.lpop(constants.MOTION_LOG, idx)
 
         return total
+
+    def get_all_motion_events(self):
+        return self.db.lgetall(constants.MOTION_LOG)
 
 class MotionEvents:
     def __init__(self):
