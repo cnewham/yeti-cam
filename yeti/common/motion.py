@@ -20,13 +20,13 @@ class MotionLog:
 
     def get_motion_events_from(self, hours):
         total = 0
-        for event in self.db.lgetall(constants.MOTION_LOG):
+        for idx, event in enumerate(self.db.lgetall(constants.MOTION_LOG)):
             event_date = datetime.strptime(event, "%Y-%m-%dT%H:%M:%S.%f")
             delta_date = datetime.now() - timedelta(hours=hours)
             if event_date >= delta_date:
                 total += 1
             else:
-                self.db.lpop(constants.MOTION_LOG, event)
+                self.db.lpop(constants.MOTION_LOG, idx)
 
         return total
 
