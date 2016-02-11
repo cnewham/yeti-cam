@@ -14,7 +14,7 @@ class Authorize:
     def __init__(self, callback):
         self.callback = callback
         self.flow = client.flow_from_clientsecrets(
-            'client_secrets.json',
+            'client_secret.json',
             scope='https://www.googleapis.com/auth/drive',
             redirect_uri=callback)
 

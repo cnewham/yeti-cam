@@ -30,7 +30,6 @@ if not db.get(constants.STATUS):
 
 #Load content
 from yeti.server import apis, content
-from yeti.server import drive
 
 flask.config['UPLOAD_FOLDER'] = db.get('UPLOAD_FOLDER')
 flask.config['CAM_LOG_FOLDER'] = db.get('CAM_LOG_FOLDER')
@@ -40,20 +39,4 @@ api.add_resource(apis.ImageApi, '/api/image')
 api.add_resource(apis.ConfigApi, '/api/config')
 api.add_resource(apis.StatusApi, '/api/status')
 api.add_resource(apis.LogApi, '/api/log')
-
-@flask.route('/drive/auth')
-def google_drive_auth():
-    auth = drive.Authorize(flask.url_for('drive/auth', _external=True))
-    code = flask.request.args.get('code')
-    error = flask.request.args.get('error')
-    
-    if error:
-        logger.error("An error occurred while attempting to authorize Google Drive: %s" % error)
-        return
-    elif code:
-        logger.info("Updating credentials with code %s" % code)
-        auth.complete(code)
-        return
-
-    return redirect(auth.start())
 

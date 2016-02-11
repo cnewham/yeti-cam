@@ -3,5 +3,6 @@
 *.jpg
 *.db
 *.log
+*.json
 logs/
 env/
