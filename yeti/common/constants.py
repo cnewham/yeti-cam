@@ -49,3 +49,4 @@ SENSORS_READ_INTERVAL_SEC = 'read_interval_sec'
 #OTHER CONSTANTS
 
 MOTION_LOG = 'motion_log'
+GDRIVE_FOLDER = 'gdrive_folder'

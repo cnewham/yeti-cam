@@ -1,7 +1,7 @@
 ﻿__author__ = 'chris'
 import os, shutil, datetime
 from yeti.common import constants, motion
-from yeti.server import db
+from yeti.server import db, drive
 
 import logging
 logger = logging.getLogger(__name__)
@@ -14,8 +14,12 @@ class UploadProcessor:
 
     def process(self, event, filename):
         logger.info("Processing %s event for image %s" % (event, filename))
-        event_filename = "%s-%s" % (event, filename)
-        shutil.copy(os.path.join(db.get('UPLOAD_FOLDER'), "current.jpg"), os.path.join(db.get('UPLOAD_FOLDER'), event_filename))
+        try:
+            event_filename = "%s-%s" % (event, filename)
+            shutil.copy(os.path.join(db.get('UPLOAD_FOLDER'), "current.jpg"), os.path.join(db.get('UPLOAD_FOLDER'), event_filename))
+            drive.upload_image(event_filename, event, db.get(constants.GDRIVE_FOLDER))
+        except:
+            logger.exception("An exception occurred during proccessing file upload for %s" % event_filename)
 
         if event == constants.EVENT_MOTION:
             motion_log.add_motion_event(datetime.datetime.now().isoformat(), event_filename)

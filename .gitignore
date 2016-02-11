@@ -3,4 +3,5 @@
 *.jpg
 *.db
 *.log
-logs/*.log.*
+logs/
+env/
