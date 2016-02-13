@@ -6,6 +6,8 @@ from yeti.common import constants
 import logging
 logger = logging.getLogger(__name__)
 
+logger.info("Starting yeti-cam-server...")
+
 flask = Flask(__name__, static_folder='static', static_url_path='')
 api = Api(flask)
 jsglue = JSGlue(flask)
@@ -24,6 +26,9 @@ if not db.get('ALLOWED_EXTENSIONS'):
 
 if not db.get(constants.GDRIVE_FOLDER):
     db.set(constants.GDRIVE_FOLDER, '')
+
+if not db.get(constants.ENABLE_GDRIVE):
+    db.set(constants.ENABLE_GDRIVE, False)
 
 if not db.get(constants.STATUS):
     db.dcreate(constants.STATUS)

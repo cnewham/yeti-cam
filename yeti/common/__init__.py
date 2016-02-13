@@ -7,7 +7,7 @@ LOG_FILENAME = "logs/yeticam.log"
 
 #configure logging
 logging.basicConfig(level=LOG_LEVEL,
-                    format="%%(name)-12s: %(levelname)-8s %(message)s")
+                    format="%(name)-12s: %(levelname)-8s %(message)s")
 
 handler = logging.handlers.RotatingFileHandler(
               LOG_FILENAME, maxBytes=1000000, backupCount=5)

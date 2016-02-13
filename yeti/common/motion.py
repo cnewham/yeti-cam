@@ -15,7 +15,7 @@ class MotionLog:
             self.db.lcreate(constants.MOTION_LOG)
     
     def add_motion_event(self, event_time, filename):
-        self.db.ladd(constants.MOTION_LOG, {filename : event_time}) #TODO: check if a kvp can be added to a pickledb list
+        self.db.ladd(constants.MOTION_LOG, event_time)
 
     def get_motion_events_from(self, hours):
         total = 0

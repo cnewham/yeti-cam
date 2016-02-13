@@ -56,10 +56,10 @@ class ConfigApi(Resource):
             config.update(request.json)
             return {}, 201
         except ValueError as ex:
-            logger.exception("Could not parse status request from cam client")
+            logger.exception("Invalid configuration object")
             abort(400)
         except Exception as ex:
-            logger.exception("An error occurred while attempting to update config from cam client")
+            logger.exception("An error occurred while attempting to update config")
             abort(500)
 
     def get(self):

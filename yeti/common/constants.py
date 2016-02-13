@@ -50,3 +50,4 @@ SENSORS_READ_INTERVAL_SEC = 'read_interval_sec'
 
 MOTION_LOG = 'motion_log'
 GDRIVE_FOLDER = 'gdrive_folder'
+ENABLE_GDRIVE = 'enable_gdrive'

@@ -54,7 +54,7 @@ def upload_image(filename, event, folder_id):
 
     media_body = MediaFileUpload(filename, mimetype='image/jpeg', resumable=True)
     body = {
-      'name': filename,
+      'name': os.path.basename(filename),
       'description': 'Event: %s' % event,
     }
 
@@ -65,7 +65,7 @@ def upload_image(filename, event, folder_id):
         upload = service.files().create(
         body=body,
         media_body=media_body).execute()
-        logger.debug("Uploaded image to Drive (Id %s)" % upload['id'])
+        logger.debug("Uploaded image to Drive (Id: %s)" % upload['id'])
     except:
         logger.exception("Could not upload image to Drive")
         

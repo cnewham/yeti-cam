@@ -15,14 +15,19 @@ class UploadProcessor:
     def process(self, event, filename):
         logger.info("Processing %s event for image %s" % (event, filename))
         try:
-            event_filename = "%s-%s" % (event, filename)
-            shutil.copy(os.path.join(db.get('UPLOAD_FOLDER'), "current.jpg"), os.path.join(db.get('UPLOAD_FOLDER'), event_filename))
-            drive.upload_image(event_filename, event, db.get(constants.GDRIVE_FOLDER))
+            filename = "%s-%s" % (event, filename)
+            capture = os.path.join(db.get('UPLOAD_FOLDER'), filename)
+            shutil.copy(os.path.join(db.get('UPLOAD_FOLDER'), "current.jpg"), capture)
+
+            if db.get(constants.ENABLE_GDRIVE):
+                drive.upload_image(capture, event, db.get(constants.GDRIVE_FOLDER))
+
+            os.remove(capture)
         except:
-            logger.exception("An exception occurred during proccessing file upload for %s" % event_filename)
+            logger.exception("An exception occurred during proccessing file upload for %s" % filename)
 
         if event == constants.EVENT_MOTION:
-            motion_log.add_motion_event(datetime.datetime.now().isoformat(), event_filename)
+            motion_log.add_motion_event(datetime.datetime.now().isoformat(), filename)
 
 
 class StatusProcessor:
