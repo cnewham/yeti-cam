@@ -1,12 +1,14 @@
+function refresh() {
+    updateImage();
+    updateStatus();
+};
 
 function updateImage() {
 	current = Flask.url_for("upload_folder", {"filename": "current.jpg"});
 
 	newImage = $("#current");
 	newImage.attr("src", current + "?" + new Date().getTime());
-
-	$("#currentTime").text('success!');
-}
+};
 
 function updateStatus() {
 	$.ajax({
@@ -26,17 +28,12 @@ function updateStatus() {
     		$("#status").html(status);
 		}
 	});
-}
+};
 
-function refresh() {
-    updateImage();
-    updateStatus();
-}
+$(function () {
+    refresh();
 
-$(function(){
-	refresh();
-
-	setInterval(function(){
+    setInterval(function () {
         refresh();
-	}, 10000);
+    }, 10000);
 });

@@ -11,7 +11,7 @@
 
     {{ JSGlue.include() }}
     <script type=text/javascript src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
-    <script type=text/javascript src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script type=text/javascript src="{{ url_for('static', filename='js/configure.js') }}"></script>
 
     <!-- Mobile Specific Metas
     –––––––––––––––––––––––––––––––––––––––––––––––––– -->
@@ -29,7 +29,6 @@
     <!-- Favicon
     –––––––––––––––––––––––––––––––––––––––––––––––––– -->
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon.png') }}">
-
 </head>
 <body style="background-image: url({{ url_for('static', filename='images/background-dark.png') }}); background-repeat: repeat">
 
@@ -39,6 +38,105 @@
         <div class="row" style="margin-top: 10%">
             <h4>CONFIGURE</h4>
         </div>
+        
+        <form id="config">
+            <!--Image configurations-->
+            <div class="row" style="margin-top: 5%">
+                <h5>Image</h5>
+            </div>
+            <div class="row"> 
+                <div class="six columns">
+                    <label for="image_dir">Image Directory</label>
+                    <input class="u-full-width" type="text" id="image_dir" name="image_dir">
+                </div>
+            </div>
+            <div class="row">
+                <div class="six columns">
+                    <label for="image_prefix">Image Prefix</label>
+                    <input class="u-full-width" type="text" id="image_prefix" name="image_prefix">
+                </div>
+            </div>
+            <div class="row">
+                <div class="four columns">
+                    <label for="timer_interval">Image Capture Timer (min)</label>
+                    <input class="u-full-width" type="number" id="timer_interval" name="timer_interval">
+                </div>
+            </div>
+            <div class="row">
+                <div class="two columns">
+                    <label for="image_width">Width</label>
+                    <input class="u-full-width" type="number" id="image_width" name="image_width">
+                </div>
+                <div class="two columns">
+                    <label for="image_height">Height</label>
+                    <input class="u-full-width" type="number" id="image_height" name="image_height">
+                </div>
+            </div>
+            <div class="row">
+                <label class="three columns">
+                    <input type="checkbox" id="image_vflip" name="image_vflip">
+                    <span class="label-body">Flip Vertically</span>
+                </label>
+                <label class="three columns">
+                    <input type="checkbox" id="image_hflip" name="image_hflip">
+                    <span class="label-body">Flip Horizontally</span>
+                </label>
+            </div>
+            <!--Motion configurations-->
+            <div class="row" style="margin-top: 5%">
+                <h5>Motion</h5>
+            </div>
+            <div class="row">
+                <label class="three columns">
+                    <input type="checkbox" id="motion_enabled" name="motion_enabled">
+                    <span class="label-body">Enabled</span>
+                </label>
+            </div>
+            <div class="row">
+                <div class="three columns">
+                    <label for="motion_capture_threshold">Capture Threshold</label>
+                    <input class="u-full-width" type="number" id="motion_capture_threshold" name="motion_capture_threshold">
+                </div>
+                <div class="three columns">
+                    <label for="motion_delay">Motion Delay (sec)</label>
+                    <input class="u-full-width" type="number" id="motion_delay" name="motion_delay">
+                </div>
+            </div>
+            <div class="row">
+                <div class="three columns">
+                    <label for="motion_sensitivity">Sensitivity</label>
+                    <input class="u-full-width" type="number" id="motion_sensitivity" name="motion_sensitivity">
+                </div>
+                <div class="three columns">
+                    <label for="motion_threshold">Threshold</label>
+                    <input class="u-full-width" type="number" id="motion_threshold" name="motion_threshold">
+                </div>
+            </div>
+
+            <!--Server configurations-->
+            <div class="row" style="margin-top: 5%">
+                <h5>Server</h5>
+            </div>
+            <div class="row">
+                <div class="six columns">
+                    <label for="server">Server URL</label>
+                    <input class="u-full-width" type="text" id="server" name="server">
+                </div>
+            </div>
+            <div class="row">
+                <div class="four columns">
+                    <label for="config_check_interval">Config update interval (min)</label>
+                    <input class="u-full-width" type="number" id="config_check_interval" name="config_check_interval">
+                </div>
+            </div>
+
+            <div class="row" style="margin-top: 5%">
+                <input type="hidden" id="version" name="version" />
+                <input class="button-primary" type="submit" value="Submit">
+                <h6 id="success-message" style="color:darkgreen" hidden>Successfully updated config</h6>
+                <h6 id="error-message" style="color:darkred" hidden>Error</h6>
+            </div>
+        </form>
     </div>
 
     <!-- End Document

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 
@@ -11,7 +11,7 @@
 
   {{ JSGlue.include() }}
   <script type=text/javascript src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
-  <script type=text/javascript src="{{ url_for('static', filename='js/app.js') }}"></script>
+  <script type=text/javascript src="{{ url_for('static', filename='js/viewer.js') }}"></script>
 
   <!-- Mobile Specific Metas
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
@@ -29,7 +29,6 @@
   <!-- Favicon
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon.png') }}">
-
 </head>
 <body style="background-image: url({{ url_for('static', filename='images/background-dark.png') }}); background-repeat: repeat">
 
