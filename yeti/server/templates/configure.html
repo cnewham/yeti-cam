@@ -73,6 +73,12 @@
                 </div>
             </div>
             <div class="row">
+                <div class="four columns">
+                    <label for="timer_interval">Image Quality</label>
+                    <input class="u-full-width" type="number" id="image_quality" name="image_quality">
+                </div>
+            </div>
+            <div class="row">
                 <label class="three columns">
                     <input type="checkbox" id="image_vflip" name="image_vflip">
                     <span class="label-body">Flip Vertically</span>
@@ -92,24 +98,26 @@
                     <span class="label-body">Enabled</span>
                 </label>
             </div>
-            <div class="row">
-                <div class="three columns">
-                    <label for="motion_capture_threshold">Capture Threshold</label>
-                    <input class="u-full-width" type="number" id="motion_capture_threshold" name="motion_capture_threshold">
+            <div id="motion_settings">
+                <div class="row">
+                    <div class="three columns">
+                        <label for="motion_capture_threshold">Capture Threshold</label>
+                        <input class="u-full-width" type="number" id="motion_capture_threshold" name="motion_capture_threshold">
+                    </div>
+                    <div class="three columns">
+                        <label for="motion_delay">Motion Delay (sec)</label>
+                        <input class="u-full-width" type="number" id="motion_delay" name="motion_delay">
+                    </div>
                 </div>
-                <div class="three columns">
-                    <label for="motion_delay">Motion Delay (sec)</label>
-                    <input class="u-full-width" type="number" id="motion_delay" name="motion_delay">
-                </div>
-            </div>
-            <div class="row">
-                <div class="three columns">
-                    <label for="motion_sensitivity">Sensitivity</label>
-                    <input class="u-full-width" type="number" id="motion_sensitivity" name="motion_sensitivity">
-                </div>
-                <div class="three columns">
-                    <label for="motion_threshold">Threshold</label>
-                    <input class="u-full-width" type="number" id="motion_threshold" name="motion_threshold">
+                <div class="row">
+                    <div class="three columns">
+                        <label for="motion_sensitivity">Sensitivity</label>
+                        <input class="u-full-width" type="number" id="motion_sensitivity" name="motion_sensitivity">
+                    </div>
+                    <div class="three columns">
+                        <label for="motion_threshold">Threshold</label>
+                        <input class="u-full-width" type="number" id="motion_threshold" name="motion_threshold">
+                    </div>
                 </div>
             </div>
 
@@ -120,7 +128,7 @@
             <div class="row">
                 <div class="six columns">
                     <label for="server">Server URL</label>
-                    <input class="u-full-width" type="text" id="server" name="server">
+                    <input class="u-full-width disabled" type="text" id="server" name="server" disabled>
                 </div>
             </div>
             <div class="row">
@@ -130,11 +138,12 @@
                 </div>
             </div>
 
-            <div class="row" style="margin-top: 5%">
+            <div class="row" style="margin-top: 3%">
+                <h6 id="version_display">Config Version: </h6>
                 <input type="hidden" id="version" name="version" />
                 <input class="button-primary" type="submit" value="Submit">
-                <h6 id="success-message" style="color:darkgreen" hidden>Successfully updated config</h6>
-                <h6 id="error-message" style="color:darkred" hidden>Error</h6>
+                <span id="success-message" style="color:darkgreen; margin-left: 2%" hidden>Success</span>
+                <span id="error-message" style="color:darkred; margin-left: 2%" hidden>Error</span>
             </div>
         </form>
     </div>

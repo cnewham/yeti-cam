@@ -17,6 +17,7 @@ def send(image, event):
         logger.info("Sending image with event %s" % event)
         status = {}
         status[constants.STATUS_EVENT] = event
+        status[constants.STATUS_CONFIG_VERSION] = config.version()
 
         #read temperature/humidity values
         for key, value in temp.read().iteritems():

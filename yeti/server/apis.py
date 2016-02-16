@@ -53,8 +53,12 @@ class ImageApi(Resource):
 class ConfigApi(Resource):
     def put(self):
         try:
-            config.update(request.json)
-            return {}, 201
+            result = config.update(request.json)
+            if result:
+                return {'error': result}, 409
+            else:
+                return {}, 204
+
         except ValueError as ex:
             logger.exception("Invalid configuration object")
             abort(400)

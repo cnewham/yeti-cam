@@ -287,6 +287,10 @@ label > .label-body {
   margin-left: .5rem;
   font-weight: normal; }
 
+input.disabled {
+    color:gray
+}
+
 
 /* Lists
 –––––––––––––––––––––––––––––––––––––––––––––––––– */

@@ -44,11 +44,13 @@ def captureImage(filename):
         with picamera.PiCamera() as camera:
             camera.resolution = (config.get(constants.CONFIG_IMAGE_WIDTH), config.get(constants.CONFIG_IMAGE_HEIGHT))
             camera.vflip = config.get(constants.CONFIG_IMAGE_VFLIP)
-            camera.hflip = config.get(constants.CONFIG_IMAGE_HFLIP)
+            camera.hflip = config.get(constants.CONFIG_IMAGE_HFLIP)            
+            quality = config.get(constants.CONFIG_IMAGE_QUALITY)
+
             # Day Automatic Mode
             camera.exposure_mode = 'auto'
             camera.awb_mode = 'auto'
-            camera.capture(filename)
+            camera.capture(filename, format="jpeg", quality=quality)
         logger.info("Capture Image - Captured %s" % filename)
 
     return filename

@@ -9,11 +9,14 @@
         success: function (result) {
             $.each(result, function (key, value) {
                 if (!isNumber(value) && (value == true || value == false)) {
-                    $("#" + key).attr("checked", value);
+                    $("#" + key).prop("checked", value);
                 } else {
-                    $("#" + key).attr("value", value);
+                    $("#" + key).prop("value", value);
                 }
             });
+
+            $("#version_display").text("Current Config Version: " + result["version"]);
+            toggleMotionSettings(result["motion_enabled"]);
         }
     });
 };
@@ -23,6 +26,8 @@ function saveConfig(config) {
         //throw error
         return;
     }
+
+    $("#config input[type=submit]").prop("disabled", true);
 
     var version = parseInt(config["version"]);
     config["version"] = version + 1;
@@ -37,11 +42,26 @@ function saveConfig(config) {
             $("#error-message").show().fadeOut(5000);
         },
         success: function (result) {
+            $("#success-message").text("Config queued for delivery");
             $("#success-message").show().fadeOut(5000);
+        },
+        complete: function() {
             getConfig();
+            $("#config input[type=submit]").prop("disabled", false);
         }
     });
 };
+
+function toggleMotionSettings(enabled) {
+    var motion_settings = $("#motion_settings input");
+    if (enabled) {
+        motion_settings.removeClass("disabled");
+        motion_settings.prop("disabled", false);
+    } else {
+        motion_settings.addClass("disabled");
+        motion_settings.prop("disabled", true);
+    }
+}
 
 function isNumber(n) {
     return !isNaN(parseFloat(n)) && isFinite(n);
@@ -67,5 +87,9 @@ $(function () {
 
         e.preventDefault();
         saveConfig(values);
+    });
+
+    $("#motion_enabled[type=checkbox]").change(function() {
+        toggleMotionSettings(this.checked);
     });
 });

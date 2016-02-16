@@ -22,12 +22,14 @@ STATUS_OUTDOOR_TEMP = 'outdoor_temp'
 STATUS_TEMP = 'temp'
 STATUS_HUMIDITY = 'humidity'
 STATUS_MOTION_EVENTS_24H = 'motion_events_24h'
+STATUS_CONFIG_VERSION = 'config_version'
 
 #CONFIG CONSTANTS
 
 CONFIG_VERSION = 'version'
 CONFIG_CHECK_INTERVAL_MIN = 'config_check_interval'
 CONFIG_SERVER = 'server'
+CONFIG_IMAGE_QUALITY = "image_quality"
 CONFIG_IMAGE_DIR = "image_dir"
 CONFIG_IMAGE_PREFIX = 'image_prefix'
 CONFIG_IMAGE_WIDTH = 'image_width'

@@ -15,6 +15,9 @@ jsglue = JSGlue(flask)
 db = pickledb.load('db/server.db', True)
 
 # set default configuration
+if not db.get('SERVER_NAME'):
+    db.set('SERVER_NAME', 'localhost:5000');
+
 if not db.get('UPLOAD_FOLDER'):
     db.set('UPLOAD_FOLDER', '/var/www/yeti-cam/uploads');
 
@@ -39,6 +42,7 @@ from yeti.server import apis, content
 flask.config['UPLOAD_FOLDER'] = db.get('UPLOAD_FOLDER')
 flask.config['CAM_LOG_FOLDER'] = db.get('CAM_LOG_FOLDER')
 flask.config['ALLOWED_EXTENSIONS'] = db.get('ALLOWED_EXTENSIONS')
+flask.config['SERVER_NAME'] = db.get('SERVER_NAME')
 
 api.add_resource(apis.ImageApi, '/api/image')
 api.add_resource(apis.ConfigApi, '/api/config')
