@@ -2,7 +2,8 @@
 import threading, time, os
 from datetime import datetime
 from yeti.common import constants, config, motion
-from yeti.cam import service, sensors, camera
+from yeti.cam import service, sensors
+import camera_v2 as camera
 
 import logging
 logger = logging.getLogger(__name__)

@@ -52,7 +52,7 @@ class StatusProcessor:
             elif key == constants.STATUS_OUTDOOR_TEMP:
                 db.dadd(constants.STATUS, ("Outdoor Temp", "%.2f%sF, %.2f%%" % (value[constants.STATUS_TEMP], unichr(176), value[constants.STATUS_HUMIDITY])))
             elif key == constants.STATUS_CONFIG_VERSION:
-                db.dadd(constants.STATUS_CONFIG_VERSION, ("Config Version", value))
+                db.dadd(constants.STATUS, ("Config Version", value))
             else:
                 db.dadd(constants.STATUS, (key, value))
 

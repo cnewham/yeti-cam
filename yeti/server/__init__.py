@@ -42,7 +42,7 @@ from yeti.server import apis, content
 flask.config['UPLOAD_FOLDER'] = db.get('UPLOAD_FOLDER')
 flask.config['CAM_LOG_FOLDER'] = db.get('CAM_LOG_FOLDER')
 flask.config['ALLOWED_EXTENSIONS'] = db.get('ALLOWED_EXTENSIONS')
-flask.config['SERVER_NAME'] = db.get('SERVER_NAME')
+#flask.config['SERVER_NAME'] = db.get('SERVER_NAME')
 
 api.add_resource(apis.ImageApi, '/api/image')
 api.add_resource(apis.ConfigApi, '/api/config')
