@@ -21,8 +21,8 @@ class UploadProcessor:
 
             if db.get(constants.ENABLE_GDRIVE):
                 drive.upload_image(capture, event, db.get(constants.GDRIVE_FOLDER))
+                os.remove(capture)
 
-            os.remove(capture)
         except:
             logger.exception("An exception occurred during proccessing file upload for %s" % filename)
 
