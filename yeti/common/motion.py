@@ -14,7 +14,7 @@ class MotionLog:
         if not self.db.get(constants.MOTION_LOG):
             self.db.lcreate(constants.MOTION_LOG)
     
-    def add_motion_event(self, event_time, filename):
+    def add_motion_event(self, event_time):
         self.db.ladd(constants.MOTION_LOG, event_time)
 
     def get_motion_events_from(self, hours):

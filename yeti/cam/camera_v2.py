@@ -82,5 +82,5 @@ def scan_motion(sensitivity, threshold):
                 camera.wait_recording(1)
                 motion_starting = False
 
-    return not capturing
+    return motion_detected
 
