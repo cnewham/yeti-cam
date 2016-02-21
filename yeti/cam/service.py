@@ -1,7 +1,7 @@
 __author__ = 'chris'
 import json
 import requests
-from yeti.common import config
+from yeti.common import config, constants
 
 
 import logging
@@ -33,4 +33,9 @@ class YetiService:
     def send_config(self):
         logger.info("Updating server configs")
         r = requests.put(self.baseUrl + "config", json=config.get())
+        logger.info("StatusCode: %s, Text: %s" % (r.status_code, r.text))
+
+    def send_config_status(self, status):
+        logger.info("Updating server config status")
+        r = requests.patch(self.baseUrl + "config", json={'status': status})
         logger.info("StatusCode: %s, Text: %s" % (r.status_code, r.text))

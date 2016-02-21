@@ -391,6 +391,19 @@ hr {
   border-top: 1px solid #E1E1E1; }
 
 
+.alert-red {
+  color: darkred;
+}
+
+.alert-amber {
+  color: #FFA700;
+}
+
+.alert-green {
+  color: darkgreen;
+}
+
+
 /* Clearing
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 

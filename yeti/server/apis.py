@@ -54,6 +54,25 @@ class ConfigApi(Resource):
     def put(self):
         try:
             result = config.update(request.json)
+            config.set_status(constants.CONFIG_STATUS_MODIFIED)
+            if result:
+                return {'error': result}, 409
+            else:
+                return {}, 204
+
+        except ValueError as ex:
+            logger.exception("Invalid configuration object")
+            abort(400)
+        except Exception as ex:
+            logger.exception("An error occurred while attempting to update config")
+            abort(500)
+
+    def patch(self):
+        try:
+            if not request.json["status"]:
+                abort(400)
+
+            result = config.set_status(request.json["status"])
             if result:
                 return {'error': result}, 409
             else:

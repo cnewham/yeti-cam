@@ -10,6 +10,8 @@ db = pickledb.load('db/config.db', True)
 #server/config
 if not db.get(constants.CONFIG_VERSION):
     db.set(constants.CONFIG_VERSION, 0)
+if not db.get(constants.CONFIG_STATUS):
+    db.set(constants.CONFIG_STATUS, constants.CONFIG_STATUS_NEW)
 if not db.get(constants.CONFIG_CHECK_INTERVAL_MIN):
     db.set(constants.CONFIG_CHECK_INTERVAL_MIN, 60)
 if not db.get(constants.CONFIG_SERVER):
@@ -67,6 +69,12 @@ def get(key = None):
 
 def version():
     return get(constants.CONFIG_VERSION)
+
+def get_status():
+    return get(constants.CONFIG_STATUS)
+
+def set_status(status):
+    db.set(constants.CONFIG_STATUS, status)
 
 def update(configs):
     logger.info("Updating configs")

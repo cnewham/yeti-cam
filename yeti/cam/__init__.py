@@ -18,7 +18,6 @@ def send(image, event):
         logger.info("Sending image with event %s" % event)
         status = {}
         status[constants.STATUS_EVENT] = event
-        status[constants.STATUS_CONFIG_VERSION] = config.version()
 
         #read temperature/humidity values
         for key, value in temp.read().iteritems():
@@ -43,6 +42,8 @@ def config_update():
         elif server_configs[constants.CONFIG_VERSION] > config.get(constants.CONFIG_VERSION):
             logger.info("Cam config updating from server")
             config.update(server_configs)
+            config.set_status(constants.CONFIG_STATUS_UPDATED)
+            server.send_config_status(config.get_status())
     except ValueError:
         logger.exception("Could not parse response from server")
     except Exception as ex:

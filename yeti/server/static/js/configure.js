@@ -15,7 +15,22 @@
                 }
             });
 
-            $("#version_display").text("Current Config Version: " + result["version"]);
+            var status = $("#config_status")
+
+            switch (result["status"]) {
+                case "MODIFIED":
+                    status.removeClass().addClass("alert-amber")
+                    status.text("Pending Update");
+                    break;
+                case "UPDATED":
+                    status.removeClass().addClass("alert-green")
+                    status.text("Updated");
+                    break;
+                default:
+                    status.removeClass().addClass("alert-red")
+                    status.text("Unavailable. Current Server Config Version: " + result["version"]);
+                    break;
+            }
             toggleMotionSettings(result["motion_enabled"]);
         }
     });

@@ -27,7 +27,7 @@ class UploadProcessor:
             logger.exception("An exception occurred during proccessing file upload for %s" % filename)
 
         if event == constants.EVENT_MOTION:
-            motion_log.add_motion_event(datetime.datetime.now().isoformat(), filename)
+            motion_log.add_motion_event(datetime.datetime.now().isoformat())
 
 
 class StatusProcessor:
@@ -51,8 +51,6 @@ class StatusProcessor:
                 db.dadd(constants.STATUS, ("Indoor Temp", "%.2f%sF, %.2f%%" % (value[constants.STATUS_TEMP], unichr(176), value[constants.STATUS_HUMIDITY])))
             elif key == constants.STATUS_OUTDOOR_TEMP:
                 db.dadd(constants.STATUS, ("Outdoor Temp", "%.2f%sF, %.2f%%" % (value[constants.STATUS_TEMP], unichr(176), value[constants.STATUS_HUMIDITY])))
-            elif key == constants.STATUS_CONFIG_VERSION:
-                db.dadd(constants.STATUS, ("Config Version", value))
             else:
                 db.dadd(constants.STATUS, (key, value))
 
