@@ -403,6 +403,14 @@ hr {
   color: darkgreen;
 }
 
+.indicator {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-right: 5px;
+    background: no-repeat 0 0;
+    background-size: 100%;
+}
 
 /* Clearing
 –––––––––––––––––––––––––––––––––––––––––––––––––– */

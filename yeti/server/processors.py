@@ -46,6 +46,7 @@ class StatusProcessor:
                 db.dadd(constants.STATUS, ("Event", value))
             elif key == constants.STATUS_TIME:
                 date = datetime.datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f")
+                db.set(constants.LAST_CAM_UPDATE, date.isoformat())
                 db.dadd(constants.STATUS, ("Last Update", date.strftime('%m-%d-%Y %I:%M %p')))
             elif key == constants.STATUS_INDOOR_TEMP:
                 db.dadd(constants.STATUS, ("Indoor Temp", "%.2f%sF, %.2f%%" % (value[constants.STATUS_TEMP], unichr(176), value[constants.STATUS_HUMIDITY])))

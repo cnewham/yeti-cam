@@ -1,5 +1,5 @@
 ﻿import os
-import datetime
+from datetime import datetime, timedelta
 from flask_restful import Resource, abort, request, reqparse
 from flask import url_for, jsonify
 import processors
@@ -107,7 +107,19 @@ class StatusApi(Resource):
 
     def get(self):
         try:
-            return jsonify(db.dgetall(constants.STATUS))
+            statuses = db.dgetall(constants.STATUS)
+
+            last_update = datetime.strptime(db.get(constants.LAST_CAM_UPDATE), "%Y-%m-%dT%H:%M:%S.%f")
+            interval = config.get(constants.CONFIG_TIMER_INTERVAL_MIN)
+            last_update_threshold = (interval + (interval * .5))
+            last_expected_update = datetime.now() - timedelta(minutes=last_update_threshold)
+            
+            if last_update > last_expected_update:
+                statuses['online'] = True
+            else:
+                statuses['online'] = False
+                                   
+            return jsonify(statuses)
         except Exception as ex:
             logger.exception("An error occurred while attempting to send status")
             abort(500)

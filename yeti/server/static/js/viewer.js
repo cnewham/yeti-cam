@@ -10,6 +10,16 @@ function updateImage() {
 	newImage.attr("src", current + "?" + new Date().getTime());
 };
 
+function toggleOnlineStatus(isOnline) {
+    if (isOnline) {
+        $("#online-indicator").prop("hidden", false);
+        $("#offline-indicator").prop("hidden", true);
+    } else {
+        $("#online-indicator").prop("hidden", true);
+        $("#offline-indicator").prop("hidden", false);
+    }
+}
+
 function updateStatus() {
 	$.ajax({
         type: "GET",
@@ -20,8 +30,12 @@ function updateStatus() {
         },
         success: function (result) {
     		status = "<table style='width:100%'>";
-    		$.each(result, function(key, value) {
-    			status += "<tr><td>" + key + "</td><td>" + value + "</td></tr>";
+    		$.each(result, function (key, value) {
+    		    if (key == "online") {
+		            toggleOnlineStatus(value);
+		        } else {
+    		        status += "<tr><td>" + key + "</td><td>" + value + "</td></tr>";
+		        }
     		});
     		status += "</table>";
 

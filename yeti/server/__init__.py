@@ -1,4 +1,4 @@
-﻿import pickledb
+﻿import pickledb, datetime
 from flask import Flask, redirect
 from flask_restful import Api
 from flask_jsglue import JSGlue
@@ -35,6 +35,9 @@ if not db.get(constants.ENABLE_GDRIVE):
 
 if not db.get(constants.STATUS):
     db.dcreate(constants.STATUS)
+
+if not db.get(constants.LAST_CAM_UPDATE):
+    db.set(constants.LAST_CAM_UPDATE, datetime.datetime.now().isoformat())
 
 #Load content
 from yeti.server import apis, content

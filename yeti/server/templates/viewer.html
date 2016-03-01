@@ -36,7 +36,22 @@
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <div class="container">
     <div class="row" style="margin-top: 10%">
-      <h4>YETI CAM</h4>
+        <div class="four columns">
+            <h4>YETI CAM</h4>
+        </div>
+        <div id="online-indicator" hidden>
+            <div class="eight columns">
+                <div class="u-pull-right" style="align-content: center">Online&nbsp;</div>
+                <div id="online" class="u-pull-right indicator" style="content: url({{ url_for('static', filename='images/indicator-green.png') }});"></div>
+            </div>
+        </div>
+        <div id="offline-indicator">
+            <div class="eight columns">
+                <div class="u-pull-right" style="align-content: center">Offline&nbsp;</div>
+                <div id="online" class="u-pull-right indicator" style="content: url({{ url_for('static', filename='images/indicator-grey.png') }});"></div>
+            </div>
+        </div>
+        
     </div>
     <div class="row">
       <div>
