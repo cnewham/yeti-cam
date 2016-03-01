@@ -13,7 +13,6 @@ server = service.YetiService(config.get(constants.CONFIG_SERVER))
 motion_events = motion.MotionEvents()
 
 def send(image, event):
-
     try:
         logger.info("Sending image with event %s" % event)
         status = {}
@@ -55,7 +54,7 @@ def check_config_updates():
         time.sleep(config.get(constants.CONFIG_CHECK_INTERVAL_MIN) * constants.SECONDS2MIN)
 
 def capture_timer_image():
-    time.sleep(60) #Sleep for 30 seconds on startup then take the first picture
+    time.sleep(30) #Sleep for 30 seconds on startup then take the first picture
     while True:
         logger.info("Capturing timer image: %i min" % config.get(constants.CONFIG_TIMER_INTERVAL_MIN))
         try:
@@ -67,7 +66,7 @@ def capture_timer_image():
         time.sleep(config.get(constants.CONFIG_TIMER_INTERVAL_MIN) * constants.SECONDS2MIN)
 
 def scan_motion_image():
-    time.sleep(30) #Sleep for 60 seconds before checking for motion
+    time.sleep(60) #Sleep for 60 seconds before checking for motion
     while True:
         sensitivity = config.get(constants.CONFIG_MOTION_SENSITIVITY)
         threshold = config.get(constants.CONFIG_MOTION_THRESHOLD)

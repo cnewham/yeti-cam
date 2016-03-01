@@ -15,13 +15,9 @@ logger.info("Initializing camera")
 
 camera_lock = threading.Lock()
 
+initializing = True
 motion_detected = False
-motion_starting = True
 capturing = False
-
-imageDir = config.get(constants.CONFIG_IMAGE_DIR)
-imagePath = config.get(constants.CONFIG_IMAGE_DIR)
-imageNamePrefix = config.get(constants.CONFIG_IMAGE_PREFIX)  # Prefix for all image file names. Eg front-
 
 class DetectMotion(picamera.array.PiMotionAnalysis):
     def __init__(self, camera, sensitivity, threshold):
@@ -30,7 +26,7 @@ class DetectMotion(picamera.array.PiMotionAnalysis):
         self.threshold = threshold
 
     def analyse(self, a):
-        global motion_detected, motion_starting
+        global motion_detected, initializing
         a = np.sqrt(
             np.square(a['x'].astype(np.float)) +
             np.square(a['y'].astype(np.float))
@@ -38,18 +34,18 @@ class DetectMotion(picamera.array.PiMotionAnalysis):
 
         # If there're more than 10 vectors with a magnitude greater
         # than 60, then say we've detected motion
-        if (a > self.sensitivity).sum() > self.threshold and not motion_starting:
+        if (a > self.sensitivity).sum() > self.threshold and not initializing:
             logger.debug("Motion Detected!")
             motion_detected = True
 
-def get_filename(imagePath, imageNamePrefix):
+def get_filename(path, prefix):
     now = datetime.now()
-    return "%s/%s%04d%02d%02d-%02d%02d%02d.jpg" % ( imagePath, imageNamePrefix ,now.year, now.month, now.day, now.hour, now.minute, now.second)
+    return "%s/%s%04d%02d%02d-%02d%02d%02d.jpg" % ( path, prefix ,now.year, now.month, now.day, now.hour, now.minute, now.second)
 
 def capture_image():
     global capturing
     capturing = True
-    filename = get_filename(imagePath, imageNamePrefix)
+    filename = get_filename(config.get(constants.CONFIG_IMAGE_DIR), config.get(constants.CONFIG_IMAGE_PREFIX))
 
     with camera_lock:
         with picamera.PiCamera() as camera:
@@ -66,11 +62,11 @@ def capture_image():
     return filename
 
 def scan_motion(sensitivity, threshold):
-    global motion_detected, motion_starting, capturing
+    global motion_detected, initializing, capturing
     with camera_lock:
         with picamera.PiCamera() as camera:
             motion_detected = False
-            motion_starting = True
+            initializing = True
             width = 640
             height = 480
 
@@ -80,7 +76,7 @@ def scan_motion(sensitivity, threshold):
 
             while not motion_detected and not capturing:
                 camera.wait_recording(1)
-                motion_starting = False
+                initializing = False
 
     return motion_detected
 
