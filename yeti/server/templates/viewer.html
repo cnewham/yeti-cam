@@ -36,22 +36,20 @@
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <div class="container">
     <div class="row" style="margin-top: 10%">
-        <div class="four columns">
-            <h4>YETI CAM</h4>
+        <div class="five columns">
+            <h5>YETI CAM</h5>
         </div>
-        <div id="online-indicator" hidden>
-            <div class="eight columns">
-                <div class="u-pull-right" style="align-content: center">Online&nbsp;</div>
-                <div id="online" class="u-pull-right indicator" style="content: url({{ url_for('static', filename='images/indicator-green.png') }});"></div>
+        <div class="seven columns">
+            <div class="u-max-full-width" id="online-indicator" style="padding-top:8px"  hidden>
+                <span class="indicator" style="content: url({{ url_for('static', filename='images/indicator-green.png') }});"></span>
+                <span>Online</span>
+            </div>
+            <div class="u-max-full-width" id="offline-indicator" style="padding-top:8px">
+                <span class="indicator" style="content: url({{ url_for('static', filename='images/indicator-grey.png') }});"></span>
+                <span>Offline</span>
             </div>
         </div>
-        <div id="offline-indicator">
-            <div class="eight columns">
-                <div class="u-pull-right" style="align-content: center">Offline&nbsp;</div>
-                <div id="online" class="u-pull-right indicator" style="content: url({{ url_for('static', filename='images/indicator-grey.png') }});"></div>
-            </div>
-        </div>
-        
+
     </div>
     <div class="row">
       <div>
