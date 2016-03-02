@@ -15,20 +15,29 @@
                 }
             });
 
-            var status = $("#config_status")
+            var status = $("#config_status");
+            var red = $("#indicator-red");
+            var yellow = $("#indicator-yellow");
+            var green = $("#indicator-green");
 
             switch (result["status"]) {
                 case "MODIFIED":
-                    status.removeClass().addClass("alert-amber")
-                    status.text("Pending Update");
+                    yellow.prop("hidden", false);
+                    red.prop("hidden", true);
+                    green.prop("hidden", true);
+                    status.text("Pending camera delivery");
                     break;
                 case "UPDATED":
-                    status.removeClass().addClass("alert-green")
-                    status.text("Updated");
+                    yellow.prop("hidden", true);
+                    red.prop("hidden", true);
+                    green.prop("hidden", false);
+                    status.text("Camera config up to date");
                     break;
                 default:
-                    status.removeClass().addClass("alert-red")
-                    status.text("Unavailable. Current Server Config Version: " + result["version"]);
+                    yellow.prop("hidden", true);
+                    red.prop("hidden", false);
+                    green.prop("hidden", true);
+                    status.text("Config status unavailable. Current server config version: " + result["version"]);
                     break;
             }
             toggleMotionSettings(result["motion_enabled"]);

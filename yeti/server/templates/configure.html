@@ -139,11 +139,17 @@
             </div>
 
             <div class="row" style="margin-top: 3%">
-                <h6>Camera Config:&nbsp&nbsp<span id="config_status">Unknown</span></h6>
                 <input type="hidden" id="version" name="version" />
                 <input class="button-primary" type="submit" value="Submit">
-                <span id="success-message" style="color:darkgreen; margin-left: 2%" hidden>Success</span>
-                <span id="error-message" style="color:darkred; margin-left: 2%" hidden>Error</span>
+                <span id="indicator-red"><span class="indicator" style="content: url({{ url_for('static', filename='images/indicator-red.png') }}); margin-left:2%;"></span></span>
+                <span id="indicator-yellow"><span class="indicator" style="content: url({{ url_for('static', filename='images/indicator-yellow.png') }}); margin-left:2%;"></span></span>
+                <span id="indicator-green"><span class="indicator" style="content: url({{ url_for('static', filename='images/indicator-green.png') }}); margin-left:2%;"></span></span>
+                <span id="config_status">Error</span>
+            </div>
+            
+            <div class="row">
+                <span id="success-message" style="color:darkgreen;" hidden>Success</span>
+                <span id="error-message" style="color:darkred;" hidden>Error</span>
             </div>
         </form>
     </div>
