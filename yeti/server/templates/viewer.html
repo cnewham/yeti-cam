@@ -36,18 +36,16 @@
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <div class="container">
     <div class="row" style="margin-top: 10%">
-        <div class="five columns">
-            <h5>YETI CAM</h5>
-        </div>
-        <div class="seven columns">
-            <div class="u-max-full-width" id="online-indicator" style="padding-top:8px"  hidden>
+        <div class="12 columns">
+            <span style="font-size:2em">YETI CAM</span>
+            <span class="u-pull-right" style="padding-top:1em;" id="online-indicator" hidden>
                 <span class="indicator" style="content: url({{ url_for('static', filename='images/indicator-green.png') }});"></span>
                 <span>Online</span>
-            </div>
-            <div class="u-max-full-width" id="offline-indicator" style="padding-top:8px">
+            </span>
+            <span class="u-pull-right" style="padding-top:1em;" id="offline-indicator">
                 <span class="indicator" style="content: url({{ url_for('static', filename='images/indicator-grey.png') }});"></span>
                 <span>Offline</span>
-            </div>
+            </span>
         </div>
 
     </div>
