@@ -3,7 +3,8 @@ import threading, time, os
 from datetime import datetime
 from yeti.common import constants, config, motion
 from yeti.cam import service, sensors
-import camera_v2 as camera
+import picamera
+import camera_v3 as camera
 
 import logging
 logger = logging.getLogger(__name__)
@@ -53,6 +54,7 @@ def check_config_updates():
         config_update()
         time.sleep(config.get(constants.CONFIG_CHECK_INTERVAL_MIN) * constants.SECONDS2MIN)
 
+
 def capture_timer_image():
     time.sleep(30) #Sleep for 30 seconds on startup then take the first picture
     while True:
@@ -68,8 +70,6 @@ def capture_timer_image():
 def scan_motion_image():
     time.sleep(60) #Sleep for 60 seconds before checking for motion
     while True:
-        sensitivity = config.get(constants.CONFIG_MOTION_SENSITIVITY)
-        threshold = config.get(constants.CONFIG_MOTION_THRESHOLD)
         capture_threshold = config.get(constants.CONFIG_MOTION_CAPTURE_THRESHOLD)
         motion_delay = config.get(constants.CONFIG_MOTION_DELAY_SEC)
 
