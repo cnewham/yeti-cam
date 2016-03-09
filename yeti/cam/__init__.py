@@ -38,6 +38,8 @@ def config_update():
         if server_configs is None or server_configs[constants.CONFIG_VERSION] < config.get(constants.CONFIG_VERSION):
             logger.info("Server config out of date, sending updated cam config")
             server.send_config()
+            config.set_status(constants.CONFIG_STATUS_UPDATED)
+            server.send_config_status(config.get_status())
         elif server_configs[constants.CONFIG_VERSION] > config.get(constants.CONFIG_VERSION):
             logger.info("Cam config updating from server")
             config.update(server_configs)

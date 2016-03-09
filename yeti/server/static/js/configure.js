@@ -25,19 +25,19 @@
                     yellow.prop("hidden", false);
                     red.prop("hidden", true);
                     green.prop("hidden", true);
-                    status.text("Pending camera delivery");
+                    status.text("Pending camera");
                     break;
                 case "UPDATED":
                     yellow.prop("hidden", true);
                     red.prop("hidden", true);
                     green.prop("hidden", false);
-                    status.text("Camera config up to date");
+                    status.text("Camera updated");
                     break;
                 default:
                     yellow.prop("hidden", true);
                     red.prop("hidden", false);
                     green.prop("hidden", true);
-                    status.text("Config status unavailable. Current server config version: " + result["version"]);
+                    status.text("Camera config status unavailable. Current server config version: " + result["version"]);
                     break;
             }
             toggleMotionSettings(result["motion_enabled"]);
