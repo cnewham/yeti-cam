@@ -41,12 +41,16 @@ class MotionEvents:
             return True
 
 class MotionDetector(picamera.array.PiMotionAnalysis):
-    def __init__(self, camera, handler, sensitivity, threshold):
+    def __init__(self, camera, handler, sensitivity, threshold, delay=3):
         super(MotionDetector, self).__init__(camera)
         self.handler = handler
         self.sensitivity = sensitivity
         self.threshold = threshold
-        self.initializing = True
+        self.delay = delay
+        self.last = datetime.now()
+
+    def delayed(self):
+        return (datetime.now() - timedelta(seconds=self.delay)) > self.last
 
     def analyse(self, a):
         a = np.sqrt(
@@ -57,10 +61,11 @@ class MotionDetector(picamera.array.PiMotionAnalysis):
         # If there're more than 10 vectors with a magnitude greater
         # than 60, then say we've detected motion
 
-        if (a > self.sensitivity).sum() > self.threshold and not self.initializing:
+        if (a > self.sensitivity).sum() > self.threshold and not self.delayed():
             logger.debug("Motion Detected!")
-
             self.handler.trigger(constants.EVENT_MOTION)
+            self.last = datetime.now()
+
 
 class EventCaptureHandler:
     def __init__(self, callback=None):
@@ -91,12 +96,12 @@ class EventCaptureHandler:
             filename = get_filename(config.get(constants.CONFIG_IMAGE_DIR), config.get(constants.CONFIG_IMAGE_PREFIX))
             camera.vflip = config.get(constants.CONFIG_IMAGE_VFLIP)
             camera.hflip = config.get(constants.CONFIG_IMAGE_HFLIP)
-            quality = config.get(constants.CONFIG_IMAGE_QUALITY)
 
-            camera.exposure_mode = 'auto'
-            camera.awb_mode = 'auto'
+            camera.exposure_mode = config.get(constants.CONFIG_IMAGE_EXPOSURE_MODE)
+            camera.awb_mode = config.get(constants.CONFIG_IMAGE_AWB_MODE)
+
             camera.stop_recording()
-            camera.capture(filename, format="jpeg", quality=quality)
+            camera.capture(filename, format="jpeg", quality=config.get(constants.CONFIG_IMAGE_QUALITY))
 
         if self.callback:
             self.callback(filename, self.event)
@@ -109,6 +114,7 @@ class EventCaptureHandler:
             return
 
         logger.info("Starting camera")
+        self.event = None
         self.running = True
         self.stopping = False
         with picamera.PiCamera() as camera:
@@ -116,25 +122,21 @@ class EventCaptureHandler:
                 sensitivity = config.get(constants.CONFIG_MOTION_SENSITIVITY)
                 threshold = config.get(constants.CONFIG_MOTION_THRESHOLD)
 
+                camera.resolution = (config.get(constants.CONFIG_IMAGE_WIDTH), config.get(constants.CONFIG_IMAGE_HEIGHT))
                 camera.framerate = 10
 
-                camera.resolution = (config.get(constants.CONFIG_IMAGE_WIDTH), config.get(constants.CONFIG_IMAGE_HEIGHT))
-
                 logger.info("Starting capture")
-                detector = MotionDetector(camera, self, sensitivity, threshold)
-                camera.start_recording('/dev/null', format='h264', motion_output=detector)
+                camera.start_recording('/dev/null', format='h264', motion_output=MotionDetector(camera, self, sensitivity, threshold))
 
                 while not self.stopping:
                     logger.debug("checking for events")
 
                     if self.event:
                         self.capture(camera)
-                        camera.start_recording('/dev/null', format='h264', motion_output=detector)
+                        logger.info("Continuing capture")
+                        camera.start_recording('/dev/null', format='h264', motion_output=MotionDetector(camera, self, sensitivity, threshold))
 
                     time.sleep(1)
-
-                    if detector.initializing:
-                        detector.initializing = False
 
             except KeyboardInterrupt:
                 pass

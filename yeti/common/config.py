@@ -32,6 +32,10 @@ if not db.get(constants.CONFIG_IMAGE_HFLIP):
     db.set(constants.CONFIG_IMAGE_HFLIP, False)
 if not db.get(constants.CONFIG_IMAGE_QUALITY):
     db.set(constants.CONFIG_IMAGE_QUALITY, 85)
+if not db.get(constants.CONFIG_IMAGE_EXPOSURE_MODE):
+    db.set(constants.CONFIG_IMAGE_EXPOSURE_MODE, "auto")
+if not db.get(constants.CONFIG_IMAGE_AWB_MODE):
+    db.set(constants.CONFIG_IMAGE_AWB_MODE, "auto")
 
 #motion
 if not db.get(constants.CONFIG_MOTION_ENABLED):

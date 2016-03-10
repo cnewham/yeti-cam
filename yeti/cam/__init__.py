@@ -45,7 +45,7 @@ def config_update():
             server.send_config_status(config.get_status())
 
             #restart the camera for new config updates
-            #capture.restart()
+            capture.restart()
     except ValueError:
         logger.exception("Could not parse response from server")
     except Exception as ex:
@@ -57,7 +57,7 @@ def check_config_updates():
         time.sleep(config.get(constants.CONFIG_CHECK_INTERVAL_MIN) * constants.SECONDS2MIN)
 
 def capture_timer_image():
-    time.sleep(5) #Sleep for 30 seconds on startup then take the first picture
+    time.sleep(30) #Sleep for 30 seconds on startup then take the first picture
     while True:
         logger.info("Capturing timer image: %i min" % config.get(constants.CONFIG_TIMER_INTERVAL_MIN))
 
@@ -76,12 +76,15 @@ timer_capture_thread.start()
 
 #start the camera capture. Retry if something fails
 capture = camera.EventCaptureHandler(send)
-try:
-    capture.start()
-except:
-    logger.exception("Camera capture failed. Restarting...")
-finally:
-    capture.stop()
+while True:
+    try:
+        capture.start()
+    except KeyboardInterrupt:
+        break
+    except Exception:
+        logger.exception("Camera capture failed. Restarting...")
+    finally:
+        capture.stop()
 
 sys.exit()
 

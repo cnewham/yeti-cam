@@ -88,6 +88,40 @@
                     <span class="label-body">Flip Horizontally</span>
                 </label>
             </div>
+            <div class="row">
+                <div class="three columns">
+                    <label for="image_exposure_mode">Exposure Mode</label>
+                    <select class="u-full-width" id="image_exposure_mode" name="image_exposure_mode">
+                        <option value="auto">auto</option>
+                        <option value="night">night</option>
+                        <option value="nightpreview">nightpreview</option>
+                        <option value="backlight">backlight</option>
+                        <option value="spotlight">spotlight</option>
+                        <option value="snow">snow</option>
+                        <option value="beach">beach</option>
+                        <option value="verylong">verylong</option>
+                        <option value="fixedfps">fixedfps</option>
+                        <option value="antishake">antishake</option>
+                        <option value="fireworks">fireworks</option>
+                        <option value="off">off</option>
+                    </select>
+                </div>
+                <div class="three columns">
+                    <label for="image_awb_mode">AWB Mode</label>
+                    <select class="u-full-width" id="image_awb_mode" name="image_awb_mode">
+                        <option value="auto">auto</option>
+                        <option value="sunlight">sunlight</option>
+                        <option value="cloudy">cloudy</option>
+                        <option value="shade">shade</option>
+                        <option value="tungsten">tungsten</option>
+                        <option value="fluorescent">fluorescent</option>
+                        <option value="incandescent">incandescent</option>
+                        <option value="flash">flash</option>
+                        <option value="horizon">horizon</option>
+                        <option value="off">off</option>
+                    </select>
+                </div>
+            </div>
             <!--Motion configurations-->
             <div class="row" style="margin-top: 5%">
                 <h5>Motion</h5>
@@ -111,11 +145,11 @@
                 </div>
                 <div class="row">
                     <div class="three columns">
-                        <label for="motion_sensitivity">Sensitivity Threshold</label>
+                        <label for="motion_sensitivity">Sensitivity</label>
                         <input class="u-full-width" type="number" id="motion_sensitivity" name="motion_sensitivity" placeholder="0-255">
                     </div>
                     <div class="three columns">
-                        <label for="motion_threshold">Area Threshold</label>
+                        <label for="motion_threshold">Area</label>
                         <input class="u-full-width" type="number" id="motion_threshold" name="motion_threshold">
                     </div>
                 </div>
