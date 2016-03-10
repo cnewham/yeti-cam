@@ -2,7 +2,7 @@ __author__ = 'chris'
 import logging
 import logging.handlers
 
-LOG_LEVEL = logging.INFO
+LOG_LEVEL = logging.DEBUG
 LOG_FILENAME = "logs/yeticam.log"
 
 #configure logging

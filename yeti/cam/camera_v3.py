@@ -1,8 +1,8 @@
 ﻿#!/usr/bin/env python
 
 __author__ = 'chris'
-import threading
-from datetime import datetime
+import threading, time
+from datetime import datetime, timedelta
 import picamera
 import picamera.array
 import numpy as np
@@ -10,8 +10,6 @@ from yeti.common import config, constants
 
 import logging
 logger = logging.getLogger(__name__)
-
-logger.info("Initializing camera")
 
 camera_lock = threading.Lock()
 
@@ -59,33 +57,36 @@ class MotionDetector(picamera.array.PiMotionAnalysis):
         # If there're more than 10 vectors with a magnitude greater
         # than 60, then say we've detected motion
 
-        if (a > self.sensitivity).sum() > self.threshold:
-            #skip the first motion detection while the camera may be still initializing
-            if self.initializing:
-                self.initializing = False
-                return
-
+        if (a > self.sensitivity).sum() > self.threshold and not self.initializing:
             logger.debug("Motion Detected!")
+
             self.handler.trigger(constants.EVENT_MOTION)
 
 class EventCaptureHandler:
     def __init__(self, callback=None):
         self.event = None
+        self.stopping = False
+        self.running = False
         self.callback = callback
         self.motion = MotionEvents()
 
     def trigger(self, event):
-        if self.event:
-            return False #already an event waiting to be processed
+        logger.debug("Attempting to trigger %s event" % event)
 
-        if event == constants.EVENT_MOTION and self.motion.enabled():
-            self.event = event
-            return True
-        else:
-            self.event = event
-            return True
+        if self.event:
+            logger.debug("Already an event waiting to be processed")
+            return False
+
+        if event == constants.EVENT_MOTION and not self.motion.enabled():
+            logger.debug("Motion events disabled")
+            return False
+
+        logger.debug("Triggering %s event" % event)
+        self.event = event
+        return True
 
     def capture(self, camera):
+        logger.info("Capture %s image" % self.event)
         with camera_lock: 
             filename = get_filename(config.get(constants.CONFIG_IMAGE_DIR), config.get(constants.CONFIG_IMAGE_PREFIX))
             camera.vflip = config.get(constants.CONFIG_IMAGE_VFLIP)
@@ -94,39 +95,68 @@ class EventCaptureHandler:
 
             camera.exposure_mode = 'auto'
             camera.awb_mode = 'auto'
-            camera.capture(filename, format="jpeg", quality=quality, use_video_port=True)
+            camera.stop_recording()
+            camera.capture(filename, format="jpeg", quality=quality)
 
         if self.callback:
-            self.callback(filename, event)
+            self.callback(filename, self.event)
 
         self.event = None
 
-    def start(self, callback):
+    def start(self):
+        if self.running:
+            logger.warn("Camera already running")
+            return
+
+        logger.info("Starting camera")
         self.running = True
+        self.stopping = False
         with picamera.PiCamera() as camera:
             try:
                 sensitivity = config.get(constants.CONFIG_MOTION_SENSITIVITY)
                 threshold = config.get(constants.CONFIG_MOTION_THRESHOLD)
 
-                camera.resolution = (config.get(constants.CONFIG_IMAGE_WIDTH), config.get(constants.CONFIG_IMAGE_HEIGHT))
                 camera.framerate = 10
-                camera.start_recording('/dev/null', format='h264', motion_output=MotionDetector(camera, self, sensitivity, threshold))
-                
-                while self.running:
+
+                camera.resolution = (config.get(constants.CONFIG_IMAGE_WIDTH), config.get(constants.CONFIG_IMAGE_HEIGHT))
+
+                logger.info("Starting capture")
+                detector = MotionDetector(camera, self, sensitivity, threshold)
+                camera.start_recording('/dev/null', format='h264', motion_output=detector)
+
+                while not self.stopping:
+                    logger.debug("checking for events")
+
                     if self.event:
                         self.capture(camera)
+                        camera.start_recording('/dev/null', format='h264', motion_output=detector)
 
-                    camera.wait_recording(1)
-                    
-            except Exception: 
-                logger.exception("Camera failure has occurred. Restarting...")
+                    time.sleep(1)
+
+                    if detector.initializing:
+                        detector.initializing = False
+
+            except KeyboardInterrupt:
+                pass
+            except Exception:
+                logger.exception("Camera failure has occurred")
             finally:
-                camera.stop_recording()
+                logger.info("Stopping camera")
                 camera.close()
                 self.running = False
 
     def stop(self):
-        self.running = False
+        if self.running:
+            self.stopping = True
+
+    def restart(self):
+        logger.info("Restarting camera")
+        self.stop()
+
+        while self.running:
+            time.sleep(.5)
+
+        self.start()
 
 def get_filename(path, prefix):
     now = datetime.now()

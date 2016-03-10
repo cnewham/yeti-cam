@@ -1,9 +1,8 @@
 ﻿__author__ = 'chris'
-import threading, time, os
+import threading, time, os, sys
 from datetime import datetime
-from yeti.common import constants, config, motion
+from yeti.common import constants, config
 from yeti.cam import service, sensors
-import picamera
 import camera_v3 as camera
 
 import logging
@@ -11,7 +10,6 @@ logger = logging.getLogger(__name__)
 
 temp = sensors.Temperature()
 server = service.YetiService(config.get(constants.CONFIG_SERVER))
-motion_events = motion.MotionEvents()
 
 def send(image, event):
     try:
@@ -39,13 +37,15 @@ def config_update():
         if server_configs is None or server_configs[constants.CONFIG_VERSION] < config.get(constants.CONFIG_VERSION):
             logger.info("Server config out of date, sending updated cam config")
             server.send_config()
-            config.set_status(constants.CONFIG_STATUS_UPDATED)
-            server.send_config_status(config.get_status())
         elif server_configs[constants.CONFIG_VERSION] > config.get(constants.CONFIG_VERSION):
             logger.info("Cam config updating from server")
+
             config.update(server_configs)
             config.set_status(constants.CONFIG_STATUS_UPDATED)
             server.send_config_status(config.get_status())
+
+            #restart the camera for new config updates
+            #capture.restart()
     except ValueError:
         logger.exception("Could not parse response from server")
     except Exception as ex:
@@ -56,37 +56,15 @@ def check_config_updates():
         config_update()
         time.sleep(config.get(constants.CONFIG_CHECK_INTERVAL_MIN) * constants.SECONDS2MIN)
 
-
 def capture_timer_image():
-    time.sleep(30) #Sleep for 30 seconds on startup then take the first picture
+    time.sleep(5) #Sleep for 30 seconds on startup then take the first picture
     while True:
         logger.info("Capturing timer image: %i min" % config.get(constants.CONFIG_TIMER_INTERVAL_MIN))
-        try:
-            image = camera.capture_image()
-            send(image, constants.EVENT_TIMER)
-        except Exception:
-            logger.exception("An error occurred when attempting to capture timer image")
+
+        if not capture.trigger(constants.EVENT_TIMER):
+            logger.info("Timer image was triggered by there was already another event waiting to be captured")
 
         time.sleep(config.get(constants.CONFIG_TIMER_INTERVAL_MIN) * constants.SECONDS2MIN)
-
-def scan_motion_image():
-    time.sleep(60) #Sleep for 60 seconds before checking for motion
-    while True:
-        capture_threshold = config.get(constants.CONFIG_MOTION_CAPTURE_THRESHOLD)
-        motion_delay = config.get(constants.CONFIG_MOTION_DELAY_SEC)
-
-        try:
-            if motion_events.enabled():
-                if camera.scan_motion(sensitivity, threshold):
-                    logger.info("Capturing motion image: threshold=%i sensitivity=%i ......"  % (threshold, sensitivity))
-                    image = camera.capture_image()
-                    send(image, constants.EVENT_MOTION)
-                    time.sleep(3)
-            else:
-                logger.warning("Motion events disabled for %s seconds because threshold (%s) has been exceeded" % (motion_delay, capture_threshold))
-                time.sleep(motion_delay)
-        except Exception:
-            logger.exception("An error occurred when attempting to capture motion image")
 
 config_update_thread = threading.Thread(target=check_config_updates)
 config_update_thread.daemon = True
@@ -96,9 +74,16 @@ timer_capture_thread = threading.Thread(target=capture_timer_image)
 timer_capture_thread.daemon = True
 timer_capture_thread.start()
 
-motion_capture_thread = threading.Thread(target=scan_motion_image)
-motion_capture_thread.daemon = True
-motion_capture_thread.start()
+#start the camera capture. Retry if something fails
+capture = camera.EventCaptureHandler(send)
+try:
+    capture.start()
+except:
+    logger.exception("Camera capture failed. Restarting...")
+finally:
+    capture.stop()
+
+sys.exit()
 
 
 
