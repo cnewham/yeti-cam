@@ -50,7 +50,7 @@ class MotionDetector(picamera.array.PiMotionAnalysis):
         self.last = datetime.now()
 
     def delayed(self):
-        return (datetime.now() - timedelta(seconds=self.delay)) > self.last
+        return (datetime.now() - timedelta(seconds=self.delay)) < self.last
 
     def analyse(self, a):
         a = np.sqrt(
@@ -138,8 +138,6 @@ class EventCaptureHandler:
 
                     time.sleep(1)
 
-            except KeyboardInterrupt:
-                pass
             except Exception:
                 logger.exception("Camera failure has occurred")
             finally:
@@ -151,13 +149,12 @@ class EventCaptureHandler:
         if self.running:
             self.stopping = True
 
+            while self.running:
+                time.sleep(.5)
+
     def restart(self):
         logger.info("Restarting camera")
         self.stop()
-
-        while self.running:
-            time.sleep(.5)
-
         self.start()
 
 def get_filename(path, prefix):

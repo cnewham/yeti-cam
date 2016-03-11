@@ -1,5 +1,5 @@
 ﻿__author__ = 'chris'
-import threading, time, os, sys
+import threading, time, os, sys, signal
 from datetime import datetime
 from yeti.common import constants, config
 from yeti.cam import service, sensors
@@ -8,8 +8,7 @@ import camera_v3 as camera
 import logging
 logger = logging.getLogger(__name__)
 
-temp = sensors.Temperature()
-server = service.YetiService(config.get(constants.CONFIG_SERVER))
+logger.info("Starting yeticam")
 
 def send(image, event):
     try:
@@ -66,6 +65,23 @@ def capture_timer_image():
 
         time.sleep(config.get(constants.CONFIG_TIMER_INTERVAL_MIN) * constants.SECONDS2MIN)
 
+#Initialize
+capture = camera.EventCaptureHandler(send)
+temp = sensors.Temperature()
+server = service.YetiService(config.get(constants.CONFIG_SERVER))
+
+def camera_capture():
+    try:
+        capture.start()
+    except Exception:
+        logger.exception("Camera capture failed.")
+    finally:
+        capture.stop()
+
+#start all threads and run until a stop signal is detected
+camera_capture_thread = threading.Thread(target=camera_capture)
+camera_capture_thread.start()
+
 config_update_thread = threading.Thread(target=check_config_updates)
 config_update_thread.daemon = True
 config_update_thread.start()
@@ -74,20 +90,10 @@ timer_capture_thread = threading.Thread(target=capture_timer_image)
 timer_capture_thread.daemon = True
 timer_capture_thread.start()
 
-#start the camera capture. Retry if something fails
-capture = camera.EventCaptureHandler(send)
-while True:
-    try:
-        capture.start()
-    except KeyboardInterrupt:
-        break
-    except Exception:
-        logger.exception("Camera capture failed. Restarting...")
-    finally:
-        capture.stop()
+def signal_handler(signal, frame):
+    logger.warning("Stop signal detected...")
+    capture.stop()
+    sys.exit(0)
 
-sys.exit()
-
-
-
+signal.signal(signal.SIGINT, signal_handler)
 
