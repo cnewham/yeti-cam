@@ -2,6 +2,7 @@
 from datetime import datetime, timedelta
 from flask_restful import Resource, abort, request, reqparse
 from flask import url_for, jsonify
+from werkzeug import exceptions
 import processors
 from yeti.server import db
 from yeti.common import constants, config
@@ -13,6 +14,53 @@ upload_processor = processors.UploadProcessor()
 status_processor = processors.StatusProcessor()
 log_processor = processors.LogProcessor()
 
+class CaptureApi(Resource):
+    def __init__(self):
+        self.parser = reqparse.RequestParser()
+        self.parser.add_argument(constants.STATUS_CAM, type=str, required=False)
+        self.parser.add_argument("event", type=str, required=True, location="form")
+
+    def get(self):
+        try:
+            args = self.parser.parse_args()
+            if args and args[constants.STATUS_CAM]:
+                current = args.get(constants.STATUS_CAM) + "-current.jpg"
+            else:
+                current = "current.jpg"
+            return url_for("upload_folder", filename=current)
+        except Exception as ex:
+            logger.exception("An error occurred while attempting to send image")
+            abort(400)
+
+    def post(self):
+        try:
+            args = self.parser.parse_args(request)
+            uploads = request.files['uploads']
+
+            if uploads and self.allowed_file(uploads.filename):
+                filename = os.path.basename(uploads.filename)
+                uploads.save(os.path.join(db.get('UPLOAD_FOLDER'), filename))
+
+                if uploads.content_type in ("image/jpg","image/jpeg"):
+                    upload_processor.process_image(args["event"], filename)
+                elif uploads.content_type == "video/h264":
+                    upload_processor.process_video(args["event"], filename)
+                else:
+                    return {'error':'Unsupported capture type: %s' % uploads.content_type}, 400
+
+                return {'filename' : filename}, 201
+            else:
+                abort(400)
+        except exceptions.HTTPException:
+            raise
+        except Exception as ex:
+            logger.exception("An error occurred while attempting to receive uploaded image")
+            abort(500)
+
+    def allowed_file(self,filename):
+        return '.' in filename and filename.rsplit('.', 1)[1] in db.get('ALLOWED_EXTENSIONS')
+
+#Depreciated
 class ImageApi(Resource):
     def __init__(self):
         self.parser = reqparse.RequestParser()
@@ -38,17 +86,18 @@ class ImageApi(Resource):
             if upload and self.allowed_file(upload.filename):
                 filename = os.path.basename(upload.filename)
                 upload.save(os.path.join(db.get('UPLOAD_FOLDER'), "current.jpg"))
-                upload_processor.process(args["event"], filename)
+                upload_processor.process_image(args["event"], filename)
                 return {}, 201
             else:
                 abort(400)
+        except exceptions.HTTPException:
+            raise
         except Exception as ex:
             logger.exception("An error occurred while attempting to receive uploaded image")
             abort(500)
 
     def allowed_file(self,filename):
         return '.' in filename and filename.rsplit('.', 1)[1] in db.get('ALLOWED_EXTENSIONS')
-
 
 class ConfigApi(Resource):
     def put(self):
@@ -58,8 +107,9 @@ class ConfigApi(Resource):
             if result:
                 return {'error': result}, 409
             else:
-                return {}, 204
-
+                return 204
+        except exceptions.HTTPException:
+            raise
         except ValueError as ex:
             logger.exception("Invalid configuration object")
             abort(400)
@@ -76,8 +126,9 @@ class ConfigApi(Resource):
             if result:
                 return {'error': result}, 409
             else:
-                return {}, 204
-
+                return {'status':config.get_status()}, 204
+        except exceptions.HTTPException:
+            raise
         except ValueError as ex:
             logger.exception("Invalid configuration object")
             abort(400)
@@ -88,6 +139,8 @@ class ConfigApi(Resource):
     def get(self):
         try:
             return jsonify(config.get())
+        except exceptions.HTTPException:
+            raise
         except Exception as ex:
             logger.exception("An error occurred while attempting to send configs")
             abort(500)
@@ -97,7 +150,9 @@ class StatusApi(Resource):
         try:
             status = request.json
             status_processor.process(status)
-            return {}, 201
+            return 201
+        except exceptions.HTTPException:
+            raise
         except ValueError as ex:
             logger.exception("Could not parse status request from cam client")
             abort(400)
@@ -120,6 +175,8 @@ class StatusApi(Resource):
                 statuses['online'] = False
                                    
             return jsonify(statuses)
+        except exceptions.HTTPException:
+            raise
         except Exception as ex:
             logger.exception("An error occurred while attempting to send status")
             abort(500)
@@ -132,9 +189,11 @@ class LogApi(Resource):
                 filename = os.path.basename(upload.filename)
                 upload.save(os.path.join(db.get('CAM_LOG_FOLDER'), filename))
                 log_processor.process(os.path.join(db.get('CAM_LOG_FOLDER'), filename))
-                return {}, 201
+                return 201
             else:
                 abort(400)
+        except exceptions.HTTPException:
+            raise
         except Exception as ex:
             logger.exception("An error occurred while attempting to receive logs")
             abort(500)

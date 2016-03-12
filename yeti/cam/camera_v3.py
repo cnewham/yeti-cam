@@ -33,6 +33,11 @@ class MotionEvents:
         else:
             return False #exceeds motion capture threshold
 
+    def record(self):
+        if not config.get(constants.CONFIG_MOTION_ENABLED):
+            return False #motion disabled in configuration
+            #TODO: implement logic to determine if a motion event should be recorded
+
     def exceeds_motion_capture_delay(self):
         if self.last_motion_event is not None:
             delta_date = datetime.now() - timedelta(seconds=config.get(constants.CONFIG_MOTION_DELAY_SEC))
@@ -90,6 +95,26 @@ class EventCaptureHandler:
         self.event = event
         return True
 
+    def record(self, camera, seconds):
+        logger.info("Recording %s event for %s seconds" % (self.event, seconds))
+
+        filename = get_filename(config.get(constants.CONFIG_IMAGE_DIR), "recording-", "h264")
+        camera.vflip = config.get(constants.CONFIG_IMAGE_VFLIP)
+        camera.hflip = config.get(constants.CONFIG_IMAGE_HFLIP)
+
+        camera.exposure_mode = config.get(constants.CONFIG_IMAGE_EXPOSURE_MODE)
+        camera.awb_mode = config.get(constants.CONFIG_IMAGE_AWB_MODE)
+
+        camera.start_recording(filename, format='h264', splitter_port=2, resize=(640,480))
+        camera.wait_recording(seconds, splitter_port=2)
+        camera.stop_recording(splitter_port=2)
+
+        if self.callback:
+            self.callback(filename, self.event, constants.EVENT_TYPE_VIDEO)
+
+        self.event = None
+
+
     def capture(self, camera):
         logger.info("Capture %s image" % self.event)
         with camera_lock: 
@@ -104,7 +129,7 @@ class EventCaptureHandler:
             camera.capture(filename, format="jpeg", quality=config.get(constants.CONFIG_IMAGE_QUALITY))
 
         if self.callback:
-            self.callback(filename, self.event)
+            self.callback(filename, self.event, constants.EVENT_TYPE_IMAGE)
 
         self.event = None
 
@@ -133,6 +158,8 @@ class EventCaptureHandler:
 
                     if self.event:
                         self.capture(camera)
+
+                        #self.record(camera, 5)
                         logger.info("Continuing capture")
                         camera.start_recording('/dev/null', format='h264', motion_output=MotionDetector(camera, self, sensitivity, threshold))
 
@@ -157,9 +184,9 @@ class EventCaptureHandler:
         self.stop()
         self.start()
 
-def get_filename(path, prefix):
+def get_filename(path, prefix, ext="jpg"):
     now = datetime.now()
-    return "%s/%s%04d%02d%02d-%02d%02d%02d.jpg" % ( path, prefix ,now.year, now.month, now.day, now.hour, now.minute, now.second)
+    return "%s/%s%04d%02d%02d-%02d%02d%02d.%s" % ( path, prefix ,now.year, now.month, now.day, now.hour, now.minute, now.second, ext)
 
 
 

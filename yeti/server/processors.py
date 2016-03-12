@@ -12,7 +12,7 @@ class UploadProcessor:
     def __init__(self):
         logger.info("Initializing UploadProcessor")
 
-    def process(self, event, filename):
+    def process_image(self, event, filename):
         logger.info("Processing %s event for image %s" % (event, filename))
         try:
             filename = "%s-%s" % (event, filename)
@@ -20,15 +20,29 @@ class UploadProcessor:
             shutil.copy(os.path.join(db.get('UPLOAD_FOLDER'), "current.jpg"), capture)
 
             if db.get(constants.ENABLE_GDRIVE):
-                drive.upload_image(capture, event, db.get(constants.GDRIVE_FOLDER))
+                drive.upload(capture, event, db.get(constants.GDRIVE_FOLDER))
                 os.remove(capture)
-
         except:
-            logger.exception("An exception occurred during proccessing file upload for %s" % filename)
+            logger.exception("An exception occurred during processing image upload for %s" % filename)
 
         if event == constants.EVENT_MOTION:
             motion_log.add_motion_event(datetime.datetime.now().isoformat())
 
+    def process_video(self, event, filename):
+        logger.info("Processing %s event for video %s" % (event, filename))
+        try:
+            filename = "%s-%s" % (event, filename)
+            capture = os.path.join(db.get('UPLOAD_FOLDER'), filename)
+
+            if db.get(constants.ENABLE_GDRIVE):
+                drive.upload(capture, event, db.get(constants.GDRIVE_FOLDER))
+                os.remove(capture)
+
+        except:
+            logger.exception("An exception occurred during processing video upload for %s" % filename)
+
+        if event == constants.EVENT_MOTION:
+            motion_log.add_motion_event(datetime.datetime.now().isoformat())
 
 class StatusProcessor:
     def __init__(self):

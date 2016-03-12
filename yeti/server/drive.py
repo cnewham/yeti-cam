@@ -47,7 +47,7 @@ def get_credentials():
 
     return credentials
 
-def upload_image(filename, event, folder_id):
+def upload(filename, event, folder_id):
     credentials = get_credentials()
     http = credentials.authorize(httplib2.Http())
     service = discovery.build('drive', 'v3', http=http)

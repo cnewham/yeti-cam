@@ -25,7 +25,7 @@ if not db.get('CAM_LOG_FOLDER'):
     db.set('CAM_LOG_FOLDER', '/var/www/yeti-cam/logs');
 
 if not db.get('ALLOWED_EXTENSIONS'):
-    db.set('ALLOWED_EXTENSIONS', ['jpg', 'jpeg', 'txt'])
+    db.set('ALLOWED_EXTENSIONS', ['jpg', 'jpeg', 'txt', 'h264'])
 
 if not db.get(constants.GDRIVE_FOLDER):
     db.set(constants.GDRIVE_FOLDER, '')
@@ -47,7 +47,8 @@ flask.config['CAM_LOG_FOLDER'] = db.get('CAM_LOG_FOLDER')
 flask.config['ALLOWED_EXTENSIONS'] = db.get('ALLOWED_EXTENSIONS')
 #flask.config['SERVER_NAME'] = db.get('SERVER_NAME')
 
-api.add_resource(apis.ImageApi, '/api/image')
+api.add_resource(apis.CaptureApi, '/api/capture')
+api.add_resource(apis.ImageApi, '/api/image') #Depreciated
 api.add_resource(apis.ConfigApi, '/api/config')
 api.add_resource(apis.StatusApi, '/api/status')
 api.add_resource(apis.LogApi, '/api/log')

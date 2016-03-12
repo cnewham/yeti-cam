@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 logger.info("Starting yeticam")
 
-def send(image, event):
+def send(filename, event, capture_type):
     try:
         logger.info("Sending image with event %s" % event)
         status = {}
@@ -22,9 +22,16 @@ def send(image, event):
                 status[key] = value
 
         status[constants.STATUS_TIME] = datetime.now().isoformat()
-        server.post_image(image, event)
+
+        if capture_type == constants.EVENT_TYPE_IMAGE:
+            server.post_image(filename, event)
+        elif capture_type == constants.EVENT_TYPE_VIDEO:
+            server.post_video(filename, event)
+        else:
+            logger.warning("Unknown capture type")
+
         server.post_status(status)
-        os.remove(image)
+        os.remove(filename)
     except Exception:
         logger.exception("An error occurred while attempting to upload to server")
 

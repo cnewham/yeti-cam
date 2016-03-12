@@ -9,6 +9,8 @@ SECONDS2MIN = 60
 EVENT_TIMER = 'timer'
 EVENT_MOTION = 'motion'
 EVENT_MANUAL = 'manual'
+EVENT_TYPE_IMAGE = 'image'
+EVENT_TYPE_VIDEO = 'video'
 
 #STATUS CONSTANTS
 
@@ -42,6 +44,7 @@ CONFIG_IMAGE_HFLIP = 'image_hflip'
 CONFIG_IMAGE_EXPOSURE_MODE = "image_exposure_mode"
 CONFIG_IMAGE_AWB_MODE = "image_awb_mode"
 CONFIG_MOTION_ENABLED = 'motion_enabled'
+CONFIG_MOTION_RECORD_ENABLED = 'motion_record_enabled'
 CONFIG_MOTION_THRESHOLD = 'motion_threshold'
 CONFIG_MOTION_SENSITIVITY = 'motion_sensitivity'
 CONFIG_MOTION_DELAY_SEC = 'motion_delay'

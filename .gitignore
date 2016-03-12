@@ -1,6 +1,7 @@
 .idea
 *.pyc
 *.jpg
+*.h264
 *.db
 *.log
 *.json

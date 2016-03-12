@@ -14,8 +14,14 @@ class YetiService:
 
     def post_image(self, image, event):
         logger.info("Posting Image: %s" % image)
-        multiple_files = [('images', (image, open(image, 'rb'), 'image/jpg'))]
-        r = requests.post(self.baseUrl + "image", files=multiple_files, data={"event":event})
+        multiple_files = [('uploads', (image, open(image, 'rb'), 'image/jpg'))]
+        r = requests.post(self.baseUrl + "capture", files=multiple_files, data={"event":event})
+        logger.info("StatusCode: %s, Text: %s" % (r.status_code, r.text))
+
+    def post_video(self, video, event):
+        logger.info("Posting Video: %s" % video)
+        multiple_files = [('uploads', (video, open(video, 'rb'), 'video/h264'))]
+        r = requests.post(self.baseUrl + "capture", files=multiple_files, data={"event":event})
         logger.info("StatusCode: %s, Text: %s" % (r.status_code, r.text))
 
     def post_status(self, status):
