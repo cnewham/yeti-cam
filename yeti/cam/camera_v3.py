@@ -150,6 +150,8 @@ class EventCaptureHandler:
                 camera.resolution = (config.get(constants.CONFIG_IMAGE_WIDTH), config.get(constants.CONFIG_IMAGE_HEIGHT))
                 camera.framerate = 10
 
+                camera.led = False
+
                 logger.info("Starting capture")
                 camera.start_recording('/dev/null', format='h264', motion_output=MotionDetector(camera, self, sensitivity, threshold))
 
