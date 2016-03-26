@@ -38,13 +38,10 @@ class CaptureApi(Resource):
             uploads = request.files['uploads']
 
             if uploads and self.allowed_file(uploads.filename):
-                filename = os.path.basename(uploads.filename)
-                uploads.save(os.path.join(db.get('UPLOAD_FOLDER'), filename))
-
                 if uploads.content_type in ("image/jpg","image/jpeg"):
-                    upload_processor.process_image(args["event"], filename)
+                    filename = upload_processor.process_image(args["event"], uploads)
                 elif uploads.content_type == "video/h264":
-                    upload_processor.process_video(args["event"], filename)
+                    filename = upload_processor.process_video(args["event"], uploads)
                 else:
                     return {'error':'Unsupported capture type: %s' % uploads.content_type}, 400
 

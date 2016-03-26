@@ -16,6 +16,7 @@ class MotionDetector(picamera.array.PiMotionAnalysis):
 
         text = ""
         for i in range(0,100,5):
+
             text += "[%s:%s] " % (i, (a>i).sum())
 
         camera.annotate_text = text

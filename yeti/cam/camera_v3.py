@@ -33,11 +33,6 @@ class MotionEvents:
         else:
             return False #exceeds motion capture threshold
 
-    def record(self):
-        if not config.get(constants.CONFIG_MOTION_ENABLED):
-            return False #motion disabled in configuration
-            #TODO: implement logic to determine if a motion event should be recorded
-
     def exceeds_motion_capture_delay(self):
         if self.last_motion_event is not None:
             delta_date = datetime.now() - timedelta(seconds=config.get(constants.CONFIG_MOTION_DELAY_SEC))
@@ -52,6 +47,7 @@ class MotionDetector(picamera.array.PiMotionAnalysis):
         self.sensitivity = sensitivity
         self.threshold = threshold
         self.delay = delay
+        self.motion = MotionEvents()
         self.last = datetime.now()
 
     def delayed(self):
@@ -68,8 +64,10 @@ class MotionDetector(picamera.array.PiMotionAnalysis):
 
         if (a > self.sensitivity).sum() > self.threshold and not self.delayed():
             logger.debug("Motion Detected!")
-            self.handler.trigger(constants.EVENT_MOTION)
-            self.last = datetime.now()
+
+            if self.motion.enabled():
+                self.handler.trigger(constants.EVENT_MOTION, constants.EVENT_TYPE_VIDEO)
+                self.last = datetime.now()
 
 
 class EventCaptureHandler:
@@ -78,45 +76,36 @@ class EventCaptureHandler:
         self.stopping = False
         self.running = False
         self.callback = callback
-        self.motion = MotionEvents()
 
-    def trigger(self, event):
+    def trigger(self, event, event_type = constants.EVENT_TYPE_IMAGE):
         logger.debug("Attempting to trigger %s event" % event)
 
         if self.event:
             logger.debug("Already an event waiting to be processed")
             return False
 
-        if event == constants.EVENT_MOTION and not self.motion.enabled():
-            logger.debug("Motion events disabled")
-            return False
-
         logger.debug("Triggering %s event" % event)
-        self.event = event
+        self.event = event, event_type
         return True
 
     def record(self, camera, seconds):
-        logger.info("Recording %s event for %s seconds" % (self.event, seconds))
+        logger.info("Recording %s event for %s seconds" % (self.event[0], seconds))
+        with camera_lock:
+            filename = get_filename(config.get(constants.CONFIG_IMAGE_DIR), "recording-", "h264")
+            camera.vflip = config.get(constants.CONFIG_IMAGE_VFLIP)
+            camera.hflip = config.get(constants.CONFIG_IMAGE_HFLIP)
 
-        filename = get_filename(config.get(constants.CONFIG_IMAGE_DIR), "recording-", "h264")
-        camera.vflip = config.get(constants.CONFIG_IMAGE_VFLIP)
-        camera.hflip = config.get(constants.CONFIG_IMAGE_HFLIP)
+            camera.exposure_mode = config.get(constants.CONFIG_IMAGE_EXPOSURE_MODE)
+            camera.awb_mode = config.get(constants.CONFIG_IMAGE_AWB_MODE)
 
-        camera.exposure_mode = config.get(constants.CONFIG_IMAGE_EXPOSURE_MODE)
-        camera.awb_mode = config.get(constants.CONFIG_IMAGE_AWB_MODE)
+            camera.start_recording(filename, format='h264', splitter_port=2, resize=(640,480))
+            camera.wait_recording(seconds, splitter_port=2)
+            camera.stop_recording(splitter_port=2)
 
-        camera.start_recording(filename, format='h264', splitter_port=2, resize=(640,480))
-        camera.wait_recording(seconds, splitter_port=2)
-        camera.stop_recording(splitter_port=2)
-
-        if self.callback:
-            self.callback(filename, self.event, constants.EVENT_TYPE_VIDEO)
-
-        self.event = None
-
+        return filename
 
     def capture(self, camera):
-        logger.info("Capture %s image" % self.event)
+        logger.info("Capture %s image" % self.event[0])
         with camera_lock: 
             filename = get_filename(config.get(constants.CONFIG_IMAGE_DIR), config.get(constants.CONFIG_IMAGE_PREFIX))
             camera.vflip = config.get(constants.CONFIG_IMAGE_VFLIP)
@@ -128,10 +117,7 @@ class EventCaptureHandler:
             camera.stop_recording()
             camera.capture(filename, format="jpeg", quality=config.get(constants.CONFIG_IMAGE_QUALITY))
 
-        if self.callback:
-            self.callback(filename, self.event, constants.EVENT_TYPE_IMAGE)
-
-        self.event = None
+        return filename
 
     def start(self):
         if self.running:
@@ -148,7 +134,7 @@ class EventCaptureHandler:
                 threshold = config.get(constants.CONFIG_MOTION_THRESHOLD)
 
                 camera.resolution = (config.get(constants.CONFIG_IMAGE_WIDTH), config.get(constants.CONFIG_IMAGE_HEIGHT))
-                camera.framerate = 10
+                camera.framerate = 30
 
                 camera.led = False
 
@@ -159,11 +145,21 @@ class EventCaptureHandler:
                     logger.debug("checking for events")
 
                     if self.event:
-                        self.capture(camera)
+                        if self.event[1] == constants.EVENT_TYPE_IMAGE:
+                            filename = self.capture(camera)
+                            logger.info("Continuing capture")
+                            camera.start_recording('/dev/null', format='h264', motion_output=MotionDetector(camera, self, sensitivity, threshold))
+                        elif self.event[1] == constants.EVENT_TYPE_VIDEO:
+                            filename = self.record(camera, 5)
+                        else:
+                            logger.warning("Unknown event capture type: %s" % self.event[1])
+                            self.event = None
+                            continue
 
-                        #self.record(camera, 5)
-                        logger.info("Continuing capture")
-                        camera.start_recording('/dev/null', format='h264', motion_output=MotionDetector(camera, self, sensitivity, threshold))
+                        if self.callback:
+                            self.callback(filename, *self.event)
+
+                        self.event = None
 
                     time.sleep(1)
 

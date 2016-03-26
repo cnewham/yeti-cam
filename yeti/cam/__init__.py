@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 logger.info("Starting yeticam")
 
-def send(filename, event, capture_type):
+def send(filename, event, event_type):
     try:
         logger.info("Sending image with event %s" % event)
         status = {}
@@ -23,9 +23,9 @@ def send(filename, event, capture_type):
 
         status[constants.STATUS_TIME] = datetime.now().isoformat()
 
-        if capture_type == constants.EVENT_TYPE_IMAGE:
+        if event_type == constants.EVENT_TYPE_IMAGE:
             server.post_image(filename, event)
-        elif capture_type == constants.EVENT_TYPE_VIDEO:
+        elif event_type == constants.EVENT_TYPE_VIDEO:
             server.post_video(filename, event)
         else:
             logger.warning("Unknown capture type")
@@ -63,7 +63,7 @@ def check_config_updates():
         time.sleep(config.get(constants.CONFIG_CHECK_INTERVAL_MIN) * constants.SECONDS2MIN)
 
 def capture_timer_image():
-    time.sleep(30) #Sleep for 30 seconds on startup then take the first picture
+    time.sleep(5) #Sleep for 30 seconds on startup then take the first picture
     while True:
         logger.info("Capturing timer image: %i min" % config.get(constants.CONFIG_TIMER_INTERVAL_MIN))
 
