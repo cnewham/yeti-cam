@@ -40,6 +40,25 @@ class MotionEvents:
         else:
             return True
 
+class MotionDetectorRGB(picamera.array.PiRGBAnalysis):
+    def __init__(self, handler, sensitivity, threshold, delay=3):
+        self.handler = handler
+        self.sensitivity = sensitivity
+        self.threshold = threshold
+        self.delay = delay
+        self.motion = MotionEvents()
+        self.last = datetime.now()
+
+    def delayed(self):
+        return (datetime.now() - timedelta(seconds=self.delay)) < self.last
+
+    def analyse(self, array):
+        #Motion detection analysis here
+
+        if self.motion.enabled():
+            self.handler.trigger(constants.EVENT_MOTION, constants.EVENT_TYPE_VIDEO)
+            self.last = datetime.now()
+
 class MotionDetector(picamera.array.PiMotionAnalysis):
     def __init__(self, camera, handler, sensitivity, threshold, delay=3):
         super(MotionDetector, self).__init__(camera)
@@ -139,7 +158,7 @@ class EventCaptureHandler:
                 camera.led = False
 
                 logger.info("Starting capture")
-                camera.start_recording('/dev/null', format='h264', motion_output=MotionDetector(camera, self, sensitivity, threshold))
+                camera.start_recording(MotionDetectorRGB(self, sensitivity, threshold), format='rgb')
 
                 while not self.stopping:
                     logger.debug("checking for events")
@@ -148,7 +167,7 @@ class EventCaptureHandler:
                         if self.event[1] == constants.EVENT_TYPE_IMAGE:
                             filename = self.capture(camera)
                             logger.info("Continuing capture")
-                            camera.start_recording('/dev/null', format='h264', motion_output=MotionDetector(camera, self, sensitivity, threshold))
+                            camera.start_recording(MotionDetectorRGB(self, sensitivity, threshold), format='rgb')
                         elif self.event[1] == constants.EVENT_TYPE_VIDEO:
                             filename = self.record(camera, 5)
                         else:
