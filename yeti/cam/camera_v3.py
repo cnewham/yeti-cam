@@ -1,7 +1,7 @@
 ﻿#!/usr/bin/env python
 
 __author__ = 'chris'
-import threading, time
+import threading, time, io
 from datetime import datetime, timedelta
 import picamera
 import picamera.array
@@ -10,7 +10,10 @@ from yeti.common import config, constants
 
 import logging
 logger = logging.getLogger(__name__)
-
+FILE_BUFFER = 1048576            # the size of the file buffer (bytes)
+REC_SECONDS = 2             # number of seconds to store in ring buffer
+REC_BITRATE = 1000000        # bitrate for H.264 encoder
+REC_FRAMERATE = 24          #frame rate to capture
 camera_lock = threading.Lock()
 
 class MotionEvents:
@@ -31,6 +34,7 @@ class MotionEvents:
             self.last_motion_event = datetime.now()
             return True #still within motion capture threshold
         else:
+            logger.warning("Motion capture threshold exceeded")
             return False #exceeds motion capture threshold
 
     def exceeds_motion_capture_delay(self):
@@ -88,34 +92,42 @@ class EventCaptureHandler:
         self.event = event, event_type
         return True
 
-    def record(self, camera, seconds):
+    def record(self, camera, stream, seconds):
         logger.info("Recording %s event for %s seconds" % (self.event[0], seconds))
-        with camera_lock:
-            filename = get_filename(config.get(constants.CONFIG_IMAGE_DIR), "recording-", "h264")
-            camera.vflip = config.get(constants.CONFIG_IMAGE_VFLIP)
-            camera.hflip = config.get(constants.CONFIG_IMAGE_HFLIP)
+        filename = get_filename(config.get(constants.CONFIG_IMAGE_DIR), "recording-", "h264")
 
-            camera.exposure_mode = config.get(constants.CONFIG_IMAGE_EXPOSURE_MODE)
-            camera.awb_mode = config.get(constants.CONFIG_IMAGE_AWB_MODE)
 
-            camera.start_recording(filename, format='h264', splitter_port=2, resize=(640,480))
-            camera.wait_recording(seconds, splitter_port=2)
-            camera.stop_recording(splitter_port=2)
+        with io.open(filename, 'wb') as output:
+            #Write before motion buffer into file first
+            with stream.lock:
+                for frame in stream.frames:
+                    if frame.frame_type == picamera.PiVideoFrameType.sps_header:
+                        stream.seek(frame.position)
+                        break
+                while True:
+                    buf = stream.read1()
+                    if not buf:
+                        break
+                    output.write(buf)
+
+                stream.seek(0)
+                stream.truncate()
+
+            #Split the recording into the output file to append motion recording
+            camera.split_recording(output)
+            camera.wait_recording(seconds)
+
+            #split the recording back into the circular stream
+            camera.split_recording(stream)
 
         return filename
 
     def capture(self, camera):
         logger.info("Capture %s image" % self.event[0])
-        with camera_lock: 
-            filename = get_filename(config.get(constants.CONFIG_IMAGE_DIR), config.get(constants.CONFIG_IMAGE_PREFIX))
-            camera.vflip = config.get(constants.CONFIG_IMAGE_VFLIP)
-            camera.hflip = config.get(constants.CONFIG_IMAGE_HFLIP)
+        filename = get_filename(config.get(constants.CONFIG_IMAGE_DIR), config.get(constants.CONFIG_IMAGE_PREFIX))
 
-            camera.exposure_mode = config.get(constants.CONFIG_IMAGE_EXPOSURE_MODE)
-            camera.awb_mode = config.get(constants.CONFIG_IMAGE_AWB_MODE)
-
-            camera.stop_recording()
-            camera.capture(filename, format="jpeg", quality=config.get(constants.CONFIG_IMAGE_QUALITY))
+        camera.stop_recording()
+        camera.capture(filename, format="jpeg", quality=config.get(constants.CONFIG_IMAGE_QUALITY))
 
         return filename
 
@@ -134,23 +146,32 @@ class EventCaptureHandler:
                 threshold = config.get(constants.CONFIG_MOTION_THRESHOLD)
 
                 camera.resolution = (config.get(constants.CONFIG_IMAGE_WIDTH), config.get(constants.CONFIG_IMAGE_HEIGHT))
-                camera.framerate = 30
+                camera.framerate = REC_FRAMERATE
+
+                camera.vflip = config.get(constants.CONFIG_IMAGE_VFLIP)
+                camera.hflip = config.get(constants.CONFIG_IMAGE_HFLIP)
+
+                camera.exposure_mode = config.get(constants.CONFIG_IMAGE_EXPOSURE_MODE)
+                camera.awb_mode = config.get(constants.CONFIG_IMAGE_AWB_MODE)
 
                 camera.led = False
 
                 logger.info("Starting capture")
-                camera.start_recording('/dev/null', format='h264', motion_output=MotionDetector(camera, self, sensitivity, threshold))
+                stream = picamera.PiCameraCircularIO(camera, seconds=REC_SECONDS)
+                camera.start_recording(stream, format='h264', motion_output=MotionDetector(camera, self, sensitivity, threshold))
 
                 while not self.stopping:
-                    logger.debug("checking for events")
+                    #logger.debug("checking for events")
 
                     if self.event:
                         if self.event[1] == constants.EVENT_TYPE_IMAGE:
                             filename = self.capture(camera)
                             logger.info("Continuing capture")
-                            camera.start_recording('/dev/null', format='h264', motion_output=MotionDetector(camera, self, sensitivity, threshold))
+                            stream = picamera.PiCameraCircularIO(camera, seconds=REC_SECONDS)
+                            camera.start_recording(stream, format='h264', motion_output=MotionDetector(camera, self, sensitivity, threshold))
                         elif self.event[1] == constants.EVENT_TYPE_VIDEO:
-                            filename = self.record(camera, 5)
+                            filename = self.record(camera, stream, 3)
+                            logger.info("Continuing capture")
                         else:
                             logger.warning("Unknown event capture type: %s" % self.event[1])
                             self.event = None
