@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 logger.info("Starting yeticam")
 
-def send(filename, event, event_type):
+def send(filename, event, capture_type):
     try:
         logger.info("Sending image with event %s" % event)
         status = {}
@@ -23,9 +23,9 @@ def send(filename, event, event_type):
 
         status[constants.STATUS_TIME] = datetime.now().isoformat()
 
-        if event_type == constants.EVENT_TYPE_IMAGE:
+        if capture_type == constants.EVENT_TYPE_IMAGE:
             server.post_image(filename, event)
-        elif event_type == constants.EVENT_TYPE_VIDEO:
+        elif capture_type == constants.EVENT_TYPE_VIDEO:
             server.post_video(filename, event)
         else:
             logger.warning("Unknown capture type")
@@ -67,13 +67,13 @@ def capture_timer_image():
     while True:
         logger.info("Capturing timer image: %i min" % config.get(constants.CONFIG_TIMER_INTERVAL_MIN))
 
-        if not capture.trigger(constants.EVENT_TIMER):
-            logger.info("Timer image was triggered by there was already another event waiting to be captured")
+        if not capture.request_capture():
+            logger.info("Timer image was triggered by the camera was already in use")
 
         time.sleep(config.get(constants.CONFIG_TIMER_INTERVAL_MIN) * constants.SECONDS2MIN)
 
 #Initialize
-capture = camera.EventCaptureHandler(send)
+capture = camera.CaptureHandler(send)
 temp = sensors.Temperature()
 server = service.YetiService(config.get(constants.CONFIG_SERVER))
 
