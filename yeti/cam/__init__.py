@@ -51,6 +51,7 @@ def config_update():
             server.send_config_status(config.get_status())
 
             #restart the camera for new config updates
+            #TODO: this does not work as expected - this should signal a restart, not restart it here
             capture.restart()
     except ValueError:
         logger.exception("Could not parse response from server")
@@ -67,7 +68,9 @@ def capture_timer_image():
     while True:
         logger.info("Capturing timer image: %i min" % config.get(constants.CONFIG_TIMER_INTERVAL_MIN))
 
-        if not capture.request_capture():
+        success = capture.request_image()
+
+        if not success:
             logger.info("Timer image was triggered by the camera was already in use")
 
         time.sleep(config.get(constants.CONFIG_TIMER_INTERVAL_MIN) * constants.SECONDS2MIN)

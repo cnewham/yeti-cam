@@ -44,7 +44,7 @@ class CaptureHandler:
 
         return False
 
-    def request_capture(self):
+    def request_image(self):
         logger.debug("Image capture requested")
         if self.working:
             return False
@@ -161,8 +161,10 @@ class CaptureHandler:
                             self.event = None
                             continue
 
-                        if self.callback:
+                        if filename and self.callback:
                             self.callback(filename, *self.event)
+                        else:
+                            logger.warning("Capture did not complete successfully")
 
                         self.event = None
 

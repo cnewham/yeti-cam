@@ -1,27 +1,32 @@
-import numpy as np
+﻿import numpy as np
+sample = 3
 
-threshold = 1
-sample = 50
-vectors = (5,20)
-magnitude = 5
-a = np.ndarray(shape=((vectors[1]/vectors[0]) - 1, sample))
-a.fill(np.nan)
+a = np.random.randint(10,size=(3,3,3))
+b = np.random.randint(10,size=(3,3,3))
+c = np.random.randint(10,size=(3,3,3))
 
-print a.shape
-
-motion = False
-for i in range(0, 75):
-    index = 0
-    for j in range(vectors[0],vectors[1],magnitude):
-        average = np.average(a[index])
-        #if average + (average * threshold) > vectors:
-        #    motion = True
-
-        a[index, 0] = i
-        a[index] = np.roll(a[index], -1)
-
-        index += 1
+print "---RAW---"
 
 print a
+print b
+print c
+
+print "---MEAN---"
+
+total = []
+total.append(a.mean(axis=2))
+total.append(b.mean(axis=2))
+total.append(c.mean(axis=2))
+
+total = np.array(total)
+
+print total
+print "---OUTPUT---"
+
+print total.mean(axis=2)
+
+
+
+
 
 
