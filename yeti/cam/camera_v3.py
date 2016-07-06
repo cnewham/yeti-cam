@@ -1,5 +1,5 @@
 ﻿__author__ = 'chris'
-import threading, time, io
+import threading, time, io, os
 from datetime import datetime, timedelta
 from yeti.cam import motion
 import picamera
@@ -52,8 +52,6 @@ class CaptureHandler:
         return True
 
     def record(self, camera, stream, seconds):
-        #TODO: Fix this function to immediately split_recording to the file and stitch the stream to the beginning.
-        #BUG: There is a gap created during capture between the stream writing to disk and the recording is split
         with camera_lock:
             if self.working:
                 return
@@ -61,9 +59,14 @@ class CaptureHandler:
             logger.info("Recording %s event for %s seconds" % (self.event[0], seconds))
             self.working = True
             filename = get_filename(config.get(constants.CONFIG_IMAGE_DIR), "recording-", "h264")
+            before = "%s-before" % filename
+            after = "%s-after" % filename
 
-            with io.open(filename, 'wb') as output:
-                #Write before motion buffer into file first
+            #Split the recording into the output file for the after motion data
+            camera.split_recording(after, splitter_port=1)
+
+            #Write before motion buffer into file            
+            with io.open(before, 'wb') as output:
                 with stream.lock:
                     for frame in stream.frames:
                         if frame.frame_type == picamera.PiVideoFrameType.sps_header:
@@ -78,12 +81,26 @@ class CaptureHandler:
                     stream.seek(0)
                     stream.truncate()
 
-                #Split the recording into the output file to append motion recording
-                camera.split_recording(output, splitter_port=1)
-                camera.wait_recording(seconds, splitter_port=1)
+            #split the recording back into the circular stream
+            camera.wait_recording(seconds, splitter_port=1)
+            camera.split_recording(stream, splitter_port=1)
 
-                #split the recording back into the circular stream
-                camera.split_recording(stream, splitter_port=1)
+            #stitch the 2 streams together and remove the temp files
+            files = [before, after]
+            with io.open(filename, 'wb') as output:
+                for file in files:
+                    with io.open(file) as input:
+                        with input.lock:
+                            for frame in input.frames:
+                                if frame.frame_type == picamera.PiVideoFrameType.sps_header:
+                                    input.seek(frame.position)
+                                    break
+                            while True:
+                                buf = input.read1()
+                                if not buf:
+                                    break
+                                output.write(buf)
+                os.remove(file)
 
             self.working = False
             return filename
@@ -97,7 +114,7 @@ class CaptureHandler:
             self.working = True
             filename = get_filename(config.get(constants.CONFIG_IMAGE_DIR), config.get(constants.CONFIG_IMAGE_PREFIX))
         
-            camera.capture(filename, format="jpeg", use_video_port=True, quality=config.get(constants.CONFIG_IMAGE_QUALITY), splitter_port=3)
+            camera.capture(filename, format="jpeg", use_video_port=True, quality=config.get(constants.CONFIG_IMAGE_QUALITY))
 
             self.working = False
             return filename
@@ -123,7 +140,7 @@ class CaptureHandler:
         analyzer = motion.RGBMotionDetector(camera, self, sensitivity, threshold, sample_size=REC_FRAMERATE * 2)
 
         camera.start_recording(recorder, format='h264', splitter_port=1)
-        camera.start_recording(analyzer, format='rgb', splitter_port=2)
+        camera.start_recording(analyzer, format='rgb', splitter_port=2, resize=(320,240))
 
         return recorder
 

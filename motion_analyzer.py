@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 
 import io
 from datetime import datetime, timedelta
@@ -105,7 +105,7 @@ def rgb_motion_detector_test():
             print("Recording sample for %s seconds..." % seconds)
 
             analyzer = RGBMotionDetector(camera, MotionCallback(), 10, 60, sample_size=REC_FRAMERATE * 2)
-            camera.start_recording(analyzer, format='rgb')
+            camera.start_recording(analyzer, format='rgb', resize=(320,240))
 
             recording = 0
             while recording <= seconds:
