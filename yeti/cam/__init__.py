@@ -7,6 +7,7 @@ import camera_v3 as camera
 
 import logging
 logger = logging.getLogger(__name__)
+global keep_alive
 
 logger.info("Starting yeticam")
 
@@ -50,9 +51,7 @@ def config_update():
             config.set_status(constants.CONFIG_STATUS_UPDATED)
             server.send_config_status(config.get_status())
 
-            #restart the camera for new config updates
-            #TODO: this does not work as expected - this should signal a restart, not restart it here
-            capture.restart()
+            restart_capture() #send restart request
     except ValueError:
         logger.exception("Could not parse response from server")
     except Exception as ex:
@@ -80,13 +79,21 @@ capture = camera.CaptureHandler(send)
 temp = sensors.Temperature()
 server = service.YetiService(config.get(constants.CONFIG_SERVER))
 
+def restart_capture():
+    global keep_alive
+    keep_alive = True
+    capture.stop()
+
 def camera_capture():
-    try:
-        capture.start()
-    except Exception:
-        logger.exception("Camera capture failed.")
-    finally:
-        capture.stop()
+    global keep_alive
+    keep_alive = True
+
+    while keep_alive:
+        try:
+            keep_alive = False
+            capture.start()
+        except Exception:
+            logger.exception("Camera capture failed.")
 
 #start all threads and run until a stop signal is detected
 camera_capture_thread = threading.Thread(target=camera_capture)

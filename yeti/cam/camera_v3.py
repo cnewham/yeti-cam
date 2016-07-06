@@ -180,7 +180,7 @@ class CaptureHandler:
 
                         self.event = None
 
-                    time.sleep(1)
+                    camera.wait_recording(1)
 
             except Exception:
                 logger.exception("Camera failure has occurred")
@@ -195,11 +195,6 @@ class CaptureHandler:
 
             while self.running:
                 time.sleep(.5)
-
-    def restart(self):
-        logger.info("Restarting camera")
-        self.stop()
-        self.start()
 
 def get_filename(path, prefix, ext="jpg"):
     now = datetime.now()
