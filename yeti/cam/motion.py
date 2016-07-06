@@ -1,4 +1,5 @@
-﻿import picamera
+﻿from datetime import datetime, timedelta
+import picamera
 import picamera.array
 import numpy as np
 from yeti.common import config, constants
@@ -39,7 +40,8 @@ class RGBMotionDetector(picamera.array.PiRGBAnalysis):
     Calculates an average RGB value for each pixel, from a sample of images, and detects motion if there are any changes beyond
     the threshold value
     """
-    def __init__(self, handler, sensitivity, threshold, delay=3, sample_size=10):
+    def __init__(self, camera, handler, sensitivity, threshold, delay=3, sample_size=10):
+        super(RGBMotionDetector, self).__init__(camera, size=(320, 240))
         self.handler = handler
         self.sensitivity = sensitivity
         self.threshold = threshold
@@ -54,22 +56,28 @@ class RGBMotionDetector(picamera.array.PiRGBAnalysis):
 
     def analyse(self, a):
         if self.delayed():
+            logger.debug('delayed')
             return        
 
+        logger.debug('calculating mean for shape %s' % a.shape)
         current = a.mean(axis=2) #calculate average RGB value for the current frame
 
         if not self.background: #check if we've built a big enough sample to average
+            logger.debug('building cache')
             self.cache.append(current)
             if self.cache.count >= self.sample_size:
+                logger.debug('calculating background average')
                 sample = np.array(self.cache)
                 self.background = sample.mean(axis=2) #average the background image for comparison to subsequent frames
                 self.cache = []
             else:
                 return               
 
+        logger.debug('comparing current image')
         diff = abs(current - self.background)
 
         if (diff > self.threshold).sum() > self.sensitivity:
+            logger.debug('motion detected!')
             self.handler.motion_detected()
             self.last = datetime.now()
             self.background = None
@@ -80,7 +88,7 @@ class SADMotionDetector(picamera.array.PiMotionAnalysis):
     Sum of Absolute Differences - uses the built in picamera SAD calculation to analyze changes in pixels
     """
     def __init__(self, camera, handler, sensitivity, threshold, delay=3):
-        super(VectorMotionDetector, self).__init__(camera)
+        super(SADMotionDetector, self).__init__(camera)
         self.handler = handler
         self.sensitivity = sensitivity
         self.threshold = threshold

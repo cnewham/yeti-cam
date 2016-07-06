@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import io
+from datetime import datetime, timedelta
 import picamera, picamera.array
 import numpy as np
 
@@ -25,53 +26,144 @@ class MotionDetector(picamera.array.PiMotionAnalysis):
 
             text += "[%s:%s] " % (i, (a>i).sum())
 
-        camera.annotate_text = text
+        self.camera.annotate_text = text
 
         #if (a > self.sensitivity).sum() > self.threshold:
-        #    logger.debug("Motion Detected!")
+        #    print("Motion Detected!")
 
-seconds = 10
-print("Initializing camera")
-with picamera.PiCamera() as camera:
-    try:
-        camera.led = False
-        camera.resolution = REC_RESOLUTION
-        camera.framerate = REC_FRAMERATE
-        camera.vflip = False
-        camera.hflip = False
-        camera.annotate_text_size = 10
-        camera.annotate_background = picamera.Color('black')
-        camera.annotate_frame_num = True
-        camera.awb_mode='horizon'
-        camera.exposure_mode='night'
-        camera.start_preview()
-        print("Recording sample for %s seconds..." % seconds)
-        stream = picamera.PiCameraCircularIO(camera, seconds=REC_SECONDS, bitrate=REC_BITRATE)
-        camera.start_recording(stream, format='h264', bitrate=REC_BITRATE, intra_period=REC_FRAMERATE, motion_output=MotionDetector(camera))
+class RGBMotionDetector(picamera.array.PiRGBAnalysis):
+    """
+    Calculates an average RGB value for each pixel, from a sample of images, and detects motion if there are any changes beyond
+    the threshold value
+    """
+    def __init__(self, camera, handler, sensitivity, threshold, delay=3, sample_size=10):
+        super(RGBMotionDetector, self).__init__(camera, size=(320, 240))
+        self.handler = handler
+        self.sensitivity = sensitivity
+        self.threshold = threshold
+        self.delay = delay
+        self.last = datetime.now()
+        self.background = None
+        self.cache = []
+        self.sample_size = sample_size
 
-        camera.wait_recording(10)
+    def delayed(self):
+        return (datetime.now() - timedelta(seconds=self.delay)) < self.last
 
-        #Write before motion buffer into file first
-        with io.open('motion_test.h264', 'wb') as output:
-            with stream.lock:
-                for frame in stream.frames:
-                    if frame.frame_type == picamera.PiVideoFrameType.sps_header:
-                        stream.seek(frame.position)
-                        break
-                while True:
-                    buf = stream.read1()
-                    if not buf:
-                        break
-                    output.write(buf)
+    def analyse(self, a):
+        print a.shape
+        #rgb = np.array(a)
 
-            camera.split_recording(output)
-            camera.wait_recording(4)
+        #print rgb.shape
+        # if self.delayed():
+        #     print('delayed')
+        #     return
+        #
+        # print('calculating mean for shape %s' % a.shape)
+        # current = a.mean(axis=2) #calculate average RGB value for the current frame
+        #
+        # if not self.background: #check if we've built a big enough sample to average
+        #     print('building cache')
+        #     self.cache.append(current)
+        #     if self.cache.count >= self.sample_size:
+        #         print('calculating background average')
+        #         sample = np.array(self.cache)
+        #         self.background = sample.mean(axis=2) #average the background image for comparison to subsequent frames
+        #         self.cache = []
+        #     else:
+        #         return
+        #
+        # print('comparing current image')
+        # diff = abs(current - self.background)
+        #
+        # if (diff > self.threshold).sum() > self.sensitivity:
+        #     print('motion detected!')
+        #     self.handler.motion_detected()
+        #     self.last = datetime.now()
+        #     self.background = None
+
+class MotionCallback():
+    def motion_detected(self):
+        print "Motion Callback called"
+
+def rgb_motion_detector_test():
+    seconds = 10
+    print("Initializing camera")
+    with picamera.PiCamera() as camera:
+        try:
+            camera.led = False
+            camera.resolution = REC_RESOLUTION
+            camera.framerate = REC_FRAMERATE
+            camera.vflip = False
+            camera.hflip = False
+            camera.annotate_text_size = 10
+            camera.annotate_background = picamera.Color('black')
+            camera.annotate_frame_num = True
+            camera.awb_mode='horizon'
+            camera.exposure_mode='night'
+            camera.start_preview()
+            print("Recording sample for %s seconds..." % seconds)
+
+            analyzer = RGBMotionDetector(camera, MotionCallback(), 10, 60, sample_size=REC_FRAMERATE * 2)
+            camera.start_recording(analyzer, format='rgb')
+
+            recording = 0
+            while recording <= seconds:
+                camera.wait_recording(1)
+                recording += 1
+
             camera.stop_recording()
+            camera.stop_preview()
+        finally:
+            print("Closing camera")
+            camera.close()
 
-        #stream = picamera.PiCameraCircularIO(camera, seconds=3)
-        #camera.split_recording(stream)
+def circular_buffer_test():
+    seconds = 10
+    print("Initializing camera")
+    with picamera.PiCamera() as camera:
+        try:
+            camera.led = False
+            camera.resolution = REC_RESOLUTION
+            camera.framerate = REC_FRAMERATE
+            camera.vflip = False
+            camera.hflip = False
+            camera.annotate_text_size = 10
+            camera.annotate_background = picamera.Color('black')
+            camera.annotate_frame_num = True
+            camera.awb_mode='horizon'
+            camera.exposure_mode='night'
+            camera.start_preview()
+            print("Recording sample for %s seconds..." % seconds)
+            stream = picamera.PiCameraCircularIO(camera, seconds=REC_SECONDS, bitrate=REC_BITRATE)
+            camera.start_recording(stream, format='h264', bitrate=REC_BITRATE, intra_period=REC_FRAMERATE, motion_output=MotionDetector(camera))
 
-        camera.stop_preview()
-    finally:
-        print("Closing camera")
-        camera.close()
+            camera.wait_recording(10)
+
+            #Write before motion buffer into file first
+            with io.open('motion_test.h264', 'wb') as output:
+                with stream.lock:
+                    for frame in stream.frames:
+                        if frame.frame_type == picamera.PiVideoFrameType.sps_header:
+                            stream.seek(frame.position)
+                            break
+                    while True:
+                        buf = stream.read1()
+                        if not buf:
+                            break
+                        output.write(buf)
+
+                camera.split_recording(output)
+                camera.wait_recording(4)
+                camera.stop_recording()
+
+            #stream = picamera.PiCameraCircularIO(camera, seconds=3)
+            #camera.split_recording(stream)
+
+            camera.stop_preview()
+        finally:
+            print("Closing camera")
+            camera.close()
+
+#start here
+rgb_motion_detector_test()

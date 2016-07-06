@@ -39,7 +39,7 @@ class CaptureHandler:
 
         if self.motion.enabled():
             #TODO: configuration to determine if it should be image or video
-            self.event = constants.EVENT_MOTION, constants.EVENT_TYPE_VIDEO
+            self.event = constants.EVENT_MOTION, constants.EVENT_TYPE_IMAGE
             return True
 
         return False
@@ -80,11 +80,11 @@ class CaptureHandler:
                     stream.truncate()
 
                 #Split the recording into the output file to append motion recording
-                camera.split_recording(output)
-                camera.wait_recording(seconds)
+                camera.split_recording(output, splitter_port=1)
+                camera.wait_recording(seconds, splitter_port=1)
 
                 #split the recording back into the circular stream
-                camera.split_recording(stream)
+                camera.split_recording(stream, splitter_port=1)
 
             self.working = False
             return filename
@@ -98,24 +98,39 @@ class CaptureHandler:
             self.working = True
             filename = get_filename(config.get(constants.CONFIG_IMAGE_DIR), config.get(constants.CONFIG_IMAGE_PREFIX))
         
-            camera.capture(filename, format="jpeg", quality=config.get(constants.CONFIG_IMAGE_QUALITY))
+            camera.capture(filename, format="jpeg", use_video_port=True, quality=config.get(constants.CONFIG_IMAGE_QUALITY), splitter_port=3)
 
             self.working = False
             return filename
 
-    def start_capture(camera):
+    def start_capture(self, camera):
         logger.info("Starting capture")
-        recorder = picamera.PiCameraCircularIO(camera, seconds=REC_SECONDS)
-        analyzer = motion.RGBMotionDetector(self, sensitivity, threshold)
 
-        camera.start_recording(recorder, format='h264')
-        camera.start_recording(analyzer, format='rgb', splitter_port=1)
+        sensitivity = config.get(constants.CONFIG_MOTION_SENSITIVITY)
+        threshold = config.get(constants.CONFIG_MOTION_THRESHOLD)
+
+        camera.resolution = (config.get(constants.CONFIG_IMAGE_WIDTH), config.get(constants.CONFIG_IMAGE_HEIGHT))
+        camera.framerate = REC_FRAMERATE
+
+        camera.vflip = config.get(constants.CONFIG_IMAGE_VFLIP)
+        camera.hflip = config.get(constants.CONFIG_IMAGE_HFLIP)
+
+        camera.exposure_mode = config.get(constants.CONFIG_IMAGE_EXPOSURE_MODE)
+        camera.awb_mode = config.get(constants.CONFIG_IMAGE_AWB_MODE)
+
+        camera.led = False
+
+        recorder = picamera.PiCameraCircularIO(camera, seconds=REC_SECONDS)
+        analyzer = motion.RGBMotionDetector(camera, self, sensitivity, threshold, sample_size=REC_FRAMERATE * 2)
+
+        camera.start_recording(recorder, format='h264', splitter_port=1)
+        camera.start_recording(analyzer, format='rgb', splitter_port=2)
 
         return recorder
 
-    def stop_capture(camera):
+    def stop_capture(self, camera):
+        camera.stop_recording(splitter_port=2)
         camera.stop_recording(splitter_port=1)
-        camera.stop_recording()
         logger.info("Stopping capture")
 
     def start(self):
@@ -129,30 +144,14 @@ class CaptureHandler:
         self.stopping = False
         with picamera.PiCamera() as camera:
             try:
-                sensitivity = config.get(constants.CONFIG_MOTION_SENSITIVITY)
-                threshold = config.get(constants.CONFIG_MOTION_THRESHOLD)
-
-                camera.resolution = (config.get(constants.CONFIG_IMAGE_WIDTH), config.get(constants.CONFIG_IMAGE_HEIGHT))
-                camera.framerate = REC_FRAMERATE
-
-                camera.vflip = config.get(constants.CONFIG_IMAGE_VFLIP)
-                camera.hflip = config.get(constants.CONFIG_IMAGE_HFLIP)
-
-                camera.exposure_mode = config.get(constants.CONFIG_IMAGE_EXPOSURE_MODE)
-                camera.awb_mode = config.get(constants.CONFIG_IMAGE_AWB_MODE)
-
-                camera.led = False
-
                 logger.info("Starting capture")
                 stream = self.start_capture(camera)
 
                 while not self.stopping:
                     if self.event:
                         if self.event[1] == constants.EVENT_TYPE_IMAGE:
-                            self.stop_capture(camera)
                             filename = self.capture(camera)
                             logger.info("Continuing capture")
-                            stream = self.start_capture(camera)                          
                         elif self.event[1] == constants.EVENT_TYPE_VIDEO:
                             filename = self.record(camera, stream, 3)
                             logger.info("Continuing capture")
