@@ -49,6 +49,7 @@ CONFIG_MOTION_THRESHOLD = 'motion_threshold'
 CONFIG_MOTION_SENSITIVITY = 'motion_sensitivity'
 CONFIG_MOTION_DELAY_SEC = 'motion_delay'
 CONFIG_MOTION_CAPTURE_THRESHOLD = 'motion_capture_threshold'
+CONFIG_MOTION_EVENT_CAPTURE_TYPE = 'motion_event_capture_type'
 CONFIG_TIMER_INTERVAL_MIN = 'timer_interval'
 
 #SENSOR CONSTANTS

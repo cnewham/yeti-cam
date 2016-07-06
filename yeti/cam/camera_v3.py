@@ -38,8 +38,7 @@ class CaptureHandler:
             return False
 
         if self.motion.enabled():
-            #TODO: configuration to determine if it should be image or video
-            self.event = constants.EVENT_MOTION, constants.EVENT_TYPE_IMAGE
+            self.event = constants.EVENT_MOTION, config.get(constants.CONFIG_MOTION_EVENT_CAPTURE_TYPE)
             return True
 
         return False

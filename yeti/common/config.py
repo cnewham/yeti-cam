@@ -50,6 +50,8 @@ if not db.get(constants.CONFIG_MOTION_THRESHOLD):
     db.set(constants.CONFIG_MOTION_THRESHOLD, 10)
 if not db.get(constants.CONFIG_MOTION_CAPTURE_THRESHOLD):
     db.set(constants.CONFIG_MOTION_CAPTURE_THRESHOLD, 3)
+if not db.get(constants.CONFIG_MOTION_EVENT_CAPTURE_TYPE):
+    db.set(constants.CONFIG_MOTION_EVENT_CAPTURE_TYPE, constants.EVENT_TYPE_IMAGE)
 
 #capture timer
 if not db.get(constants.CONFIG_TIMER_INTERVAL_MIN):

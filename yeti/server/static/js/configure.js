@@ -77,7 +77,7 @@ function saveConfig(config) {
 };
 
 function toggleMotionSettings(enabled) {
-    var motion_settings = $("#motion_settings input");
+    var motion_settings = $("#motion_settings input, #motion_settings select");
     if (enabled) {
         motion_settings.removeClass("disabled");
         motion_settings.prop("disabled", false);
