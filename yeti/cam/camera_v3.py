@@ -59,14 +59,13 @@ class CaptureHandler:
             logger.info("Recording %s event for %s seconds" % (self.event[0], seconds))
             self.working = True
             filename = get_filename(config.get(constants.CONFIG_IMAGE_DIR), "recording-", "h264")
-            before = "%s-before" % filename
-            after = "%s-after" % filename
+            temp = "%s-temp" % filename
 
             #Split the recording into the output file for the after motion data
-            camera.split_recording(after, splitter_port=1)
+            camera.split_recording(temp, splitter_port=1)
 
             #Write before motion buffer into file            
-            with io.open(before, 'wb') as output:
+            with io.open(filename, 'wb') as output:
                 with stream.lock:
                     for frame in stream.frames:
                         if frame.frame_type == picamera.PiVideoFrameType.sps_header:
@@ -86,21 +85,19 @@ class CaptureHandler:
             camera.split_recording(stream, splitter_port=1)
 
             #stitch the 2 streams together and remove the temp files
-            files = [before, after]
-            with io.open(filename, 'wb') as output:
-                for file in files:
-                    with io.open(file) as input:
-                        with input.lock:
-                            for frame in input.frames:
-                                if frame.frame_type == picamera.PiVideoFrameType.sps_header:
-                                    input.seek(frame.position)
-                                    break
-                            while True:
-                                buf = input.read1()
-                                if not buf:
-                                    break
-                                output.write(buf)
-                os.remove(file)
+            with io.open(filename, 'ab') as output:
+                with io.open(temp) as input:
+                    with input.lock:
+                        for frame in input.frames:
+                            if frame.frame_type == picamera.PiVideoFrameType.sps_header:
+                                input.seek(frame.position)
+                                break
+                        while True:
+                            buf = input.read1()
+                            if not buf:
+                                break
+                            output.write(buf)
+            os.remove(temp)
 
             self.working = False
             return filename
