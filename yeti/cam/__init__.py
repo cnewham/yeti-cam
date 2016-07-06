@@ -67,10 +67,10 @@ def capture_timer_image():
     while True:
         logger.info("Capturing timer image: %i min" % config.get(constants.CONFIG_TIMER_INTERVAL_MIN))
 
-        success = capture.request_image()
+        success = capture.request()
 
         if not success:
-            logger.info("Timer image was triggered by the camera was already in use")
+            logger.info("Timer image was triggered but the camera was already in use")
 
         time.sleep(config.get(constants.CONFIG_TIMER_INTERVAL_MIN) * constants.SECONDS2MIN)
 
