@@ -1,8 +1,8 @@
 ﻿__author__ = 'chris'
 import threading, time, io, os
 from datetime import datetime, timedelta
-from yeti.cam import motion
 import picamera
+import motion
 from yeti.common import config, constants
 
 import logging
@@ -15,54 +15,53 @@ REC_FRAMERATE = 24          #frame rate to capture
 
 class YetiPiCamera:
     """
-    Facade for picamera 
+    Facade for picamera. Handles the implementation of YetiCam for use with picamera:
+    start() - starts PiCameraCircularIO stream and RGBMotionDetector
+    stop() - stops all captures
+    wait(seconds) - accesses wait_recording(seconds)
+    close() - destroys the picamera instance
+    capture() - captures an image to a file. returns filename
+    record(seconds) - records the current stream with an additional n seconds to a file. returns filename
     """
     def __init__(self, camera):
         self.camera = camera
+        self.buffer = picamera.PiCameraCircularIO(camera, seconds=REC_SECONDS)
         self.__lock__ = threading.Lock()
 
-    def record(self, stream, seconds):
+    def record(self, seconds):
         with self.__lock__:
             logger.info("Recording %s event for %s seconds" % (self.event[0], seconds))
             filename = get_filename(config.get(constants.CONFIG_IMAGE_DIR), "recording-", "h264")
-            temp = "%s-temp" % filename
+            temp = "%s.temp" % filename
 
             #Split the recording into the output file for the after motion data
-            self.camera.split_recording(temp, splitter_port=1)
+            self.camera.split_recording(temp)
 
             #Write before motion buffer into file            
             with io.open(filename, 'wb') as output:
-                with stream.lock:
+                with self.buffer.lock:
                     for frame in stream.frames:
                         if frame.frame_type == picamera.PiVideoFrameType.sps_header:
-                            stream.seek(frame.position)
+                            self.buffer.seek(frame.position)
                             break
                     while True:
-                        buf = stream.read1()
+                        buf = self.buffer.read1()
                         if not buf:
                             break
                         output.write(buf)
 
-                    stream.seek(0)
-                    stream.truncate()
+                    self.buffer.seek(0)
+                    self.buffer.truncate()
 
             #split the recording back into the circular stream
-            self.camera.wait_recording(seconds, splitter_port=1)
-            self.camera.split_recording(stream, splitter_port=1)
+            self.camera.wait_recording(seconds)
+            self.camera.split_recording(self.buffer)
 
-            #stitch the 2 streams together and remove the temp files
+            #stitch the 2 streams together and remove the temp file
             with io.open(filename, 'ab') as output:
                 with io.open(temp) as input:
-                    with input.lock:
-                        for frame in input.frames:
-                            if frame.frame_type == picamera.PiVideoFrameType.sps_header:
-                                input.seek(frame.position)
-                                break
-                        while True:
-                            buf = input.read1()
-                            if not buf:
-                                break
-                            output.write(buf)
+                    output.write(input.read()) #TODO: does this output the video correctly?
+
             os.remove(temp)
 
             return filename
@@ -72,9 +71,10 @@ class YetiPiCamera:
             logger.info("Capture %s image" % self.event[0])
             self.working = True
             filename = get_filename(config.get(constants.CONFIG_IMAGE_DIR), config.get(constants.CONFIG_IMAGE_PREFIX))
-        
+            
+            #TODO: Camea is using video port for captures. convert this to use the capture port for better quality
             self.camera.capture(filename, format="jpeg", use_video_port=True, quality=config.get(constants.CONFIG_IMAGE_QUALITY))
-
+            
             return filename
 
     def start(self):
@@ -94,10 +94,9 @@ class YetiPiCamera:
 
         self.camera.led = False
 
-        recorder = picamera.PiCameraCircularIO(self.camera, seconds=REC_SECONDS)
         analyzer = motion.RGBMotionDetector(self.camera, self, sensitivity, threshold, sample_size=REC_FRAMERATE * 2)
 
-        self.camera.start_recording(recorder, format='h264', splitter_port=1)
+        self.camera.start_recording(self.buffer, format='h264')
         self.camera.start_recording(analyzer, format='rgb', splitter_port=2, resize=(320,240))
 
         return recorder
@@ -109,8 +108,12 @@ class YetiPiCamera:
     def stop(self):
         logger.info("Stopping capture")
         self.camera.stop_recording(splitter_port=2)
-        self.camera.stop_recording(splitter_port=1)
-        self.camera.close()
+        self.camera.stop_recording()
+
+    def close(self):
+        if not self.camera.closed():
+            logger.info('Cleaning up camera')
+            self.camera.close()
 
     def __enter__(self):
         return self
@@ -168,16 +171,16 @@ class CaptureHandler:
         with YetiPiCamera(picamera.PiCamera()) as camera:
             try:
                 logger.info("Starting capture")
-                stream = camera.start()
+                camera.start()
 
                 while not self.stopping:
                     if self.event:
                         self.working = True
                         if self.event[1] == constants.EVENT_TYPE_IMAGE:
-                            filename = camera.capture(camera)
+                            filename = camera.capture()
                             logger.info("Continuing capture")
                         elif self.event[1] == constants.EVENT_TYPE_VIDEO:
-                            filename = camera.record(camera, stream, 3)
+                            filename = camera.record(3)
                             logger.info("Continuing capture")
                         else:
                             logger.warning("Unknown event capture type: %s" % self.event[1])
@@ -199,7 +202,7 @@ class CaptureHandler:
                 logger.exception("Camera failure has occurred")
             finally:
                 logger.info("Stopping camera")
-                camera.stop()
+                camera.close()
                 self.running = False
 
     def stop(self):
