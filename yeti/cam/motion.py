@@ -37,10 +37,11 @@ class MotionEvents:
 
 class RGBMotionDetector(picamera.array.PiRGBAnalysis):
     """
-    Calculates an average RGB value for each pixel, from a sample of images, and detects motion if there are any changes beyond
-    the threshold value
+    Uses background subtraction by calculating an average RGB value for each pixel over a series of frames (sample), 
+    and detects motion if there are any changes beyond the threshold value.
+    Filters out significant changes due to lighting and camera image adjustments
     """
-    def __init__(self, camera, handler, sensitivity, threshold, delay=3, sample_size=10):
+    def __init__(self, camera, handler, sensitivity, threshold, delay=3, sample_size=10, percent_change_max=40):
         super(RGBMotionDetector, self).__init__(camera, size=(320, 240))
         self.handler = handler
         self.sensitivity = sensitivity
@@ -48,8 +49,10 @@ class RGBMotionDetector(picamera.array.PiRGBAnalysis):
         self.delay = delay
         self.last = datetime.now()
         self.background = None
+        self.background_total = None
         self.cache = []
         self.sample_size = sample_size
+        self.percent_change_max = percent_change_max
 
     def delayed(self):
         return (datetime.now() - timedelta(seconds=self.delay)) < self.last
@@ -59,24 +62,37 @@ class RGBMotionDetector(picamera.array.PiRGBAnalysis):
             return
 
         try:
-            current = a.mean(axis=2) #calculate average RGB value for the current frame
+            #calculate average RGB value for the current frame
+            current = a.mean(axis=2) 
 
-            if self.background is None: #check if we've built a big enough sample to average
+            #check if we've built a big enough sample to average
+            if self.background is None: 
                 self.cache.append(current)
                 if len(self.cache) >= self.sample_size:
+                    #filter camera noise by averaging background image
                     sample = np.array(self.cache)
-                    self.background = sample.mean(axis=0) #average the background image for comparison to subsequent frames
+                    self.background = sample.mean(axis=0) 
+                    self.background_total = sample.sum()
                     self.cache = []
                 else:
                     return
 
-            diff = abs(current - self.background)
+            #filter significant changes (i.e. lighting, camera adjustments)
+            percent_change = abs(100 - (current.sum() / self.background_total) * 100) 
 
-            if (diff > self.threshold).sum() > self.sensitivity:
-                print('motion detected!')
+            if percent_change >= self.percent_change_max:
+                logger.debug('Filtering out significant change (> %s) - %s%%' % (self.percent_change_max, filter_percent))
+
+            #background subtraction
+            diff = abs(self.background - current)
+            pixel_changes = (diff > self.threshold).sum()
+
+            if pixel_changes > self.sensitivity:
+                logger.debug('Motion Detected with value %s (threshold %s, sensitivity %s)' % (pixel_changes, self.threshold, self.sensitivity))
                 self.handler.motion_detected()
                 self.last = datetime.now()
                 self.background = None
+                self.background_total = None
         except Exception:
             logger.exception("Exception calculating motion")
             return

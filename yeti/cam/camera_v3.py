@@ -15,7 +15,7 @@ REC_FRAMERATE = 24          #frame rate to capture
 
 class YetiPiCamera:
     """
-    Facade for picamera. Handles the implementation of YetiCam for use with picamera:
+    Facade for picamera for use with yeti-cam:
     start() - starts PiCameraCircularIO stream and RGBMotionDetector
     stop() - stops all captures
     wait(seconds) - accesses wait_recording(seconds)
@@ -82,6 +82,7 @@ class YetiPiCamera:
 
         sensitivity = config.get(constants.CONFIG_MOTION_SENSITIVITY)
         threshold = config.get(constants.CONFIG_MOTION_THRESHOLD)
+        percent_change_max = config.get(constants.CONFIG_MOTION_PERCENT_CHANGE_MAX)
 
         self.camera.resolution = (config.get(constants.CONFIG_IMAGE_WIDTH), config.get(constants.CONFIG_IMAGE_HEIGHT))
         self.camera.framerate = REC_FRAMERATE
@@ -94,7 +95,7 @@ class YetiPiCamera:
 
         self.camera.led = False
 
-        analyzer = motion.RGBMotionDetector(self.camera, self.handler, sensitivity, threshold, sample_size=REC_FRAMERATE * 2)
+        analyzer = motion.RGBMotionDetector(self.camera, self.handler, sensitivity, threshold, sample_size=REC_FRAMERATE * 2, percent_change_max = percent_change_max)
 
         self.camera.start_recording(self.buffer, format='h264')
         self.camera.start_recording(analyzer, format='rgb', splitter_port=2, resize=(320,240))
@@ -134,29 +135,9 @@ class CaptureHandler:
         self.working = False
         self.callback = callback
         self.motion = motion.MotionEvents()
+        self.t = threading.Thread(target=self._worker)
 
-    def motion_detected(self):
-        logger.debug("Motion capture requested")
-        if self.working:
-            logger.info("Cannot process motion request. Another request is still in progress")
-            return False
-
-        if self.motion.enabled():
-            self.event = constants.EVENT_MOTION, config.get(constants.CONFIG_MOTION_EVENT_CAPTURE_TYPE)
-            return True
-
-        return False
-
-    def request(self):
-        logger.debug("Image capture requested")
-        if self.working:
-            logger.info("Cannot process capture request. Another request is still in progress")
-            return False
-
-        self.event = constants.EVENT_TIMER, constants.EVENT_TYPE_IMAGE
-        return True
-
-    def start(self):
+    def _worker(self):
         if self.running:
             logger.warn("Camera already running")
             return
@@ -203,12 +184,40 @@ class CaptureHandler:
                 camera.close()
                 self.running = False
 
+    def motion_detected(self):
+        logger.debug("Motion capture requested")
+        if self.working:
+            logger.info("Cannot process motion request. Another request is still in progress")
+            return False
+
+        if self.motion.enabled():
+            self.event = constants.EVENT_MOTION, config.get(constants.CONFIG_MOTION_EVENT_CAPTURE_TYPE)
+            return True
+
+        return False
+
+    def request(self):
+        logger.debug("Image capture requested")
+        if self.working:
+            logger.info("Cannot process capture request. Another request is still in progress")
+            return False
+
+        self.event = constants.EVENT_TIMER, constants.EVENT_TYPE_IMAGE
+        return True
+
+    def start(self):
+        self.t.start()
+        
     def stop(self):
         if self.running:
             self.stopping = True
 
             while self.running:
                 time.sleep(.5)
+
+    def restart(self):
+        self.stop()
+        self.start()
 
 def get_filename(path, prefix, ext="jpg"):
     now = datetime.now()
