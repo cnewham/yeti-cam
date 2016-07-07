@@ -37,7 +37,7 @@ class RGBMotionDetector(picamera.array.PiRGBAnalysis):
     the threshold value
     """
     def __init__(self, camera, handler, sensitivity, threshold, delay=3, sample_size=10):
-        super(RGBMotionDetector, self).__init__(camera, size=(320, 240))
+        super(RGBMotionDetector, self).__init__(camera, size=(320,240))
         self.handler = handler
         self.sensitivity = sensitivity
         self.threshold = threshold
@@ -51,43 +51,43 @@ class RGBMotionDetector(picamera.array.PiRGBAnalysis):
         return (datetime.now() - timedelta(seconds=self.delay)) < self.last
 
     def analyse(self, a):
-        print a.shape
-        #rgb = np.array(a)
 
-        #print rgb.shape
-        # if self.delayed():
-        #     print('delayed')
-        #     return
-        #
-        # print('calculating mean for shape %s' % a.shape)
-        # current = a.mean(axis=2) #calculate average RGB value for the current frame
-        #
-        # if not self.background: #check if we've built a big enough sample to average
-        #     print('building cache')
-        #     self.cache.append(current)
-        #     if self.cache.count >= self.sample_size:
-        #         print('calculating background average')
-        #         sample = np.array(self.cache)
-        #         self.background = sample.mean(axis=2) #average the background image for comparison to subsequent frames
-        #         self.cache = []
-        #     else:
-        #         return
-        #
-        # print('comparing current image')
-        # diff = abs(current - self.background)
-        #
-        # if (diff > self.threshold).sum() > self.sensitivity:
-        #     print('motion detected!')
-        #     self.handler.motion_detected()
-        #     self.last = datetime.now()
-        #     self.background = None
+        try:
+            current = a.mean(axis=2) #calculate average RGB value for the current frame
+            print current.shape
+
+            if self.background is None: #check if we've built a big enough sample to average
+                print('building cache')
+                self.cache.append(current)
+                if len(self.cache) >= self.sample_size:
+                    print('calculating background average')
+                    sample = np.array(self.cache)
+                    print sample.shape
+                    self.background = sample.mean(axis=0) #average the background image for comparison to subsequent frames
+                    print self.background.shape
+                    self.cache = []
+                else:
+                    return
+
+            print('comparing current image')
+            diff = abs(current - self.background)
+
+            print('detecting motion')
+            if (diff > self.threshold).sum() > self.sensitivity:
+                print('motion detected!')
+                self.handler.motion_detected()
+                self.last = datetime.now()
+                self.background = None
+        except Exception as ex:
+            print ex
+            return
 
 class MotionCallback():
     def motion_detected(self):
         print "Motion Callback called"
 
 def rgb_motion_detector_test():
-    seconds = 10
+    seconds = 60
     print("Initializing camera")
     with picamera.PiCamera() as camera:
         try:
@@ -104,7 +104,7 @@ def rgb_motion_detector_test():
             camera.start_preview()
             print("Recording sample for %s seconds..." % seconds)
 
-            analyzer = RGBMotionDetector(camera, MotionCallback(), 10, 60, sample_size=REC_FRAMERATE * 2)
+            analyzer = RGBMotionDetector(camera, MotionCallback(), 10, 60, sample_size=10)
             camera.start_recording(analyzer, format='rgb', resize=(320,240))
 
             recording = 0
@@ -114,6 +114,8 @@ def rgb_motion_detector_test():
 
             camera.stop_recording()
             camera.stop_preview()
+        except Exception as ex:
+            print ex
         finally:
             print("Closing camera")
             camera.close()

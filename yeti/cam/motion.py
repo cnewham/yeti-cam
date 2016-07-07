@@ -56,32 +56,30 @@ class RGBMotionDetector(picamera.array.PiRGBAnalysis):
 
     def analyse(self, a):
         if self.delayed():
-            logger.debug('delayed')
-            return        
+            return
 
-        logger.debug('calculating mean for shape %s' % a.shape)
-        current = a.mean(axis=2) #calculate average RGB value for the current frame
+        try:
+            current = a.mean(axis=2) #calculate average RGB value for the current frame
 
-        if not self.background: #check if we've built a big enough sample to average
-            logger.debug('building cache')
-            self.cache.append(current)
-            if self.cache.count >= self.sample_size:
-                logger.debug('calculating background average')
-                sample = np.array(self.cache)
-                self.background = sample.mean(axis=2) #average the background image for comparison to subsequent frames
-                self.cache = []
-            else:
-                return               
+            if self.background is None: #check if we've built a big enough sample to average
+                self.cache.append(current)
+                if len(self.cache) >= self.sample_size:
+                    sample = np.array(self.cache)
+                    self.background = sample.mean(axis=0) #average the background image for comparison to subsequent frames
+                    self.cache = []
+                else:
+                    return
 
-        logger.debug('comparing current image')
-        diff = abs(current - self.background)
+            diff = abs(current - self.background)
 
-        if (diff > self.threshold).sum() > self.sensitivity:
-            logger.debug('motion detected!')
-            self.handler.motion_detected()
-            self.last = datetime.now()
-            self.background = None
-
+            if (diff > self.threshold).sum() > self.sensitivity:
+                print('motion detected!')
+                self.handler.motion_detected()
+                self.last = datetime.now()
+                self.background = None
+        except Exception:
+            logger.exception("Exception calculating motion")
+            return
 
 class SADMotionDetector(picamera.array.PiMotionAnalysis):
     """

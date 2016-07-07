@@ -23,14 +23,15 @@ class YetiPiCamera:
     capture() - captures an image to a file. returns filename
     record(seconds) - records the current stream with an additional n seconds to a file. returns filename
     """
-    def __init__(self, camera):
+    def __init__(self, camera, handler):
         self.camera = camera
+        self.handler = handler
         self.buffer = picamera.PiCameraCircularIO(camera, seconds=REC_SECONDS)
         self.__lock__ = threading.Lock()
 
     def record(self, seconds):
         with self.__lock__:
-            logger.info("Recording %s event for %s seconds" % (self.event[0], seconds))
+            logger.info("Recording event for %s seconds" % seconds)
             filename = get_filename(config.get(constants.CONFIG_IMAGE_DIR), "recording-", "h264")
             temp = "%s.temp" % filename
 
@@ -40,7 +41,7 @@ class YetiPiCamera:
             #Write before motion buffer into file            
             with io.open(filename, 'wb') as output:
                 with self.buffer.lock:
-                    for frame in stream.frames:
+                    for frame in self.buffer.frames:
                         if frame.frame_type == picamera.PiVideoFrameType.sps_header:
                             self.buffer.seek(frame.position)
                             break
@@ -59,8 +60,8 @@ class YetiPiCamera:
 
             #stitch the 2 streams together and remove the temp file
             with io.open(filename, 'ab') as output:
-                with io.open(temp) as input:
-                    output.write(input.read()) #TODO: does this output the video correctly?
+                with io.open(temp) as t:
+                    output.write(t.read()) #TODO: does this output the video correctly?
 
             os.remove(temp)
 
@@ -68,12 +69,11 @@ class YetiPiCamera:
 
     def capture(self):
         with self.__lock__:
-            logger.info("Capture %s image" % self.event[0])
-            self.working = True
+            logger.info("Capture image")
             filename = get_filename(config.get(constants.CONFIG_IMAGE_DIR), config.get(constants.CONFIG_IMAGE_PREFIX))
             
-            #TODO: Camea is using video port for captures. convert this to use the capture port for better quality
-            self.camera.capture(filename, format="jpeg", use_video_port=True, quality=config.get(constants.CONFIG_IMAGE_QUALITY))
+            #TODO: Camera is using video port for captures. convert this to use the capture port for better quality
+            self.camera.capture(filename, format="jpeg", use_video_port=True, splitter_port=3, quality=config.get(constants.CONFIG_IMAGE_QUALITY))
             
             return filename
 
@@ -94,12 +94,10 @@ class YetiPiCamera:
 
         self.camera.led = False
 
-        analyzer = motion.RGBMotionDetector(self.camera, self, sensitivity, threshold, sample_size=REC_FRAMERATE * 2)
+        analyzer = motion.RGBMotionDetector(self.camera, self.handler, sensitivity, threshold, sample_size=REC_FRAMERATE * 2)
 
         self.camera.start_recording(self.buffer, format='h264')
         self.camera.start_recording(analyzer, format='rgb', splitter_port=2, resize=(320,240))
-
-        return recorder
 
     def wait(self, seconds=1):
         logger.debug('Waiting for %s second(s)' % seconds)
@@ -111,7 +109,7 @@ class YetiPiCamera:
         self.camera.stop_recording()
 
     def close(self):
-        if not self.camera.closed():
+        if not self.camera.closed:
             logger.info('Cleaning up camera')
             self.camera.close()
 
@@ -168,7 +166,7 @@ class CaptureHandler:
         self.running = True
         self.stopping = False
 
-        with YetiPiCamera(picamera.PiCamera()) as camera:
+        with YetiPiCamera(picamera.PiCamera(), self) as camera:
             try:
                 logger.info("Starting capture")
                 camera.start()
