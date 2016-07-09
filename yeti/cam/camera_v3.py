@@ -1,5 +1,5 @@
 ﻿__author__ = 'chris'
-import threading, time, io, os
+import threading, time, io, os, shutil
 from datetime import datetime, timedelta
 import picamera
 import motion
@@ -7,11 +7,6 @@ from yeti.common import config, constants
 
 import logging
 logger = logging.getLogger(__name__)
-
-FILE_BUFFER = 1048576            # the size of the file buffer (bytes)
-REC_SECONDS = 2             # number of seconds to store in ring buffer
-REC_BITRATE = 1000000        # bitrate for H.264 encoder
-REC_FRAMERATE = 24          #frame rate to capture
 
 class YetiPiCamera:
     """
@@ -26,7 +21,7 @@ class YetiPiCamera:
     def __init__(self, camera, handler):
         self.camera = camera
         self.handler = handler
-        self.buffer = picamera.PiCameraCircularIO(camera, seconds=REC_SECONDS)
+        self.buffer = picamera.PiCameraCircularIO(camera, seconds=3)
         self.__lock__ = threading.Lock()
 
     def record(self, seconds):
@@ -60,8 +55,8 @@ class YetiPiCamera:
 
             #stitch the 2 streams together and remove the temp file
             with io.open(filename, 'ab') as output:
-                with io.open(temp) as t:
-                    output.write(t.read()) #TODO: does this output the video correctly?
+                with io.open(temp, 'rb') as t:
+                    output.write(t.read())
 
             os.remove(temp)
 
@@ -72,9 +67,11 @@ class YetiPiCamera:
             logger.info("Capture image")
             filename = get_filename(config.get(constants.CONFIG_IMAGE_DIR), config.get(constants.CONFIG_IMAGE_PREFIX))
             
-            #TODO: Camera is using video port for captures. convert this to use the capture port for better quality
-            self.camera.capture(filename, format="jpeg", use_video_port=True, splitter_port=3, quality=config.get(constants.CONFIG_IMAGE_QUALITY))
-            
+            self.stop()
+            self.camera.resolution = (config.get(constants.CONFIG_IMAGE_WIDTH), config.get(constants.CONFIG_IMAGE_HEIGHT))
+            self.camera.capture(filename, format="jpeg", quality=config.get(constants.CONFIG_IMAGE_QUALITY))
+            self.start()
+
             return filename
 
     def start(self):
@@ -84,8 +81,7 @@ class YetiPiCamera:
         threshold = config.get(constants.CONFIG_MOTION_THRESHOLD)
         percent_change_max = config.get(constants.CONFIG_MOTION_PERCENT_CHANGE_MAX)
 
-        self.camera.resolution = (config.get(constants.CONFIG_IMAGE_WIDTH), config.get(constants.CONFIG_IMAGE_HEIGHT))
-        self.camera.framerate = REC_FRAMERATE
+        self.camera.resolution = (1280, 720)
 
         self.camera.vflip = config.get(constants.CONFIG_IMAGE_VFLIP)
         self.camera.hflip = config.get(constants.CONFIG_IMAGE_HFLIP)
@@ -97,7 +93,7 @@ class YetiPiCamera:
 
         analyzer = motion.RGBMotionDetector(self.camera, self.handler, sensitivity, threshold, percent_change_max = percent_change_max)
 
-        self.camera.start_recording(self.buffer, format='h264')
+        self.camera.start_recording(self.buffer, format='h264', intra_period=24)
         self.camera.start_recording(analyzer, format='rgb', splitter_port=2, resize=(320,240))
 
     def wait(self, seconds=1):
@@ -155,10 +151,8 @@ class CaptureHandler:
                         self.working = True
                         if self.event[1] == constants.EVENT_TYPE_IMAGE:
                             filename = camera.capture()
-                            logger.info("Continuing capture")
                         elif self.event[1] == constants.EVENT_TYPE_VIDEO:
                             filename = camera.record(3)
-                            logger.info("Continuing capture")
                         else:
                             logger.warning("Unknown event capture type: %s" % self.event[1])
                             self.event = None
