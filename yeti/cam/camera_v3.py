@@ -95,13 +95,12 @@ class YetiPiCamera:
 
         self.camera.led = False
 
-        analyzer = motion.RGBMotionDetector(self.camera, self.handler, sensitivity, threshold, sample_size=REC_FRAMERATE * 2, percent_change_max = percent_change_max)
+        analyzer = motion.RGBMotionDetector(self.camera, self.handler, sensitivity, threshold, percent_change_max = percent_change_max)
 
         self.camera.start_recording(self.buffer, format='h264')
         self.camera.start_recording(analyzer, format='rgb', splitter_port=2, resize=(320,240))
 
     def wait(self, seconds=1):
-        logger.debug('Waiting for %s second(s)' % seconds)
         self.camera.wait_recording(seconds)
 
     def stop(self):
@@ -135,7 +134,7 @@ class CaptureHandler:
         self.working = False
         self.callback = callback
         self.motion = motion.MotionEvents()
-        self.t = threading.Thread(target=self._worker)
+        self.t = None
 
     def _worker(self):
         if self.running:
@@ -149,7 +148,6 @@ class CaptureHandler:
 
         with YetiPiCamera(picamera.PiCamera(), self) as camera:
             try:
-                logger.info("Starting capture")
                 camera.start()
 
                 while not self.stopping:
@@ -175,7 +173,7 @@ class CaptureHandler:
                         self.event = None
                         self.working = False
 
-                    camera.wait()
+                    camera.wait(.5)
 
             except Exception:
                 logger.exception("Camera failure has occurred")
@@ -206,8 +204,9 @@ class CaptureHandler:
         return True
 
     def start(self):
+        self.t = threading.Thread(target=self._worker)
         self.t.start()
-        
+
     def stop(self):
         if self.running:
             self.stopping = True

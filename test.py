@@ -1,15 +1,22 @@
 ﻿import numpy as np
 
-a = np.random.randint(10,size=(240,320,3))
-b = np.random.randint(10,size=(240,320,3))
-c = np.random.randint(10,size=(240,320,3))
-d = np.random.randint(14,size=(240,320,3))
+a = np.random.randint(10,size=(320,240,3))
+b = np.random.randint(10,size=(320,240,3))
+c = np.random.randint(10,size=(320,240,3))
+d = np.random.randint(13,size=(3,3,3))
 
-#print "---RAW---"
+print "---PERCENT CHANGE---"
 
-#print a
-#print b
-#print c
+a1 = a.mean(axis=2)
+b1 = b.mean(axis=2)
+
+diff = abs(a1-b1)
+changed = np.count_nonzero(diff)
+total = (diff.shape[0]*diff.shape[1])
+
+print type(changed)
+print type(total)
+print (float(changed)/float(total)) * 100
 
 print "---MEAN---"
 
