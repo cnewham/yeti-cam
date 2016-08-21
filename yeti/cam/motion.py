@@ -4,6 +4,8 @@ import picamera.array
 import numpy as np
 from yeti.common import config, constants
 
+np.__version__
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -35,22 +37,22 @@ class MotionEvents:
         else:
             return True
 
-class RGBMotionDetector(picamera.array.PiRGBAnalysis):
+class SimpleGaussMotionDetector(picamera.array.PiRGBAnalysis):
     """
-    Uses background subtraction by calculating an average RGB value for each pixel over a series of frames (sample), 
+    Uses background subtraction using a gaussian average and background/foreground pixel weighting,
     and detects motion if there are any changes beyond the threshold value.
     Filters out significant changes due to lighting and camera image adjustments
     """
-    def __init__(self, camera, handler, sensitivity, threshold, delay=3, sample_size=10, percent_change_max=40):
-        super(RGBMotionDetector, self).__init__(camera, size=(320, 240))
+    def __init__(self, camera, handler, sensitivity, threshold, delay=3, percent_change_max=40):
+        super(SimpleGaussMotionDetector, self).__init__(camera, size=(320, 240))
         self.handler = handler
-        self.sensitivity = sensitivity
-        self.threshold = threshold
+        self.sensitivity = (sensitivity/255.0) ** 2 * 100
+        self.threshold = (threshold/255.0) * 100
+        self.alpha = (18/255.0) ** 3 #learning rate
         self.delay = delay
         self.last = datetime.now()
-        self.reference = None
-        self.cache = []
-        self.sample_size = sample_size
+        self.background = None
+        self.variance = None
         self.percent_change_max = percent_change_max
 
     def delayed(self):
@@ -61,56 +63,57 @@ class RGBMotionDetector(picamera.array.PiRGBAnalysis):
             return
 
         try:
-            #calculate average RGB value for the current frame
-            current = a.mean(axis=2) 
+            logger.debug('Starting analysis')
+            current = np.array(a, dtype=np.float64)
 
-            if self.reference is None:
-                self.reference = current
+            if self.background is None:
+                logger.debug('Building initial model...')
+                self.background = current
+                self.variance = np.full(current.shape, self.threshold, dtype=np.float64)
+                logger.debug('Model complete')
                 return
 
-            #TODO: is it worth getting this average or just compare to a single frame and adjust the threshold?
-            # if self.reference is None:
-            #     self.cache.append(current)
-            #     if len(self.cache) >= self.sample_size:
-            #         #filter camera noise by averaging background image
-            #         sample = np.array(self.cache)
-            #         self.reference = sample.mean(axis=0)
-            #         self.cache = []
-            #     else:
-            #         return
+            logger.debug('Background subtraction...')
+             #background subtraction
+            delta = self.background - current
+            logger.debug('Subtraction complete...')
 
-            #background subtraction
-            diff = abs(self.reference - current)
-            pixel_changes = (diff > self.threshold)
+            #pixel classification
+            logger.debug('Classifying pixels...')
+            foreground = (delta ** 2/self.variance).sum(axis=2)
+            foreground[foreground < self.sensitivity] = 0 #background
+            foreground[foreground >= self.sensitivity] = 255 #foreground
 
-            total_changes = pixel_changes.sum()
-            total_pixels = float(diff.shape[0]*diff.shape[1])
-            percent_change = (total_changes/total_pixels) * 100
+            logger.debug('Foreground Changed Pixels: %s' % np.count_nonzero(foreground))
 
-            logger.debug('Percent Change(changed %s, total %s: %s' % (total_changes, total_pixels, percent_change))
+            #foreground change percentage
+            #pixel_changes = np.count_nonzero(foreground)
+            #total_pixels = float(current.shape[0]*current.shape[1])
+            #percent_change = (pixel_changes/total_pixels) * 100
+
+            #logger.debug('Percent Change(changed %s, total %s: %s' % (pixel_changes, total_pixels, percent_change))
             #filter significant changes (i.e. lighting, camera adjustments)
 
-            if percent_change >= self.percent_change_max:
-                logger.debug('Filtering out significant change (> %s%%) - %s%%' % (self.percent_change_max, percent_change))
-                return
+            #if percent_change >= self.percent_change_max:
+            #    logger.debug('Filtering out significant change (> %s%%) - %s%%' % (self.percent_change_max, percent_change))
+            #    return
 
-            if percent_change <= 1:
-                #logger.debug('Filtering out insignificant change (> %s%%) - %s%%' % (self.percent_change_max, percent_change))
-                return
+            #Model update
+            logger.debug('Updating model...')
+            self.background += delta * self.alpha
+            self.variance += ((self.background - current) ** 2 - self.variance) * self.alpha
+            np.clip(self.variance,0,self.threshold,out=self.variance)
 
-            #TODO: Compare motion area changes
-            #motion_area = np.nonzero(pixel_changes)
-
-            #print motion_area
-            self.reference = current
-            logger.debug('Motion Detected with value %s (threshold %s, sensitivity %s)' % (total_changes, self.threshold, self.sensitivity))
-            self.handler.motion_detected()
-            self.last = datetime.now()
-
-
+            logger.debug('Model update complete...')
+            logger.debug('Analysis complete')
+            #self.last = datetime.now()
         except Exception:
             logger.exception("Exception calculating motion")
             return
+
+def get_filename(path, prefix, ext="jpg"):
+    now = datetime.now()
+    return "%s/%s%04d%02d%02d-%02d%02d%02d.%s" % ( path, prefix ,now.year, now.month, now.day, now.hour, now.minute, now.second, ext)
 
 class SADMotionDetector(picamera.array.PiMotionAnalysis):
     """

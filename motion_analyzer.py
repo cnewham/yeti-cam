@@ -120,6 +120,34 @@ def rgb_motion_detector_test():
             print("Closing camera")
             camera.close()
 
+def capture_sequence(frames=100):
+    framerate = 2
+    print("Initializing camera")
+    with picamera.PiCamera() as camera:
+        try:
+            camera.led = False
+            camera.resolution = (320,240)
+            camera.framerate = framerate
+            camera.vflip = False
+            camera.hflip = False
+            camera.awb_mode='horizon'
+            camera.exposure_mode='fixedfps'
+            camera.start_preview()
+            print("Capturing %s frames @ %s frames/sec..." % (frames, framerate))
+
+            camera.start_preview()
+            camera.capture_sequence([
+                '/home/chris/sequence/image%02d.jpg' % i
+                for i in range(frames)
+                ])
+            camera.stop_preview()
+
+        except Exception as ex:
+            print ex
+        finally:
+            print("Closing camera")
+            camera.close()
+
 def circular_buffer_test():
     seconds = 10
     print("Initializing camera")
@@ -168,4 +196,4 @@ def circular_buffer_test():
             camera.close()
 
 #start here
-rgb_motion_detector_test()
+capture_sequence()

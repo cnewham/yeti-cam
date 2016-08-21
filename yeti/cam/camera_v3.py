@@ -82,6 +82,7 @@ class YetiPiCamera:
         percent_change_max = config.get(constants.CONFIG_MOTION_PERCENT_CHANGE_MAX)
 
         self.camera.resolution = (1280, 720)
+        self.camera.framerate = 2
 
         self.camera.vflip = config.get(constants.CONFIG_IMAGE_VFLIP)
         self.camera.hflip = config.get(constants.CONFIG_IMAGE_HFLIP)
@@ -91,12 +92,12 @@ class YetiPiCamera:
 
         self.camera.led = False
 
-        analyzer = motion.RGBMotionDetector(self.camera, self.handler, sensitivity, threshold, percent_change_max = percent_change_max)
+        analyzer = motion.SimpleGaussMotionDetector(self.camera, self.handler, sensitivity, threshold, percent_change_max = percent_change_max)
 
-        self.camera.start_recording(self.buffer, format='h264', intra_period=24)
+        self.camera.start_recording(self.buffer, format='h264')
         self.camera.start_recording(analyzer, format='rgb', splitter_port=2, resize=(320,240))
 
-    def wait(self, seconds=1):
+    def wait(self, seconds=1.0):
         self.camera.wait_recording(seconds)
 
     def stop(self):
