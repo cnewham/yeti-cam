@@ -81,10 +81,8 @@ class ImageApi(Resource):
             args = self.parser.parse_args(request)
             upload = request.files['images']
             if upload and self.allowed_file(upload.filename):
-                filename = os.path.basename(upload.filename)
-                upload.save(os.path.join(db.get('UPLOAD_FOLDER'), "current.jpg"))
-                upload_processor.process_image(args["event"], filename)
-                return {}, 201
+                filename = upload_processor.process_image(args["event"], upload)
+                return {'filename' : filename}, 201
             else:
                 abort(400)
         except exceptions.HTTPException:
