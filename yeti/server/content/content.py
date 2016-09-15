@@ -1,12 +1,12 @@
 ﻿import os
 from yeti.server import drive
-from yeti.server import flask
+from yeti.server import app
 from flask import render_template, send_from_directory, url_for, request, redirect
 
 import logging
 logger = logging.getLogger(__name__)
 
-@flask.route('/')
+@app.route('/')
 def index():
     try:
         return render_template('viewer.html')
@@ -15,7 +15,7 @@ def index():
             print ex
             return 500
 
-@flask.route('/configure')
+@app.route('/configure')
 def configure():
     try:
         return render_template('configure.html')
@@ -24,7 +24,7 @@ def configure():
             print ex
             return 500
 
-@flask.route('/drive/auth')
+@app.route('/drive/auth')
 def google_drive_auth():
     auth = drive.Authorize(url_for('google_drive_auth', _external=True))
     code = request.args.get('code')
@@ -43,10 +43,10 @@ def google_drive_auth():
 
     return redirect(auth.start())
 
-@flask.route('/uploads/<path:filename>')
+@app.route('/uploads/<path:filename>')
 def upload_folder(filename):
     try:
-        return send_from_directory(os.path.join(os.path.dirname(flask.root_path), flask.config["UPLOAD_FOLDER"]), filename)
+        return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
     except Exception as ex:
         print type(ex)
         print ex

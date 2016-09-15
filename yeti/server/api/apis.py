@@ -3,8 +3,7 @@ from datetime import datetime, timedelta
 from flask_restful import Resource, abort, request, reqparse
 from flask import url_for, jsonify
 from werkzeug import exceptions
-import processors
-from yeti.server import db
+from yeti.server import db, processors
 from yeti.common import constants, config
 
 import logging
