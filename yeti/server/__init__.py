@@ -1,4 +1,4 @@
-﻿import pickledb, datetime
+﻿import pickledb, datetime, os
 from flask import Flask, redirect
 from flask_restful import Api
 from flask_jsglue import JSGlue
@@ -11,6 +11,12 @@ logger.info("Starting yeti-cam-server...")
 flask = Flask(__name__, static_folder='static', static_url_path='')
 api = Api(flask)
 jsglue = JSGlue(flask)
+
+if not os.path.exists("db"):
+    os.makedirs("db")
+
+if not os.path.exists("uploads"):
+    os.makedirs("uploads")
 
 db = pickledb.load('db/server.db', True)
 

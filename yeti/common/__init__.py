@@ -1,9 +1,13 @@
-__author__ = 'chris'
+﻿__author__ = 'chris'
+import os
 import logging
 import logging.handlers
 
 LOG_LEVEL = logging.DEBUG
 LOG_FILENAME = "logs/yeticam.log"
+
+if not os.path.exists("logs"):
+    os.makedirs("logs")
 
 #configure logging
 logging.basicConfig(level=LOG_LEVEL,
