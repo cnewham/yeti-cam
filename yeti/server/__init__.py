@@ -6,7 +6,7 @@ logger = logging.getLogger(__name__)
 
 logger.info("Starting yeti-cam-server...")
 
-app = Flask(__name__, static_folder='content/static', template_folder='content/templates')
+app = Flask(__name__, static_folder='www/static', template_folder='www/templates')
 
 # initialize default directories
 if not os.path.exists("db"):
@@ -45,6 +45,4 @@ if not db.get(constants.LAST_CAM_UPDATE):
 app.config['UPLOAD_FOLDER'] = db.get('UPLOAD_FOLDER')
 app.config['CAM_LOG_FOLDER'] = db.get('CAM_LOG_FOLDER')
 app.config['ALLOWED_EXTENSIONS'] = db.get('ALLOWED_EXTENSIONS')
-
-# start 
-import content, api
+app.config['SECRET_KEY'] = 'secret!'

@@ -1,3 +1,5 @@
+var socket = io.connect('http://' + document.domain + ':5001');
+
 function refresh() {
     updateImage();
     updateStatus();
@@ -50,4 +52,8 @@ $(function () {
     setInterval(function () {
         refresh();
     }, 10000);
+
+    socket.on('connect', function () {
+        socket.emit('test', { data: 'I\'m connected!' });
+    });
 });
