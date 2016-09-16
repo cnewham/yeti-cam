@@ -120,8 +120,7 @@ def rgb_motion_detector_test():
             print("Closing camera")
             camera.close()
 
-def capture_sequence(frames=100):
-    framerate = 2
+def capture_sequence(frames=100, framerate=2):
     print("Initializing camera")
     with picamera.PiCamera() as camera:
         try:
@@ -196,4 +195,4 @@ def circular_buffer_test():
             camera.close()
 
 #start here
-capture_sequence()
+capture_sequence(600, 10)

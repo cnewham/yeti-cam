@@ -1,25 +1,27 @@
 __author__ = 'chris'
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 import scipy.ndimage as spimg
 import numpy as np
 
-sensitivity = (66/255.0) ** 2 * 100
-threshold = (162/255.0) * 100
-alpha = (18/255.0) ** 3 #learning rate
+sensitivity = (100/255.0) ** 2 * 100
+threshold = (250/255.0) * 100
+alpha = (5/255.0) ** 3 #learning rate
 
 print sensitivity, threshold, alpha
 
-background = None
-variance = None
+fig = plt.figure()
+frame = np.array(spimg.imread("/home/chris/sequence2/image07.jpg"),dtype=np.float64)
+background = np.array(frame, dtype=np.float64)
+variance = np.full(frame.shape, threshold, dtype=np.float64)
+previous_foreground = 0.
 
-for i in range(4,100):
+output = plt.imshow(frame, cmap = plt.get_cmap('gray'), vmin = 0, vmax = 255)
 
-    frame = spimg.imread("/home/chris/sequence/image%02d.jpg" % i)
+def update(i):
+    global background, variance, previous_foreground
 
-    if background is None:
-        background = np.array(frame, dtype=np.float64)
-        variance = np.full(frame.shape, threshold, dtype=np.float64)
-        continue
+    frame = np.array(spimg.imread("/home/chris/sequence2/image%02d.jpg" % i),dtype=np.float64)
 
     delta = background - frame
 
@@ -30,9 +32,27 @@ for i in range(4,100):
 
     #Model update
     background += delta * alpha
-    variance += ((background - frame) ** 2 - variance) * alpha
-    np.clip(variance,0,threshold,out=variance)
+    variance += (delta ** 2 - variance) * alpha
+    np.clip(variance,threshold,255,out=variance)
 
-    plt.imshow(foreground, cmap='Greys_r')
-    print('Foreground Changed Pixels: %s' % np.count_nonzero(foreground))
-    plt.show()
+    # set the data in the axesimage object
+    output.set_array(foreground)
+    # return the artists set
+
+    foreground_pixels = np.count_nonzero(foreground)
+    if foreground_pixels > 0:
+        magnitude = abs(previous_foreground/foreground_pixels) * 100
+    else:
+        magnitude = 0
+
+    previous_foreground = foreground_pixels
+
+    #print('Foreground Changed Pixels: %s' % foreground_pixels)
+    print('Magnitude of Change: %s', magnitude)
+
+    return output,
+
+# kick off the animation
+ani = animation.FuncAnimation(fig, update, frames=range(7,599), interval=100)
+
+plt.show()
