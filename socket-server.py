@@ -1,5 +1,5 @@
 #!flask/bin/python
 from yeti.server import app
-from yeti.server import socketio
+from yeti.server.socketio import socketio
 
-app.run(host='0.0.0.0', port=5001)
+socketio.run(app, host='0.0.0.0', port=5001)

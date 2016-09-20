@@ -1,5 +1,3 @@
-var socket = io.connect('http://' + document.domain + ':5001');
-
 function refresh() {
     updateImage();
     updateStatus();
@@ -49,11 +47,19 @@ function updateStatus() {
 $(function () {
     refresh();
 
-    setInterval(function () {
-        refresh();
-    }, 10000);
+    socket.on('status_update', function (data) {
+        updateStatus();
+    });
+
+    socket.on('camera_capture', function (data) {
+        updateImage();
+    });
+
+    socket.on('camera_status', function (data) {
+        toggleOnlineStatus(data.connected)
+    });
 
     socket.on('connect', function () {
-        socket.emit('test', { data: 'I\'m connected!' });
+        console.log('Socket connected...')
     });
 });

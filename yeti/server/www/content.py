@@ -1,6 +1,6 @@
 ﻿import os
 from yeti.server import drive
-from yeti.server import app
+from yeti.server import app, db
 from flask import render_template, send_from_directory, url_for, request, redirect
 
 import logging

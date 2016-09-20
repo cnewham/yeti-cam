@@ -21,6 +21,9 @@ db = pickledb.load('db/server.db', True)
 if not db.get('SERVER_NAME'):
     db.set('SERVER_NAME', 'localhost:5000');
 
+if not db.get('SOCKET_PORT'):
+    db.set('SOCKET_PORT', 5001);
+
 if not db.get('UPLOAD_FOLDER'):
     db.set('UPLOAD_FOLDER', '/var/www/yeti-cam/uploads');
 
@@ -45,4 +48,5 @@ if not db.get(constants.LAST_CAM_UPDATE):
 app.config['UPLOAD_FOLDER'] = db.get('UPLOAD_FOLDER')
 app.config['CAM_LOG_FOLDER'] = db.get('CAM_LOG_FOLDER')
 app.config['ALLOWED_EXTENSIONS'] = db.get('ALLOWED_EXTENSIONS')
+app.config['SOCKET_PORT'] = db.get('SOCKET_PORT')
 app.config['SECRET_KEY'] = 'secret!'
