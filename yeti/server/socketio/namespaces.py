@@ -36,9 +36,11 @@ class Web(Namespace):
         logger.info("Web client disconnected")
         
     def on_config_update(self, data):
+        logger.info("config update requested: %s" % data)
         emit('config_update', data, namespace='/cam', broadcast=True)
         
-    def manual_capture(self, data):
+    def on_manual_capture(self, data):
+        logger.info("manual capture requested: %s" % data)
         emit('manual_capture', data, namespace='/cam', broadcast=True)
 
 
