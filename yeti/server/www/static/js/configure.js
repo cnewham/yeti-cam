@@ -72,6 +72,8 @@ function saveConfig(config) {
         complete: function() {
             getConfig();
             $("#config input[type=submit]").prop("disabled", false);
+
+            socket.emit("config_update", {})
         }
     });
 };
@@ -92,6 +94,10 @@ function isNumber(n) {
 };
 
 $(function () {
+    socket.on('connect', function () {
+        console.log('Socket connected...')
+    });
+
     getConfig();
 
     $("#config").submit(function (e) {

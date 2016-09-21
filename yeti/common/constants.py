@@ -52,6 +52,8 @@ CONFIG_MOTION_CAPTURE_THRESHOLD = 'motion_capture_threshold'
 CONFIG_MOTION_EVENT_CAPTURE_TYPE = 'motion_event_capture_type'
 CONFIG_MOTION_PERCENT_CHANGE_MAX = 'motion_percent_change_max'
 CONFIG_TIMER_INTERVAL_MIN = 'timer_interval'
+CONFIG_SOCKET_HOST = 'config_socket_host'
+CONFIG_SOCKET_PORT = 'config_socket_port'
 
 #SENSOR CONSTANTS
 

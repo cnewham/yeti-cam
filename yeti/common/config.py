@@ -16,6 +16,10 @@ if not db.get(constants.CONFIG_CHECK_INTERVAL_MIN):
     db.set(constants.CONFIG_CHECK_INTERVAL_MIN, 60)
 if not db.get(constants.CONFIG_SERVER):
     db.set(constants.CONFIG_SERVER, "http://localhost:5000/api/")
+if not db.get(constants.CONFIG_SOCKET_HOST):
+    db.set(constants.CONFIG_SOCKET_HOST, "localhost")
+if not db.get(constants.CONFIG_SOCKET_PORT):
+    db.set(constants.CONFIG_SOCKET_PORT, 5001)
 
 #image
 if not db.get(constants.CONFIG_IMAGE_DIR):

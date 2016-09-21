@@ -189,13 +189,13 @@ class CaptureHandler:
 
         return False
 
-    def request(self):
+    def request(self, event=constants.EVENT_TIMER, event_type=constants.EVENT_TYPE_IMAGE):
         logger.debug("Image capture requested")
         if self.working:
             logger.info("Cannot process capture request. Another request is still in progress")
             return False
 
-        self.event = constants.EVENT_TIMER, constants.EVENT_TYPE_IMAGE
+        self.event = event, event_type
         return True
 
     def start(self):

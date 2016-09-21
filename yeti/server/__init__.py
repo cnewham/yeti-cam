@@ -19,7 +19,7 @@ if not os.path.exists("uploads"):
 db = pickledb.load('db/server.db', True)
 
 if not db.get('SERVER_NAME'):
-    db.set('SERVER_NAME', 'localhost:5000');
+    db.set('SERVER_NAME', 'localhost');
 
 if not db.get('SOCKET_PORT'):
     db.set('SOCKET_PORT', 5001);
