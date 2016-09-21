@@ -1,4 +1,4 @@
-#!flask/bin/python
+﻿#!flask/bin/python
 from yeti.server import app
 from yeti.server.socketio import socketio
 
