@@ -14,12 +14,6 @@ class CamNamespace(BaseNamespace):
     def on_message(self, data):
         print 'data received: ' + data
 
-    def on_config_update(self, data):
-        print 'config update request: ' + data
-
-    def on_event(self, event, data):
-        print 'event %s, args :' % event + data
-
 
 class YetiSocket():
     def __init__(self, host='localhost', port=5001):
@@ -56,8 +50,8 @@ class YetiSocket():
 
 
 if __name__ == '__main__':
-    #socket = YetiSocket('107.22.53.182', 5001)
-    socket = YetiSocket()
+    socket = YetiSocket('107.22.53.182', 8080)
+    #socket = YetiSocket()
 
     time.sleep(30)
     socket.disconnect()

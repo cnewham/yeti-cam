@@ -13,3 +13,9 @@ socketio.on_namespace(namespaces.Web('/web'))
 @socketio.on_error_default  # handles all namespaces without an explicit error handler
 def default_error_handler(e):
     logger.exception('Socket error occurred')
+
+def send_event_web(event, data):
+    socketio.emit(event, data, namespace='/web', broadcast=True)
+
+def send_event_cam(event, data):
+    socketio.emit(event, data, namespace='/cam', broadcast=True)
