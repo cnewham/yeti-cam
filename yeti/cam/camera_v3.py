@@ -156,7 +156,7 @@ class CaptureHandler:
                 camera.start()
 
                 while not self.stopping:
-                    if self.event:
+                    if self.event and not self.working:
                         self.working = True
                         if self.event[1] == constants.EVENT_TYPE_IMAGE:
                             filename = camera.capture()

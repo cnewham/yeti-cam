@@ -1,14 +1,14 @@
 function refresh() {
     updateImage();
     updateStatus();
-};
+}
 
 function updateImage() {
 	current = Flask.url_for("upload_folder", {"filename": "current.jpg"});
 
 	newImage = $("#current");
 	newImage.attr("src", current + "?" + new Date().getTime());
-};
+}
 
 function toggleOnlineStatus(isOnline) {
     if (isOnline) {
@@ -18,6 +18,43 @@ function toggleOnlineStatus(isOnline) {
         $("#online-indicator").prop("hidden", true);
         $("#offline-indicator").prop("hidden", false);
     }
+}
+
+
+function toggleManualCapture(isEnabled) {
+    button = $("#manual-capture");
+    if (isEnabled) {
+        button.removeClass('camera-disabled').addClass('camera-enabled');
+
+        button.unbind('click');
+        button.click(function() {
+            socket.emit('manual_capture', {});
+            toggleManualCapture(false);
+        });
+    }
+    else {
+        button.removeClass('camera-enabled').addClass('camera-disabled');
+        button.unbind('click');
+    }
+}
+
+function showAlert(message, expire, color) {
+    if (message === undefined)
+        return;
+
+    if (color === undefined)
+        color = "alert-default";
+
+    alert = $("#alert-message");
+
+    alert.text(message);
+    alert.removeClass().addClass(color);
+
+    if (expire === undefined)
+        alert.show();
+    else
+        alert.show().delay(expire).fadeOut(400);
+
 }
 
 function updateStatus() {
@@ -31,18 +68,14 @@ function updateStatus() {
         success: function (result) {
     		status = "<table style='width:100%'>";
     		$.each(result, function (key, value) {
-    		    if (key == "online") {
-		            toggleOnlineStatus(value);
-		        } else {
-    		        status += "<tr><td>" + key + "</td><td>" + value + "</td></tr>";
-		        }
+                status += "<tr><td>" + key + "</td><td>" + value + "</td></tr>";
     		});
     		status += "</table>";
 
     		$("#status").html(status);
 		}
 	});
-};
+}
 
 $(function () {
     refresh();
@@ -55,11 +88,21 @@ $(function () {
         updateImage();
     });
 
+    socket.on('manual_capture_result', function (data){
+        if (data.result)
+            showAlert("Manual capture request successful", 5000, "alert-green");
+        else
+            showAlert("Manual capture request failed. Camera busy", 5000, "alert-amber");
+
+        toggleManualCapture(true);
+    });
+
     socket.on('camera_status', function (data) {
-        toggleOnlineStatus(data.connected)
+        toggleOnlineStatus(data.connected);
+        toggleManualCapture(data.connected);
     });
 
     socket.on('connect', function () {
-        console.log('Socket connected...')
+        console.log('Socket connected...');
     });
 });

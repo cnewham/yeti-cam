@@ -402,6 +402,10 @@ hr {
   color: darkgreen;
 }
 
+.alert-default {
+  color: #000000;
+}
+
 .indicator {
     display: inline-block;
     width: 16px;
@@ -411,20 +415,14 @@ hr {
     background-size: 100%;
 }
 
-.camera:disabled {
+.camera-disabled {
     cursor: default;
+    opacity: .5;
 }
 
-.camera:active {
-    background-color: darkred;
-}
-
-.camera:hover {
+.camera-enabled:hover {
     cursor: pointer;
-}
-
-.waiting {
-    background-color: darkred;
+    opacity: .5;
 }
 
 .image-container {
