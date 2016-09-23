@@ -1,4 +1,32 @@
-﻿function getConfig() {
+﻿function updateStatus(status) {
+    var statusText = $("#config_status");
+    var red = $("#indicator-red");
+    var yellow = $("#indicator-yellow");
+    var green = $("#indicator-green");
+
+    switch (status) {
+        case "MODIFIED":
+            yellow.prop("hidden", false);
+            red.prop("hidden", true);
+            green.prop("hidden", true);
+            statusText.text("Pending camera");
+            break;
+        case "UPDATED":
+            yellow.prop("hidden", true);
+            red.prop("hidden", true);
+            green.prop("hidden", false);
+            statusText.text("Camera updated");
+            break;
+        default:
+            yellow.prop("hidden", true);
+            red.prop("hidden", false);
+            green.prop("hidden", true);
+            statusText.text("Camera config status unavailable. Current server config version: " + result["version"]);
+            break;
+    }
+}
+
+function getConfig() {
     $.ajax({
         type: "GET",
         url: "api/config",
@@ -15,31 +43,7 @@
                 }
             });
 
-            var status = $("#config_status");
-            var red = $("#indicator-red");
-            var yellow = $("#indicator-yellow");
-            var green = $("#indicator-green");
-
-            switch (result["status"]) {
-                case "MODIFIED":
-                    yellow.prop("hidden", false);
-                    red.prop("hidden", true);
-                    green.prop("hidden", true);
-                    status.text("Pending camera");
-                    break;
-                case "UPDATED":
-                    yellow.prop("hidden", true);
-                    red.prop("hidden", true);
-                    green.prop("hidden", false);
-                    status.text("Camera updated");
-                    break;
-                default:
-                    yellow.prop("hidden", true);
-                    red.prop("hidden", false);
-                    green.prop("hidden", true);
-                    status.text("Camera config status unavailable. Current server config version: " + result["version"]);
-                    break;
-            }
+            updateStatus(result["status"])
             toggleMotionSettings(result["motion_enabled"]);
         }
     });
@@ -73,7 +77,7 @@ function saveConfig(config) {
             getConfig();
             $("#config input[type=submit]").prop("disabled", false);
 
-            socket.emit("config_update", {})
+            socket.emit("config_update", {"version":config["version"]})
         }
     });
 };
@@ -95,7 +99,11 @@ function isNumber(n) {
 
 $(function () {
     socket.on('connect', function () {
-        console.log('Socket connected...')
+        console.log('Socket connected...');
+    });
+
+    socket.on('config_updated', function(data) {
+        updateStatus(data.status);
     });
 
     getConfig();

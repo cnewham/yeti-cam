@@ -23,6 +23,12 @@ class Cam(Namespace):
         #TODO: Do stuff on the server when there's an alert
         emit('alert', data, namespace='/web', broadcast=True)
 
+    def on_config_updated(self, data):
+        emit('config_updated', data, namespace='/web', broadcast=True)
+
+    def on_manual_capture_result(self, data):
+        emit('manual_capture_result', data, namespace='/web', broadcast=True)
+
 class Web(Namespace):
     def on_connect(self):
         logger.info("Web client connected")

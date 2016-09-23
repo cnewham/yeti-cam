@@ -30,9 +30,9 @@ if not db.get(constants.CONFIG_IMAGE_WIDTH):
     db.set(constants.CONFIG_IMAGE_WIDTH, 1980)
 if not db.get(constants.CONFIG_IMAGE_HEIGHT):
     db.set(constants.CONFIG_IMAGE_HEIGHT, 1080)
-if not db.get(constants.CONFIG_IMAGE_VFLIP):
+if not db.get(constants.CONFIG_IMAGE_VFLIP) is None:
     db.set(constants.CONFIG_IMAGE_VFLIP, False)
-if not db.get(constants.CONFIG_IMAGE_HFLIP):
+if not db.get(constants.CONFIG_IMAGE_HFLIP is None):
     db.set(constants.CONFIG_IMAGE_HFLIP, False)
 if not db.get(constants.CONFIG_IMAGE_QUALITY):
     db.set(constants.CONFIG_IMAGE_QUALITY, 85)
@@ -42,7 +42,7 @@ if not db.get(constants.CONFIG_IMAGE_AWB_MODE):
     db.set(constants.CONFIG_IMAGE_AWB_MODE, "auto")
 
 #motion
-if not db.get(constants.CONFIG_MOTION_ENABLED):
+if db.get(constants.CONFIG_MOTION_ENABLED) is None:
     db.set(constants.CONFIG_MOTION_ENABLED, True)
 if not db.get(constants.CONFIG_MOTION_THRESHOLD):
     db.set(constants.CONFIG_MOTION_THRESHOLD, 10)

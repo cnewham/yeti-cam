@@ -52,12 +52,12 @@ def check_config_updates(*args):
 
             #restart capture to load the most recent configs
             capture.restart()
+            socket.config_updated(config.get_status())
+
     except ValueError:
         logger.exception("Could not parse response from server")
     except Exception as ex:
         logger.exception("Could not update configs from the server")
-
-    time.sleep(config.get(constants.CONFIG_CHECK_INTERVAL_MIN) * constants.SECONDS2MIN)
 
 def capture_timer_image():
     time.sleep(5) #Sleep for 5 seconds on startup then take the first picture
@@ -79,6 +79,8 @@ def capture_manual_image(*args):
     if not success:
         logger.info("Manual image was triggered but the camera was already in use")
 
+    socket.manual_capture_result(success)
+
 
 #Initialize
 capture = camera.CaptureHandler(send)
@@ -86,6 +88,9 @@ temp = sensors.Temperature()
 server = service.YetiService(config.get(constants.CONFIG_SERVER))
 socket = service.YetiSocket(config.get(constants.CONFIG_SOCKET_HOST), config.get(constants.CONFIG_SOCKET_PORT),
                             config_update_callback=check_config_updates, manual_capture_callback=capture_manual_image)
+
+#check for config updates from the server
+check_config_updates({"version":"current"})
 
 #start all threads and run until a stop signal is detected
 capture.start()

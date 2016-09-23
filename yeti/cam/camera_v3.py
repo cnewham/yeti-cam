@@ -21,6 +21,7 @@ class YetiPiCamera:
     def __init__(self, camera, handler):
         self.camera = camera
         self.handler = handler
+        self.motion_enabled = config.get(constants.CONFIG_MOTION_ENABLED)
         self.buffer = picamera.PiCameraCircularIO(camera, seconds=3)
         self.__lock__ = threading.Lock()
 
@@ -94,16 +95,23 @@ class YetiPiCamera:
 
         analyzer = motion.SimpleGaussMotionDetector(self.camera, self.handler, sensitivity, threshold, percent_change_max = percent_change_max)
 
-        self.camera.start_recording(self.buffer, format='h264')
-        self.camera.start_recording(analyzer, format='rgb', splitter_port=2, resize=(320,240))
+        if self.motion_enabled:
+            self.camera.start_recording(self.buffer, format='h264')
+            self.camera.start_recording(analyzer, format='rgb', splitter_port=2, resize=(320,240))
 
     def wait(self, seconds=1.0):
-        self.camera.wait_recording(seconds)
+        if self.motion_enabled:
+            self.camera.wait_recording(seconds)
+        else:
+            time.sleep(seconds)
+
 
     def stop(self):
         logger.info("Stopping capture")
-        self.camera.stop_recording(splitter_port=2)
-        self.camera.stop_recording()
+
+        if self.motion_enabled:
+            self.camera.stop_recording(splitter_port=2)
+            self.camera.stop_recording()
 
     def close(self):
         if not self.camera.closed:
