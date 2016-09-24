@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from flask_restful import Resource, abort, request, reqparse
 from flask import url_for, jsonify
 from werkzeug import exceptions
-from yeti.server import db, processors
+from yeti.server import db, processors, rabbitmq
 from yeti.common import constants, config
 
 import logging
@@ -43,6 +43,9 @@ class CaptureApi(Resource):
                     filename = upload_processor.process_video(args["event"], uploads)
                 else:
                     return {'error':'Unsupported capture type: %s' % uploads.content_type}, 400
+
+                with rabbitmq.EventHandler() as queue:
+                    queue.send("camera_capture", {"event":args["event"]})
 
                 return {'filename' : filename}, 201
             else:
@@ -144,6 +147,10 @@ class StatusApi(Resource):
         try:
             status = request.json
             status_processor.process(status)
+
+            with rabbitmq.EventHandler() as queue:
+                queue.send("status_update",status)
+
             return 201
         except exceptions.HTTPException:
             raise
@@ -158,16 +165,6 @@ class StatusApi(Resource):
         try:
             statuses = db.dgetall(constants.STATUS)
 
-            last_update = datetime.strptime(db.get(constants.LAST_CAM_UPDATE), "%Y-%m-%dT%H:%M:%S.%f")
-            interval = config.get(constants.CONFIG_TIMER_INTERVAL_MIN)
-            last_update_threshold = (interval + (interval * .5))
-            last_expected_update = datetime.now() - timedelta(minutes=last_update_threshold)
-            
-            if last_update > last_expected_update:
-                statuses['online'] = True
-            else:
-                statuses['online'] = False
-                                   
             return jsonify(statuses)
         except exceptions.HTTPException:
             raise

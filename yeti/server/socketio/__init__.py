@@ -1,6 +1,6 @@
-﻿from yeti.server import app
+﻿from yeti.server import app, rabbitmq
 import namespaces
-from flask_socketio import SocketIO, send
+from flask_socketio import SocketIO
 
 import logging
 logger = logging.getLogger(__name__)
@@ -19,3 +19,7 @@ def send_event_web(event, data):
 
 def send_event_cam(event, data):
     socketio.emit(event, data, namespace='/cam', broadcast=True)
+
+#start listening to messages from www server
+queue = rabbitmq.EventHandler()
+queue.receive(send_event_web)

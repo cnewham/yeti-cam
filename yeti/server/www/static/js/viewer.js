@@ -86,6 +86,7 @@ $(function () {
 
     socket.on('camera_capture', function (data) {
         updateImage();
+        toggleManualCapture(true);
     });
 
     socket.on('manual_capture_result', function (data){
@@ -93,8 +94,6 @@ $(function () {
             showAlert("Manual capture request successful", 5000, "alert-green");
         else
             showAlert("Manual capture request failed. Camera busy", 5000, "alert-amber");
-
-        toggleManualCapture(true);
     });
 
     socket.on('camera_status', function (data) {
