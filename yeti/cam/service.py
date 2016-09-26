@@ -1,4 +1,4 @@
-__author__ = 'chris'
+﻿__author__ = 'chris'
 import json
 import requests
 from yeti.common import config, constants
@@ -49,18 +49,22 @@ class YetiService:
 
 class YetiSocket:
     def __init__(self, host='localhost', port=5001, config_update_callback=None, manual_capture_callback=None):
-        self.io = SocketIO(host, port)
-        self.cam = self.io.define(LoggingNamespace, '/cam')
+        try:
+            self.io = SocketIO(host, port)
+            self.cam = self.io.define(LoggingNamespace, '/cam')
 
-        if config_update_callback:
-            self.cam.on('config_update', config_update_callback)
+            if config_update_callback:
+                self.cam.on('config_update', config_update_callback)
 
-        if manual_capture_callback:
-            self.cam.on('manual_capture', manual_capture_callback)
+            if manual_capture_callback:
+                self.cam.on('manual_capture', manual_capture_callback)
 
-        self._thread = threading.Thread(target=self.io.wait)
-        self._thread.daemon = True
-        self._thread.start()
+            self._thread = threading.Thread(target=self.io.wait)
+            self._thread.daemon = True
+            self._thread.start()
+        except:
+            logger.exception("Could not connect to socket")
+
 
     def alert(self, data):
         logger.info("Sending alert to server: %s" % data)
