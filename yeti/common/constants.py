@@ -58,6 +58,8 @@ CONFIG_SOCKET_PORT = 'config_socket_port'
 #SENSOR CONSTANTS
 
 SENSORS_TEMP = 'temp'
+SENSORS_MOTION = 'motion'
+SENSORS_SOUND = 'sound'
 SENSORS_READ_INTERVAL_SEC = 'read_interval_sec'
 
 #OTHER CONSTANTS
