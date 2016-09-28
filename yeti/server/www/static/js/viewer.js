@@ -48,12 +48,12 @@ function showAlert(message, expire, color) {
     alert = $("#alert-message");
 
     alert.text(message);
-    alert.removeClass().addClass(color);
+    alert.removeClass().addClass("alert").addClass(color);
 
     if (expire === undefined)
-        alert.show();
+        alert.fadeIn(200);
     else
-        alert.show().delay(expire).fadeOut(400);
+        alert.fadeIn(200).delay(expire).fadeOut(400);
 
 }
 

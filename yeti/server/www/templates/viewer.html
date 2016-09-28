@@ -42,7 +42,6 @@
     <div class="row" style="margin-top: 10%">
         <div class="twelve columns">
             <span style="font-size:2em">YETI CAM</span>
-            <span id="alert-message" style="margin-left: 5px;" class="alert-default" hidden></span>
             <span class="u-pull-right" style="padding-top:1em;" id="online-indicator" hidden>
                 <span class="indicator" style="content: url({{ url_for('static', filename='images/indicator-green.png') }});"></span>
                 <span>Online</span>
@@ -58,6 +57,7 @@
         <div class="image-container">
             <img id="current" src="{{ url_for('upload_folder', filename='current.jpg') }}" />
             <div id="manual-capture" class="after" style="content: url({{ url_for('static', filename='images/camera-icon.png') }});"></div>
+            <h6 id="alert-message" class="alert alert-default" hidden></h6>
         </div>
     </div>
     <div class="row">
