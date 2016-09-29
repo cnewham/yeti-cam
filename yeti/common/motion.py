@@ -6,6 +6,34 @@ from yeti.common import config, constants
 import logging
 logger = logging.getLogger(__name__)
 
+class MotionEvents:
+    def __init__(self):
+        self.motion_events = 0
+        self.last_motion_event = None
+
+    def enabled(self):
+        if not config.get(constants.CONFIG_MOTION_ENABLED):
+            return False #motion disabled in configuration
+
+        if self.last_motion_event is None or self.exceeds_motion_capture_delay():
+            self.motion_events = 1
+            self.last_motion_event = datetime.now()
+            return True #doesn't exceed motion capture delay
+        elif self.motion_events + 1 <= config.get(constants.CONFIG_MOTION_CAPTURE_THRESHOLD):
+            self.motion_events += 1
+            self.last_motion_event = datetime.now()
+            return True #still within motion capture threshold
+        else:
+            logger.warning("Motion capture threshold exceeded")
+            return False #exceeds motion capture threshold
+
+    def exceeds_motion_capture_delay(self):
+        if self.last_motion_event is not None:
+            delta_date = datetime.now() - timedelta(seconds=config.get(constants.CONFIG_MOTION_DELAY_SEC))
+            return delta_date > self.last_motion_event
+        else:
+            return True
+
 class MotionLog:
     def __init__(self):
         logger.info("Initializing MotionLog")

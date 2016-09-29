@@ -79,6 +79,8 @@ class StatusProcessor:
             else:
                 db.dadd(constants.STATUS, (key, value))
 
+        db.dump() #persist
+
 class LogProcessor:
     def __init__(self):
         logger.info("Initializing LogProcessor")

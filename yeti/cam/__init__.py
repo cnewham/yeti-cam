@@ -35,30 +35,29 @@ def send(filename, event, capture_type):
     except Exception:
         logger.exception("An error occurred while attempting to upload to server")
 
-def check_config_updates():
-    while True:
-        logger.info( "Checking for config updates")
-        try:
-            server_configs = server.get_config()
+def check_config_updates(*args):
+    logger.info( "Checking for config updates: %s" % args )
+    try:
+        server_configs = server.get_config()
 
-            if server_configs is None or server_configs[constants.CONFIG_VERSION] < config.get(constants.CONFIG_VERSION):
-                logger.info("Server config out of date, sending updated cam config")
-                server.send_config()
-            elif server_configs[constants.CONFIG_VERSION] > config.get(constants.CONFIG_VERSION):
-                logger.info("Cam config updating from server")
+        if server_configs is None or server_configs[constants.CONFIG_VERSION] < config.get(constants.CONFIG_VERSION):
+            logger.info("Server config out of date, sending updated cam config")
+            server.send_config()
+        elif server_configs[constants.CONFIG_VERSION] > config.get(constants.CONFIG_VERSION):
+            logger.info("Cam config updating from server")
 
-                config.update(server_configs)
-                config.set_status(constants.CONFIG_STATUS_UPDATED)
-                server.send_config_status(config.get_status())
+            config.update(server_configs)
+            config.set_status(constants.CONFIG_STATUS_UPDATED)
+            server.send_config_status(config.get_status())
 
-                #restart capture to load the most recent configs
-                capture.restart()
-        except ValueError:
-            logger.exception("Could not parse response from server")
-        except Exception as ex:
-            logger.exception("Could not update configs from the server")
-    
-        time.sleep(config.get(constants.CONFIG_CHECK_INTERVAL_MIN) * constants.SECONDS2MIN)
+            #restart capture to load the most recent configs
+            capture.restart()
+            socket.config_updated(config.get_status())
+
+    except ValueError:
+        logger.exception("Could not parse response from server")
+    except Exception as ex:
+        logger.exception("Could not update configs from the server")
 
 def capture_timer_image():
     time.sleep(5) #Sleep for 5 seconds on startup then take the first picture
@@ -72,17 +71,41 @@ def capture_timer_image():
 
         time.sleep(config.get(constants.CONFIG_TIMER_INTERVAL_MIN) * constants.SECONDS2MIN)
 
+def capture_manual_image(*args):
+    logger.info("Capturing manual image: %s" % args)
+
+    success = capture.request(event=constants.EVENT_MANUAL)
+
+    if not success:
+        logger.info("Manual image was triggered but the camera was already in use")
+
+    socket.manual_capture_result(success)
+
+def capture_motion_image(detected):
+    logger.info("Motion sensor change: %s" % detected)
+
+    if detected:
+        success = capture.motion_detected()
+    else:
+        return
+
+    if not success:
+        logger.info("Manual image was triggered but the camera was already in use")
+
+
 #Initialize
 capture = camera.CaptureHandler(send)
 temp = sensors.Temperature()
+motion = sensors.Motion(capture_motion_image)
 server = service.YetiService(config.get(constants.CONFIG_SERVER))
+socket = service.YetiSocket(config.get(constants.CONFIG_SOCKET_HOST), config.get(constants.CONFIG_SOCKET_PORT),
+                            config_update_callback=check_config_updates, manual_capture_callback=capture_manual_image)
+
+#check for config updates from the server
+check_config_updates({"version":"current"})
 
 #start all threads and run until a stop signal is detected
 capture.start()
-
-config_update_thread = threading.Thread(target=check_config_updates)
-config_update_thread.daemon = True
-config_update_thread.start()
 
 timer_capture_thread = threading.Thread(target=capture_timer_image)
 timer_capture_thread.daemon = True

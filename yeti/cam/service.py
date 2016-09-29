@@ -1,8 +1,9 @@
-__author__ = 'chris'
+﻿__author__ = 'chris'
 import json
 import requests
 from yeti.common import config, constants
-
+import threading, time
+from socketIO_client import SocketIO, BaseNamespace, LoggingNamespace
 
 import logging
 logger = logging.getLogger(__name__)
@@ -45,3 +46,46 @@ class YetiService:
         logger.info("Updating server config status")
         r = requests.patch(self.baseUrl + "config", json={'status': status})
         logger.info("StatusCode: %s, Text: %s" % (r.status_code, r.text))
+
+class YetiSocket:
+    def __init__(self, host='localhost', port=5001, config_update_callback=None, manual_capture_callback=None):
+        try:
+            self.io = SocketIO(host, port)
+            self.cam = self.io.define(LoggingNamespace, '/cam')
+
+            if config_update_callback:
+                self.cam.on('config_update', config_update_callback)
+
+            if manual_capture_callback:
+                self.cam.on('manual_capture', manual_capture_callback)
+
+            self._thread = threading.Thread(target=self.io.wait)
+            self._thread.daemon = True
+            self._thread.start()
+        except:
+            logger.exception("Could not connect to socket")
+
+
+    def alert(self, data):
+        logger.info("Sending alert to server: %s" % data)
+        self.cam.emit("alert", data)
+
+    def config_updated(self, status):
+        logger.info("Sending config updated result: %s" % status)
+        self.cam.emit("config_updated", {"status":status})
+
+    def manual_capture_result(self, result):
+        logger.info("Sending manual capture result: %s" % result)
+        self.cam.emit("manual_capture_result", {"result":result})
+
+    def connect(self):
+        self.cam.connect()
+
+    def disconnect(self):
+        self.cam.disconnect()
+        self.io.disconnect()
+
+    def __enter__(self):
+        return self
+    def __exit__(self, exc_type, exc_value, exc_tb):
+        self.disconnect()

@@ -1,28 +1,28 @@
 ﻿import pickledb, datetime, os
-from flask import Flask, redirect
-from flask_restful import Api
-from flask_jsglue import JSGlue
+from flask import Flask
 from yeti.common import constants
 import logging
 logger = logging.getLogger(__name__)
 
 logger.info("Starting yeti-cam-server...")
 
-flask = Flask(__name__, static_folder='static', static_url_path='')
-api = Api(flask)
-jsglue = JSGlue(flask)
+app = Flask(__name__, static_folder='www/static', template_folder='www/templates')
 
+# initialize default directories
 if not os.path.exists("db"):
     os.makedirs("db")
 
 if not os.path.exists("uploads"):
     os.makedirs("uploads")
 
+# initialize configuration
 db = pickledb.load('db/server.db', True)
 
-# set default configuration
 if not db.get('SERVER_NAME'):
-    db.set('SERVER_NAME', 'localhost:5000');
+    db.set('SERVER_NAME', 'localhost');
+
+if not db.get('SOCKET_PORT'):
+    db.set('SOCKET_PORT', 5001);
 
 if not db.get('UPLOAD_FOLDER'):
     db.set('UPLOAD_FOLDER', '/var/www/yeti-cam/uploads');
@@ -45,17 +45,8 @@ if not db.get(constants.STATUS):
 if not db.get(constants.LAST_CAM_UPDATE):
     db.set(constants.LAST_CAM_UPDATE, datetime.datetime.now().isoformat())
 
-#Load content
-from yeti.server import apis, content
-
-flask.config['UPLOAD_FOLDER'] = db.get('UPLOAD_FOLDER')
-flask.config['CAM_LOG_FOLDER'] = db.get('CAM_LOG_FOLDER')
-flask.config['ALLOWED_EXTENSIONS'] = db.get('ALLOWED_EXTENSIONS')
-#flask.config['SERVER_NAME'] = db.get('SERVER_NAME')
-
-api.add_resource(apis.CaptureApi, '/api/capture')
-api.add_resource(apis.ImageApi, '/api/image') #Depreciated
-api.add_resource(apis.ConfigApi, '/api/config')
-api.add_resource(apis.StatusApi, '/api/status')
-api.add_resource(apis.LogApi, '/api/log')
-
+app.config['UPLOAD_FOLDER'] = db.get('UPLOAD_FOLDER')
+app.config['CAM_LOG_FOLDER'] = db.get('CAM_LOG_FOLDER')
+app.config['ALLOWED_EXTENSIONS'] = db.get('ALLOWED_EXTENSIONS')
+app.config['SOCKET_PORT'] = db.get('SOCKET_PORT')
+app.config['SECRET_KEY'] = 'secret!'

@@ -18,9 +18,10 @@ class YetiPiCamera:
     capture() - captures an image to a file. returns filename
     record(seconds) - records the current stream with an additional n seconds to a file. returns filename
     """
-    def __init__(self, camera, handler):
+    def __init__(self, camera, handler, motion_enabled=False):
         self.camera = camera
         self.handler = handler
+        self.motion_enabled = motion_enabled
         self.buffer = picamera.PiCameraCircularIO(camera, seconds=3)
         self.__lock__ = threading.Lock()
 
@@ -81,7 +82,7 @@ class YetiPiCamera:
         threshold = config.get(constants.CONFIG_MOTION_THRESHOLD)
         percent_change_max = config.get(constants.CONFIG_MOTION_PERCENT_CHANGE_MAX)
 
-        self.camera.resolution = (1280, 720)
+        self.camera.resolution = (config.get(constants.CONFIG_IMAGE_WIDTH),config.get(constants.CONFIG_IMAGE_HEIGHT))
         self.camera.framerate = 2
 
         self.camera.vflip = config.get(constants.CONFIG_IMAGE_VFLIP)
@@ -92,18 +93,24 @@ class YetiPiCamera:
 
         self.camera.led = False
 
-        analyzer = motion.SimpleGaussMotionDetector(self.camera, self.handler, sensitivity, threshold, percent_change_max = percent_change_max)
-
-        self.camera.start_recording(self.buffer, format='h264')
-        self.camera.start_recording(analyzer, format='rgb', splitter_port=2, resize=(320,240))
+        if self.motion_enabled:
+            analyzer = motion.SimpleGaussMotionDetector(self.camera, self.handler, sensitivity, threshold, percent_change_max = percent_change_max)
+            self.camera.start_recording(self.buffer, format='h264')
+            self.camera.start_recording(analyzer, format='rgb', splitter_port=2, resize=(320,240))
 
     def wait(self, seconds=1.0):
-        self.camera.wait_recording(seconds)
+        if self.motion_enabled:
+            self.camera.wait_recording(seconds)
+        else:
+            time.sleep(seconds)
+
 
     def stop(self):
         logger.info("Stopping capture")
-        self.camera.stop_recording(splitter_port=2)
-        self.camera.stop_recording()
+
+        if self.motion_enabled:
+            self.camera.stop_recording(splitter_port=2)
+            self.camera.stop_recording()
 
     def close(self):
         if not self.camera.closed:
@@ -130,7 +137,6 @@ class CaptureHandler:
         self.running = False
         self.working = False
         self.callback = callback
-        self.motion = motion.MotionEvents()
         self.t = None
 
     def _worker(self):
@@ -143,12 +149,12 @@ class CaptureHandler:
         self.running = True
         self.stopping = False
 
-        with YetiPiCamera(picamera.PiCamera(), self) as camera:
+        with YetiPiCamera(picamera.PiCamera(), self, config.get(constants.CONFIG_MOTION_ENABLED)) as camera:
             try:
                 camera.start()
 
                 while not self.stopping:
-                    if self.event:
+                    if self.event and not self.working:
                         self.working = True
                         if self.event[1] == constants.EVENT_TYPE_IMAGE:
                             filename = camera.capture()
@@ -183,19 +189,16 @@ class CaptureHandler:
             logger.info("Cannot process motion request. Another request is still in progress")
             return False
 
-        if self.motion.enabled():
-            self.event = constants.EVENT_MOTION, config.get(constants.CONFIG_MOTION_EVENT_CAPTURE_TYPE)
-            return True
+        self.event = constants.EVENT_MOTION, config.get(constants.CONFIG_MOTION_EVENT_CAPTURE_TYPE)
+        return True
 
-        return False
-
-    def request(self):
+    def request(self, event=constants.EVENT_TIMER, event_type=constants.EVENT_TYPE_IMAGE):
         logger.debug("Image capture requested")
         if self.working:
             logger.info("Cannot process capture request. Another request is still in progress")
             return False
 
-        self.event = constants.EVENT_TIMER, constants.EVENT_TYPE_IMAGE
+        self.event = event, event_type
         return True
 
     def start(self):
@@ -214,6 +217,9 @@ class CaptureHandler:
         self.start()
 
 def get_filename(path, prefix, ext="jpg"):
+    if not os.path.exists(path):
+        os.makedirs(path)
+
     now = datetime.now()
     return "%s/%s%04d%02d%02d-%02d%02d%02d.%s" % ( path, prefix ,now.year, now.month, now.day, now.hour, now.minute, now.second, ext)
 
