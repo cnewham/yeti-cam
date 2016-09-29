@@ -87,6 +87,7 @@ def get_status():
 
 def set_status(status):
     db.set(constants.CONFIG_STATUS, status)
+    db.dump()
 
 def update(configs):
     logger.info("Updating configs")
@@ -99,5 +100,7 @@ def update(configs):
 
     for key, value in configs.iteritems():
         db.set(key, value)
+
+    db.dump()
 
 
