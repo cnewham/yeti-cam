@@ -81,10 +81,22 @@ def capture_manual_image(*args):
 
     socket.manual_capture_result(success)
 
+def capture_motion_image(detected):
+    logger.info("Motion sensor change: %s" % detected)
+
+    if detected:
+        success = capture.motion_detected()
+    else:
+        return
+
+    if not success:
+        logger.info("Manual image was triggered but the camera was already in use")
+
 
 #Initialize
 capture = camera.CaptureHandler(send)
 temp = sensors.Temperature()
+motion = sensors.Motion(capture_motion_image)
 server = service.YetiService(config.get(constants.CONFIG_SERVER))
 socket = service.YetiSocket(config.get(constants.CONFIG_SOCKET_HOST), config.get(constants.CONFIG_SOCKET_PORT),
                             config_update_callback=check_config_updates, manual_capture_callback=capture_manual_image)
