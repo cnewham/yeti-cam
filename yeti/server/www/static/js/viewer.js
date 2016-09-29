@@ -38,6 +38,12 @@ function toggleManualCapture(isEnabled) {
     }
 }
 
+var alerts = {
+    red: "alert-red",
+    green: "alert-green",
+    amber: "alert-amber"
+}
+
 function showAlert(message, expire, color) {
     if (message === undefined)
         return;
@@ -91,9 +97,9 @@ $(function () {
 
     socket.on('manual_capture_result', function (data){
         if (data.result)
-            showAlert("Manual capture request successful", 5000, "alert-green");
+            showAlert("Manual capture request successful", 5000, alerts.green);
         else
-            showAlert("Manual capture request failed. Camera busy", 5000, "alert-amber");
+            showAlert("Manual capture request failed. Camera busy", 5000, alerts.amber);
     });
 
     socket.on('camera_status', function (data) {

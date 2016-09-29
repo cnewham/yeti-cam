@@ -36,7 +36,7 @@ class GpioInputEvent(object):
         if not channels:
             return
 
-        self.channels = channels
+        self.channels = channels or []
 
         GPIO.setup(channels, GPIO.IN)
 
@@ -61,14 +61,26 @@ class Motion(GpioInputEvent):
     def __init__(self, callback):
         super(Motion, self).__init__(db.lgetall(constants.SENSORS_MOTION))
         self.callback = callback
+        self.motion_detected = {}
 
     def activated(self, channel):
         logger.debug("Motion Channel %s has been activated" % channel)
-        self.callback(True)
+
+        if any(self.motion_detected.values()):
+            self.motion_detected[channel] = True
+            return
+        else: 
+            self.motion_detected[channel] = True
+            self.callback(True) #send callback the first time a channel starts detecting motion
 
     def deactivated(self, channel):
         logger.debug("Motion Channel %s has been deactivated" % channel)
-        self.callback(False)
+
+        self.motion_detected[channel] = False
+
+        if not any(self.motion_detected.values()): 
+            self.callback(False) #send callback after the last channel stops detecting motion
+
 
 class Temperature:
     readings = {}
