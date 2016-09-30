@@ -149,7 +149,7 @@ class CaptureHandler:
         self.running = True
         self.stopping = False
 
-        with YetiPiCamera(picamera.PiCamera(), self, config.get(constants.CONFIG_MOTION_ENABLED)) as camera:
+        with YetiPiCamera(picamera.PiCamera(), self) as camera:
             try:
                 camera.start()
 

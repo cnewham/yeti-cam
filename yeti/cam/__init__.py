@@ -1,11 +1,16 @@
 ﻿__author__ = 'chris'
-import threading, time, os, sys, signal
+import threading
+import time
+import os
+import sys
+import signal
+import logging
 from datetime import datetime
 from yeti.common import constants, config
 from yeti.cam import service, sensors
 import camera_v3 as camera
+import motion
 
-import logging
 logger = logging.getLogger(__name__)
 
 logger.info("Starting yeticam")
@@ -84,7 +89,7 @@ def capture_manual_image(*args):
 def capture_motion_image(detected):
     logger.info("Motion sensor change: %s" % detected)
 
-    if detected:
+    if detected and motion_events.enabled():
         success = capture.motion_detected()
     else:
         return
@@ -94,9 +99,11 @@ def capture_motion_image(detected):
 
 
 #Initialize
+motion_events = motion.MotionEvents()
+motion_sensors = sensors.Motion(capture_motion_image)
+
 capture = camera.CaptureHandler(send)
 temp = sensors.Temperature()
-motion = sensors.Motion(capture_motion_image)
 server = service.YetiService(config.get(constants.CONFIG_SERVER))
 socket = service.YetiSocket(config.get(constants.CONFIG_SOCKET_HOST), config.get(constants.CONFIG_SOCKET_PORT),
                             config_update_callback=check_config_updates, manual_capture_callback=capture_manual_image)

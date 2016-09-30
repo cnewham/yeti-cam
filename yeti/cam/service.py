@@ -49,7 +49,12 @@ class YetiService:
 
 class YetiSocket:
     def __init__(self, host='localhost', port=5001, config_update_callback=None, manual_capture_callback=None):
-        try:
+            self._thread = threading.Thread(target=self._worker, args=(host, port, config_update_callback, manual_capture_callback))
+            self._thread.daemon = True
+            self._thread.start()
+
+
+    def _worker(self, host, port, config_update_callback, manual_capture_callback):
             self.io = SocketIO(host, port)
             self.cam = self.io.define(LoggingNamespace, '/cam')
 
@@ -59,12 +64,7 @@ class YetiSocket:
             if manual_capture_callback:
                 self.cam.on('manual_capture', manual_capture_callback)
 
-            self._thread = threading.Thread(target=self.io.wait)
-            self._thread.daemon = True
-            self._thread.start()
-        except:
-            logger.exception("Could not connect to socket")
-
+            self.io.wait()
 
     def alert(self, data):
         logger.info("Sending alert to server: %s" % data)

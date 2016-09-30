@@ -1,9 +1,12 @@
 ﻿__author__ = 'chris'
-import os, shutil, datetime
-from yeti.common import constants, motion
-from yeti.server import db, drive
-
+import os
+import shutil
 import logging
+
+import datetime
+from yeti.common import constants
+from yeti.server import db, drive, motion
+
 logger = logging.getLogger(__name__)
 
 motion_log = motion.MotionLog()

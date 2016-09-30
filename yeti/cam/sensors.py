@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 try:
     import RPi.GPIO as GPIO
-    GPIO.setmode(GPIO.BOARD)
+    GPIO.setmode(GPIO.BCM)
     GPIO.setwarnings(False)
 except RuntimeError:
     logger.exception("Error importing RPi.GPIO!  This is probably because you need superuser privileges.  You can achieve this by using 'sudo' to run your script")
@@ -18,14 +18,15 @@ db = pickledb.load('db/sensors.db', True)
 
 if not db.get(constants.SENSORS_TEMP):
     #default temp sensor locations
+    logger.debug("adding default temp sensor config")
     db.dcreate(constants.SENSORS_TEMP)
     db.dadd(constants.SENSORS_TEMP, (constants.STATUS_INDOOR_TEMP, 4)) #{name : gpio}
     db.dadd(constants.SENSORS_TEMP, (constants.STATUS_OUTDOOR_TEMP, 17)) #{name : gpio}
 
 if not db.get(constants.SENSORS_MOTION):
     #default motion sensor locations
+    logger.debug("adding default motion sensor config")
     db.lcreate(constants.SENSORS_MOTION)
-    db.ladd(constants.SENSORS_MOTION, 19)
 
 if not db.get(constants.SENSORS_READ_INTERVAL_SEC):
     db.set(constants.SENSORS_READ_INTERVAL_SEC, 30)
@@ -38,11 +39,18 @@ class GpioInputEvent(object):
 
         self.channels = channels or []
 
-        GPIO.setup(channels, GPIO.IN)
+        logger.debug("channels: %s" % self.channels)
+        GPIO.setup(channels, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
         for channel in channels:
-            GPIO.add_event_detect(channel, GPIO.RISING, callback=self.activated, bouncetime=200)
-            GPIO.add_event_detect(channel, GPIO.FALLING, callback=self.deactivated, bouncetime=200)
+            logger.debug("adding event handler for channel %s" % channel)
+            GPIO.add_event_detect(channel, GPIO.BOTH, callback=self._callback, bouncetime=200)
+
+    def _callback(self, channel):
+        if GPIO.input(channel):
+            self.activated(channel)
+        else:
+            self.deactivated(channel)
 
     def activated(self, channel):
         #overridable: called when a channel goes active
@@ -51,10 +59,11 @@ class GpioInputEvent(object):
     def deactivated(self, channel):
         #overridable: called when a channel goes inactive
         pass
-                
+
     def __enter__(self):
         return self
     def __exit__(self, exc_type, exc_value, exc_tb):
+        logger.debug("Cleaning up channels")
         GPIO.cleanup(self.channels)
 
 class Motion(GpioInputEvent):
@@ -69,18 +78,19 @@ class Motion(GpioInputEvent):
         if any(self.motion_detected.values()):
             self.motion_detected[channel] = True
             return
-        else: 
+        else:
             self.motion_detected[channel] = True
-            self.callback(True) #send callback the first time a channel starts detecting motion
+            if self.callback:
+                self.callback(True) #send callback the first time a channel starts detecting motion
 
     def deactivated(self, channel):
         logger.debug("Motion Channel %s has been deactivated" % channel)
 
         self.motion_detected[channel] = False
 
-        if not any(self.motion_detected.values()): 
-            self.callback(False) #send callback after the last channel stops detecting motion
-
+        if not any(self.motion_detected.values()):
+            if self.callback:
+                self.callback(False) #send callback after the last channel stops detecting motion
 
 class Temperature:
     readings = {}
