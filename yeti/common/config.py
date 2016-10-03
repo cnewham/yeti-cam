@@ -30,9 +30,9 @@ if not db.get(constants.CONFIG_IMAGE_WIDTH):
     db.set(constants.CONFIG_IMAGE_WIDTH, 1980)
 if not db.get(constants.CONFIG_IMAGE_HEIGHT):
     db.set(constants.CONFIG_IMAGE_HEIGHT, 1080)
-if not db.get(constants.CONFIG_IMAGE_VFLIP) is None:
+if db.get(constants.CONFIG_IMAGE_VFLIP) is None:
     db.set(constants.CONFIG_IMAGE_VFLIP, False)
-if not db.get(constants.CONFIG_IMAGE_HFLIP is None):
+if db.get(constants.CONFIG_IMAGE_HFLIP is None):
     db.set(constants.CONFIG_IMAGE_HFLIP, False)
 if not db.get(constants.CONFIG_IMAGE_QUALITY):
     db.set(constants.CONFIG_IMAGE_QUALITY, 85)
