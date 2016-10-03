@@ -16,9 +16,8 @@ class Authorize:
         self.flow = client.flow_from_clientsecrets(
             'client_secret.json',
             scope='https://www.googleapis.com/auth/drive',
-            redirect_uri=callback,
-            include_granted_scopes=True,
-            access_type='offline')
+            redirect_uri=callback)
+        self.flow.params['access_type'] = 'offline'
 
     def start(self):
         return self.flow.step1_get_authorize_url()
