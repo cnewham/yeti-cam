@@ -1,6 +1,7 @@
 ﻿__author__ = 'chris'
 import pickledb
 from datetime import datetime, timedelta
+import yeti
 from yeti.common import constants
 
 import logging
@@ -9,7 +10,7 @@ logger = logging.getLogger(__name__)
 class MotionLog:
     def __init__(self):
         logger.info("Initializing MotionLog")
-        self.db = pickledb.load('db/motion.db', True)
+        self.db = pickledb.load(yeti.getcamdir('db') + '/motion.db', True)
 
         if not self.db.get(constants.MOTION_LOG):
             self.db.lcreate(constants.MOTION_LOG)

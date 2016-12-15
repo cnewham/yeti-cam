@@ -1,13 +1,12 @@
 ﻿__author__ = 'chris'
 import os
+import yeti
 import logging
 import logging.handlers
 
+LOG_DIR = yeti.getcamdir('logs')
 LOG_LEVEL = logging.DEBUG
-LOG_FILENAME = "logs/yeticam.log"
-
-if not os.path.exists("logs"):
-    os.makedirs("logs")
+LOG_FILENAME = "%s/yeticam.log" % LOG_DIR
 
 #configure logging
 logging.basicConfig(level=LOG_LEVEL,

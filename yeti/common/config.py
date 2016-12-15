@@ -1,11 +1,12 @@
 ﻿__author__ = 'chris'
 import pickledb
 import json
+import yeti
 from yeti.common import constants
 import logging
 logger = logging.getLogger(__name__)
 
-db = pickledb.load('db/config.db', True)
+db = pickledb.load(yeti.getcamdir('db') + '/config.db', True)
 
 #server/config
 if not db.get(constants.CONFIG_VERSION):
