@@ -6,7 +6,7 @@ from yeti.common import constants
 import logging
 logger = logging.getLogger(__name__)
 
-db = pickledb.load(yeti.getcamdir('db') + '/config.db', True)
+db = pickledb.load(yeti.createcamdir('db') + '/config.db', True)
 
 #server/config
 if not db.get(constants.CONFIG_VERSION):
@@ -65,9 +65,9 @@ if not db.get(constants.CONFIG_TIMER_INTERVAL_MIN):
     db.set(constants.CONFIG_TIMER_INTERVAL_MIN, 30)
 
 
-def get(key = None):
+def get(key=None, name=None):
     if key is None:
-        with open('db/config.db', 'r') as configdb:
+        with open('%s/db/config.db' % yeti.getcamdir(name), 'r') as configdb:
             configs = configdb.read()
 
         return json.loads(configs)

@@ -2,28 +2,33 @@
 import os
 import shutil
 import logging
-
+import yeti
+import pickledb
 import datetime
 from yeti.common import constants
-from yeti.server import db, drive, motion
+from yeti.server import drive, motion
 
 logger = logging.getLogger(__name__)
 
 motion_log = motion.MotionLog()
 
+
 class UploadProcessor:
     def __init__(self):
         logger.info("Initializing UploadProcessor")
 
-    def process_image(self, event, upload):
+    def process_image(self, event, upload, name=None):
         filename = None
 
         try:
+            uploaddir = '%s/uploads' % yeti.getcamdir(name)
+            db = pickledb.load('%s/db/server.db' % yeti.getcamdir(name), True)
+
             filename = "%s-%s" % (event,  os.path.basename(upload.filename))
             logger.info("Processing %s event for image %s" % (event, filename))
-            capture = os.path.join(db.get('UPLOAD_FOLDER'), filename)
+            capture = os.path.join(uploaddir, filename)
             upload.save(capture)
-            shutil.copy(capture, os.path.join(db.get('UPLOAD_FOLDER'),"current.jpg"))
+            shutil.copy(capture, os.path.join(uploaddir, "current.jpg"))
 
             if db.get(constants.ENABLE_GDRIVE):
                 drive.upload(capture, event, db.get(constants.GDRIVE_FOLDER))
@@ -36,13 +41,16 @@ class UploadProcessor:
 
         return filename
 
-    def process_video(self, event, upload):
+    def process_video(self, event, upload, name=None):
         filename = None
 
         try:
-            filename = "%s-%s" % (event,  os.path.basename(upload.filename))
+            uploaddir = '%s/uploads' % yeti.getcamdir(name)
+            db = pickledb.load('%s/db/server.db' % yeti.getcamdir(name), True)
+
+            filename = "%s-%s" % (event, os.path.basename(upload.filename))
             logger.info("Processing %s event for video %s" % (event, filename))
-            recording = os.path.join(db.get('UPLOAD_FOLDER'), filename)
+            recording = os.path.join(uploaddir, filename)
             upload.save(recording)
 
             if db.get(constants.ENABLE_GDRIVE):
@@ -57,12 +65,16 @@ class UploadProcessor:
 
         return filename
 
+
 class StatusProcessor:
     def __init__(self):
         logger.info("Initializing StatusProcessor")
 
-    def process(self, status):
+    def process(self, status, name=None):
         logger.info("Processing status %s" % status)
+
+        db = pickledb.load('%s/db/server.db' % yeti.getcamdir(name), True)
+
         db.drem(constants.STATUS)
         db.dcreate(constants.STATUS)
 
@@ -83,11 +95,3 @@ class StatusProcessor:
                 db.dadd(constants.STATUS, (key, value))
 
         db.dump() #persist
-
-class LogProcessor:
-    def __init__(self):
-        logger.info("Initializing LogProcessor")
-
-    def process(self, logfile):
-        logger.info("Processing logfile %s" % logfile)
-        #TODO: implement log file processor

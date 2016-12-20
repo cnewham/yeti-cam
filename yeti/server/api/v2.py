@@ -1,9 +1,11 @@
 ﻿import os
 from datetime import datetime, timedelta
+import pickledb
 from flask_restful import Resource, abort, request, reqparse
 from flask import url_for, jsonify
 from werkzeug import exceptions
-from yeti.server import db, processors, rabbitmq
+import yeti
+from yeti.server import processors, rabbitmq, app
 from yeti.common import constants, config
 
 import logging
@@ -12,39 +14,46 @@ logger = logging.getLogger(__name__)
 upload_processor = processors.UploadProcessor()
 status_processor = processors.StatusProcessor()
 
+
 class CaptureApi(Resource):
     def __init__(self):
         self.parser = reqparse.RequestParser()
-        self.parser.add_argument(constants.STATUS_CAM, type=str, required=False)
         self.parser.add_argument("event", type=str, required=True, location="form")
 
-    def get(self):
+    def get(self, name=None):
         try:
-            args = self.parser.parse_args()
-            if args and args[constants.STATUS_CAM]:
-                current = args.get(constants.STATUS_CAM) + "-current.jpg"
+            if name and not yeti.camdirexists(name):
+                return {'error': '\"%s\" cam does not exist' % name}, 404
+
+            response = []
+            if not name:
+                for cam in yeti.getnames():
+                    response.append({"name": cam, "url": url_for("upload_folder", name=cam, filename="current.jpg")})
             else:
-                current = "current.jpg"
-            return url_for("upload_folder", filename=current)
+                response.append({"name": name, "url": url_for("upload_folder", name=name, filename="current.jpg")})
+
+            return response
         except Exception as ex:
             logger.exception("An error occurred while attempting to send image")
             abort(400)
 
-    def post(self):
+    def post(self, name=yeti.options.name):
         try:
+            logger.debug("Name: " + name)
+
             args = self.parser.parse_args(request)
             uploads = request.files['uploads']
 
             if uploads and self.allowed_file(uploads.filename):
                 if uploads.content_type in ("image/jpg","image/jpeg"):
-                    filename = upload_processor.process_image(args["event"], uploads)
+                    filename = upload_processor.process_image(args["event"], uploads, name)
                 elif uploads.content_type == "video/h264":
-                    filename = upload_processor.process_video(args["event"], uploads)
+                    filename = upload_processor.process_video(args["event"], uploads, name)
                 else:
                     return {'error':'Unsupported capture type: %s' % uploads.content_type}, 400
 
                 with rabbitmq.EventHandler() as queue:
-                    queue.send("camera_capture", {"event":args["event"]})
+                    queue.send("camera_capture", {"event":args["event"], "name":name})
 
                 return {'filename' : filename}, 201
             else:
@@ -56,48 +65,35 @@ class CaptureApi(Resource):
             abort(500)
 
     def allowed_file(self,filename):
-        return '.' in filename and filename.rsplit('.', 1)[1] in db.get('ALLOWED_EXTENSIONS')
+        return '.' in filename and filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
 
-#Depreciated
-class ImageApi(Resource):
-    def __init__(self):
-        self.parser = reqparse.RequestParser()
-        self.parser.add_argument(constants.STATUS_CAM, type=str, required=False)
-        self.parser.add_argument("event", type=str, required=True, location="form")
-
-    def get(self):
-        try:
-            args = self.parser.parse_args()
-            if args and args[constants.STATUS_CAM]:
-                current = args.get(constants.STATUS_CAM) + "-current.jpg"
-            else:
-                current = "current.jpg"
-            return url_for("upload_folder", filename=current)
-        except Exception as ex:
-            logger.exception("An error occurred while attempting to send image")
-            abort(400)
-
-    def post(self):
-        try:
-            args = self.parser.parse_args(request)
-            upload = request.files['images']
-            if upload and self.allowed_file(upload.filename):
-                filename = upload_processor.process_image(args["event"], upload)
-                return {'filename' : filename}, 201
-            else:
-                abort(400)
-        except exceptions.HTTPException:
-            raise
-        except Exception as ex:
-            logger.exception("An error occurred while attempting to receive uploaded image")
-            abort(500)
-
-    def allowed_file(self,filename):
-        return '.' in filename and filename.rsplit('.', 1)[1] in db.get('ALLOWED_EXTENSIONS')
 
 class ConfigApi(Resource):
-    def put(self):
+    def get(self, name=None):
         try:
+
+            if name and not yeti.camdirexists(name):
+                return {'error': '\"%s\" cam does not exist' % name}, 404
+
+            response = []
+            if not name:
+                for cam in yeti.getnames():
+                    response.append({"name": cam, "url": url_for("configapi.v2", name=cam)})
+            else:
+                response = jsonify(config.get(name=name))
+
+            return response
+
+        except exceptions.HTTPException:
+            raise
+        except Exception as ex:
+            logger.exception("An error occurred while attempting to send configs")
+            abort(500)
+
+    def put(self, name=yeti.options.name):
+        try:
+            logger.debug("Name: " + name)
+
             result = config.update(request.json)
             config.set_status(constants.CONFIG_STATUS_MODIFIED)
             if result:
@@ -113,8 +109,10 @@ class ConfigApi(Resource):
             logger.exception("An error occurred while attempting to update config")
             abort(500)
 
-    def patch(self):
+    def patch(self, name=yeti.options.name):
         try:
+            logger.debug("Name: " + name)
+
             if not request.json["status"]:
                 abort(400)
 
@@ -132,20 +130,35 @@ class ConfigApi(Resource):
             logger.exception("An error occurred while attempting to update config")
             abort(500)
 
-    def get(self):
+
+class StatusApi(Resource):
+    def get(self, name=None):
         try:
-            return jsonify(config.get())
+
+            if name and not yeti.camdirexists(name):
+                return {'error': '\"%s\" cam does not exist' % name}, 404
+
+            response = []
+            if not name:
+                for cam in yeti.getnames():
+                    response.append({"name": cam, "url": url_for("statusapi.v2", name=cam)})
+            else:
+                db = pickledb.load('%s/db/server.db' % yeti.getcamdir(name), True)
+                response = db.dgetall(constants.STATUS)
+
+            return response
         except exceptions.HTTPException:
             raise
         except Exception as ex:
-            logger.exception("An error occurred while attempting to send configs")
+            logger.exception("An error occurred while attempting to send status")
             abort(500)
 
-class StatusApi(Resource):
-    def post(self):
+    def post(self, name=yeti.options.name):
         try:
+            logger.debug("Name: " + name)
+
             status = request.json
-            status_processor.process(status)
+            status_processor.process(status, name)
 
             with rabbitmq.EventHandler() as queue:
                 queue.send("status_update",status)
@@ -160,13 +173,4 @@ class StatusApi(Resource):
             logger.exception("An error occurred while attempting to update status from cam client")
             abort(500)
 
-    def get(self):
-        try:
-            statuses = db.dgetall(constants.STATUS)
 
-            return jsonify(statuses)
-        except exceptions.HTTPException:
-            raise
-        except Exception as ex:
-            logger.exception("An error occurred while attempting to send status")
-            abort(500)

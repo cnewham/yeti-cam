@@ -29,7 +29,7 @@
 function getConfig() {
     $.ajax({
         type: "GET",
-        url: "api/config",
+        url: "api/v2/config",
         dataType: "json",
         error: function (error) {
             $("#status").text("An error occured: " + error.status + " " + error.statusText);
@@ -62,7 +62,7 @@ function saveConfig(config) {
 
     $.ajax({
         type: "PUT",
-        url: "api/config",
+        url: "api/v2/config",
         contentType: "application/json",
         data: JSON.stringify(config),
         error: function (error) {

@@ -10,7 +10,7 @@ logger.info("Starting yeti-cam-server...")
 app = Flask(__name__, static_folder='www/static', template_folder='www/templates')
 
 # initialize configuration
-db = pickledb.load(yeti.getcamdir('db') + '/server.db', True)
+db = pickledb.load(yeti.createcamdir('db') + '/server.db', True)
 
 if not db.get('SERVER_NAME'):
     db.set('SERVER_NAME', 'localhost')
@@ -19,10 +19,10 @@ if not db.get('SOCKET_PORT'):
     db.set('SOCKET_PORT', 5001)
 
 if not db.get('UPLOAD_FOLDER'):
-    db.set('UPLOAD_FOLDER', yeti.getcamdir("uploads"))
+    db.set('UPLOAD_FOLDER', yeti.createcamdir("uploads"))
 
 if not db.get('CAM_LOG_FOLDER'):
-    db.set('CAM_LOG_FOLDER', yeti.getcamdir("logs"))
+    db.set('CAM_LOG_FOLDER', yeti.createcamdir("logs"))
 
 if not db.get('ALLOWED_EXTENSIONS'):
     db.set('ALLOWED_EXTENSIONS', ['jpg', 'jpeg', 'txt', 'h264'])
