@@ -4,7 +4,7 @@ function refresh() {
 }
 
 function updateImage() {
-	current = Flask.url_for("upload_folder", {"filename": "current.jpg"});
+	current = Flask.url_for("upload_folder", {"name":"primary","filename": "current.jpg"});
 
 	newImage = $("#current");
 	newImage.attr("src", current + "?" + new Date().getTime());
@@ -85,6 +85,8 @@ function updateStatus() {
 
 $(function () {
     refresh();
+
+    $(".cam-slider").unslider({arrows:false})
 
     socket.on('status_update', function (data) {
         updateStatus();

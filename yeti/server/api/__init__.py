@@ -9,7 +9,6 @@ api.add_resource(v1.CaptureApi, '/api/capture')
 api.add_resource(v1.ImageApi, '/api/image') #Depreciated
 api.add_resource(v1.ConfigApi, '/api/config')
 api.add_resource(v1.StatusApi, '/api/status')
-api.add_resource(v1.LogApi, '/api/log')
 
 # V2 API
 api.add_resource(v2.CaptureApi, '/api/v2/capture', '/api/v2/capture/<string:name>', endpoint='captureapi.v2')
