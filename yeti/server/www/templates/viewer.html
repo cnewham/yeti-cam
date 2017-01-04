@@ -15,11 +15,28 @@
   <script src="//stephband.info/jquery.event.move/js/jquery.event.move.js"></script>
   <script src="//stephband.info/jquery.event.swipe/js/jquery.event.swipe.js"></script>
   <script type=text/javascript src="{{ url_for('static', filename='js/unslider-min.js') }}"></script>
+  <script type=text/javascript src="{{ url_for('static', filename='js/jquery.loadTemplate-1.4.4.min.js') }}"></script>
   <script type="text/javascript">
     var socket = io.connect('ws://' + document.domain + ':' + {{config['SOCKET_PORT']}} + '/web');
   </script>
 
   <script type=text/javascript src="{{ url_for('static', filename='js/viewer.js') }}"></script>
+
+
+  <script id="capture-template" type="text/x-custom-template">
+    <li data-id="name">
+      <div class="row">
+        <div class="image-container">
+          <img class="capture" data-src="url" />
+        </div>
+      </div>
+      <div class="row">
+        <div class="column">
+          <h5 class="status">Loading status...</h5>
+        </div>
+      </div>
+    </li>
+  </script>
 
   <!-- Mobile Specific Metas
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
@@ -45,6 +62,7 @@
   <!-- Primary Page Layout
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <div class="container">
+    <h6 id="alert-message" class="alert alert-default"></h6>
     <div class="row" style="margin-top: 10%">
       <div class="twelve columns">
         <span style="font-size:2em">YETI CAM</span>
@@ -57,35 +75,10 @@
           <span>Offline</span>
         </span>
       </div>
-
     </div>
     <div class="cam-slider">
-      <ul>
-        <li>
-          <div class="row">
-            <div class="image-container">
-              <img id="current" src="{{ url_for('upload_folder', name='primary', filename='current.jpg') }}" />
-              <h6 id="alert-message" class="alert alert-default" hidden></h6>
-            </div>
-          </div>
-          <div class="row">
-            <div class="column" id="status">
-              <h5>Loading status...</h5>
-            </div>
-          </div>
-        </li>
-        <li>
-          <div class="row">
-            <div class="image-container">
-              <img id="current2" src="{{ url_for('upload_folder', name='primary', filename='current.jpg') }}" />
-            </div>
-          </div>
-          <div class="row">
-            <div class="column" id="status2">
-              <h5>Loading status 2...</h5>
-            </div>
-          </div>
-        </li>
+      <ul id="capture-container">
+        <li>No captures to display</li>
       </ul>
     </div>
   </div>

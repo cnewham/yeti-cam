@@ -53,7 +53,7 @@ class CaptureApi(Resource):
                     return {'error':'Unsupported capture type: %s' % uploads.content_type}, 400
 
                 with rabbitmq.EventHandler() as queue:
-                    queue.send("camera_capture", {"event":args["event"], "name":name})
+                    queue.send("camera_capture", {"event": args["event"], "name": name})
 
                 return {'filename' : filename}, 201
             else:
@@ -161,7 +161,7 @@ class StatusApi(Resource):
             status_processor.process(status, name)
 
             with rabbitmq.EventHandler() as queue:
-                queue.send("status_update",status)
+                queue.send("status_update", {"name": name, "status": status})
 
             return 201
         except exceptions.HTTPException:

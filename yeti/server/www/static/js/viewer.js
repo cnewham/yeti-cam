@@ -1,115 +1,136 @@
-function refresh() {
-    updateImage();
-    updateStatus();
+function init() {
+
+  $.ajax({
+        type: "GET",
+        url: "api/v2/capture",
+        dataType: "json",
+        error: function (error) {
+          showAlert("An error occurred: " + error.status + " " + error.statusText, color=alerts.red);
+        },
+        success: function (result) {
+          $("#capture-container").loadTemplate($("#capture-template"), result)
+
+          $.each(result, function(idx, data) {
+            updateStatus(data["name"])
+          });
+
+          $(".cam-slider").unslider({arrows:false,swipe:true})
+        }
+  });
+
 }
 
-function updateImage() {
-	current = Flask.url_for("upload_folder", {"name":"primary","filename": "current.jpg"});
+function updateStatus(name) {
+  $.ajax({
+    type: "GET",
+    url: "api/v2/status/" + name,
+    dataType: "json",
+    error: function (error) {
+      showAlert("An error occurred: " + error.status + " " + error.statusText, color=alerts.red);
+    },
+    success: function (result) {
+      status = "<table style='width:100%'>";
+      $.each(result, function (key, value) {
+        status += "<tr><td>" + key + "</td><td>" + value + "</td></tr>";
+      });
+      status += "</table>";
 
-	newImage = $("#current");
-	newImage.attr("src", current + "?" + new Date().getTime());
+      elem = $("#" + name + " .status")
+      elem.html(status);
+    }
+  });
+}
+
+function refresh() {
+  updateImage();
+  updateStatus();
+}
+
+function updateImage(name) {
+  current = Flask.url_for("upload_folder", {"name":name,"filename": "current.jpg"});
+
+  newImage = $("#" + name + " .capture");
+  newImage.attr("src", current + "?" + new Date().getTime());
 }
 
 function toggleOnlineStatus(isOnline) {
-    if (isOnline) {
-        $("#online-indicator").prop("hidden", false);
-        $("#offline-indicator").prop("hidden", true);
-    } else {
-        $("#online-indicator").prop("hidden", true);
-        $("#offline-indicator").prop("hidden", false);
-    }
+  if (isOnline) {
+    $("#online-indicator").prop("hidden", false);
+    $("#offline-indicator").prop("hidden", true);
+  } else {
+    $("#online-indicator").prop("hidden", true);
+    $("#offline-indicator").prop("hidden", false);
+  }
 }
 
 
 function toggleManualCapture(isEnabled) {
-    button = $("#manual-capture");
-    if (isEnabled) {
-        button.removeClass('camera-disabled').addClass('camera-enabled');
+  button = $("#manual-capture");
+  if (isEnabled) {
+    button.removeClass('camera-disabled').addClass('camera-enabled');
 
-        button.unbind('click');
-        button.click(function() {
-            socket.emit('manual_capture', {});
-            toggleManualCapture(false);
-        });
-    }
-    else {
-        button.removeClass('camera-enabled').addClass('camera-disabled');
-        button.unbind('click');
-    }
+    button.unbind('click');
+    button.click(function() {
+      socket.emit('manual_capture', {});
+      toggleManualCapture(false);
+    });
+  }
+  else {
+    button.removeClass('camera-enabled').addClass('camera-disabled');
+    button.unbind('click');
+  }
 }
 
 var alerts = {
-    red: "alert-red",
-    green: "alert-green",
-    amber: "alert-amber"
+  red: "alert-red",
+  green: "alert-green",
+  amber: "alert-amber"
 }
 
 function showAlert(message, expire, color) {
-    if (message === undefined)
-        return;
+  if (message === undefined)
+    return;
 
-    if (color === undefined)
-        color = "alert-default";
+  if (color === undefined)
+    color = "alert-default";
 
-    alert = $("#alert-message");
+  alert = $("#alert-message");
 
-    alert.text(message);
-    alert.removeClass().addClass("alert").addClass(color);
+  alert.text(message);
+  alert.removeClass().addClass("alert").addClass(color);
 
-    if (expire === undefined)
-        alert.fadeIn(200);
-    else
-        alert.fadeIn(200).delay(expire).fadeOut(400);
+  if (expire === undefined)
+    alert.fadeIn(200);
+  else
+    alert.fadeIn(200).delay(expire).fadeOut(400);
 
-}
-
-function updateStatus() {
-	$.ajax({
-        type: "GET",
-        url: "api/status",
-        dataType: "json",
-        error: function (error) {
-        	$("#status").text("An error occured: " + error.status + " " + error.statusText);
-        },
-        success: function (result) {
-    		status = "<table style='width:100%'>";
-    		$.each(result, function (key, value) {
-                status += "<tr><td>" + key + "</td><td>" + value + "</td></tr>";
-    		});
-    		status += "</table>";
-
-    		$("#status").html(status);
-		}
-	});
 }
 
 $(function () {
-    refresh();
+  init();
 
-    $(".cam-slider").unslider({arrows:false})
+  socket.on('status_update', function (data) {
+    updateStatus(data.name);
+  });
 
-    socket.on('status_update', function (data) {
-        updateStatus();
-    });
+  socket.on('camera_capture', function (data) {
+    updateImage(data.name);
+    toggleManualCapture(true);
+  });
 
-    socket.on('camera_capture', function (data) {
-        updateImage();
-        toggleManualCapture(true);
-    });
+  socket.on('manual_capture_result', function (data){
+    if (data.result)
+      showAlert("Manual capture request successful", 5000, alerts.green);
+    else
+      showAlert("Manual capture request failed. Camera busy", 5000, alerts.amber);
+  });
 
-    socket.on('manual_capture_result', function (data){
-        if (data.result)
-            showAlert("Manual capture request successful", 5000, alerts.green);
-        else
-            showAlert("Manual capture request failed. Camera busy", 5000, alerts.amber);
-    });
+  socket.on('camera_status', function (data) {
+    toggleOnlineStatus(data.connected);
+    toggleManualCapture(data.connected);
+  });
 
-    socket.on('camera_status', function (data) {
-        toggleOnlineStatus(data.connected);
-        toggleManualCapture(data.connected);
-    });
-
-    socket.on('connect', function () {
-        console.log('Socket connected...');
-    });
+  socket.on('connect', function () {
+    console.log('Socket connected...');
+  });
 });

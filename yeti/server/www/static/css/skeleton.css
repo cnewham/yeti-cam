@@ -438,16 +438,11 @@ hr {
     height: 48px;
 }
 
-.image-container .alert {
+.alert {
     position: absolute;
     background-color: #000000;
     background-color: rgba(122,124,127, 0.4);
-    border: 1px solid #555555;
-    border-radius: 2px;
-    margin-right: 5px;
-    padding: 1px 3px;
-    top: 10px;
-    left: 50px;
+    top: -20px
 }
 
 /* Clearing
