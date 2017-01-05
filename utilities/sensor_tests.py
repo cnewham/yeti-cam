@@ -1,5 +1,6 @@
 __author__ = 'chris'
 import sys, signal, time
+from datetime import datetime
 import logging
 logger = logging.getLogger(__name__)
 
@@ -15,18 +16,18 @@ except RuntimeError:
 
 
 class GpioInputEvent(object):
-    def __init__(self, channels):
+    def __init__(self, channels, bouncetime=200):
         if not channels:
             return
 
         self.channels = channels or []
 
         logger.debug("channels: %s" % self.channels)
-        GPIO.setup(channels, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        GPIO.setup(channels, GPIO.IN)
 
         for channel in channels:
             logger.debug("adding event handler for channel %s" % channel)
-            GPIO.add_event_detect(channel, GPIO.BOTH, callback=self._callback, bouncetime=200)
+            GPIO.add_event_detect(channel, GPIO.BOTH, callback=self._callback, bouncetime=bouncetime)
 
     def _callback(self, channel):
         if GPIO.input(channel):
@@ -50,7 +51,7 @@ class GpioInputEvent(object):
 
 class Motion(GpioInputEvent):
     def __init__(self, callback):
-        super(Motion, self).__init__([4,18])
+        super(Motion, self).__init__([4,17])
         self.callback = callback
         self.motion_detected = {}
 
@@ -75,12 +76,29 @@ class Motion(GpioInputEvent):
                 self.callback(False) #send callback after the last channel stops detecting motion
 
 
+class RF433(GpioInputEvent):
+    def __init__(self):
+        super(RF433, self).__init__([22])
+        self.timer = time.time()
+
+    def elapse(self):
+        delta = time.time() - self.timer
+        self.timer = time.time()
+        return delta
+
+    def activated(self, channel):
+        print("ON\n")
+
+    def deactivated(self, channel):
+        print("OFF\n")
+
+
 def callback(channel):
     logger.debug("callback called for channel %s" % channel)
 
-with Motion(callback) as motion:
-    while True:
-        time.sleep(1)
+#with Motion(callback) as motion:
+#    while True:
+#        time.sleep(1)
 
 def signal_handler(signal, frame):
     logger.warning("Stop signal detected...")
