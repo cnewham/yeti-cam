@@ -1,7 +1,7 @@
-﻿__author__ = 'chris'
-import threading, time
+﻿import threading, time
 import json
 import pickledb
+import yeti
 from yeti.common import constants
 import Adafruit_DHT
 import logging
@@ -14,7 +14,7 @@ try:
 except RuntimeError:
     logger.exception("Error importing RPi.GPIO!  This is probably because you need superuser privileges.  You can achieve this by using 'sudo' to run your script")
 
-db = pickledb.load('db/sensors.db', True)
+db = pickledb.load(yeti.createcamdir('db') + '/sensors.db', True)
 
 if not db.get(constants.SENSORS_TEMP):
     #default temp sensor locations
