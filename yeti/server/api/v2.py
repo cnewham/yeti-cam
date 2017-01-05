@@ -94,8 +94,8 @@ class ConfigApi(Resource):
         try:
             logger.debug("Name: " + name)
 
-            result = config.update(request.json)
-            config.set_status(constants.CONFIG_STATUS_MODIFIED)
+            result = config.update(request.json, name)
+            config.set_status(constants.CONFIG_STATUS_MODIFIED, name)
             if result:
                 return {'error': result}, 409
             else:
@@ -116,11 +116,11 @@ class ConfigApi(Resource):
             if not request.json["status"]:
                 abort(400)
 
-            result = config.set_status(request.json["status"])
+            result = config.set_status(request.json["status"], name)
             if result:
                 return {'error': result}, 409
             else:
-                return {'status':config.get_status()}, 204
+                return {'status': config.get_status(name)}, 204
         except exceptions.HTTPException:
             raise
         except ValueError as ex:

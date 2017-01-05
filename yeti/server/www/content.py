@@ -19,9 +19,13 @@ def index():
 
 
 @app.route('/configure')
-def configure():
+@app.route('/configure/<path:name>')
+def configure(name=None):
     try:
-        return render_template('configure.html')
+        if name:
+            return render_template('configure.html', name=name)
+        else:
+            return redirect(url_for('configure', name=yeti.options.name))
     except Exception as ex:
             print type(ex)
             print ex

@@ -6,102 +6,109 @@ from yeti.common import constants
 import logging
 logger = logging.getLogger(__name__)
 
-db = pickledb.load(yeti.createcamdir('db') + '/config.db', True)
+default = pickledb.load(yeti.createcamdir('db') + '/config.db', True)
+# server/config
+if not default.get(constants.CONFIG_VERSION):
+    default.set(constants.CONFIG_VERSION, 0)
+if not default.get(constants.CONFIG_STATUS):
+    default.set(constants.CONFIG_STATUS, constants.CONFIG_STATUS_NEW)
+if not default.get(constants.CONFIG_CHECK_INTERVAL_MIN):
+    default.set(constants.CONFIG_CHECK_INTERVAL_MIN, 60)
+if not default.get(constants.CONFIG_SERVER):
+    default.set(constants.CONFIG_SERVER, "http://localhost:5000/api/")
+if not default.get(constants.CONFIG_SOCKET_HOST):
+    default.set(constants.CONFIG_SOCKET_HOST, "localhost")
+if not default.get(constants.CONFIG_SOCKET_PORT):
+    default.set(constants.CONFIG_SOCKET_PORT, 5001)
 
-#server/config
-if not db.get(constants.CONFIG_VERSION):
-    db.set(constants.CONFIG_VERSION, 0)
-if not db.get(constants.CONFIG_STATUS):
-    db.set(constants.CONFIG_STATUS, constants.CONFIG_STATUS_NEW)
-if not db.get(constants.CONFIG_CHECK_INTERVAL_MIN):
-    db.set(constants.CONFIG_CHECK_INTERVAL_MIN, 60)
-if not db.get(constants.CONFIG_SERVER):
-    db.set(constants.CONFIG_SERVER, "http://localhost:5000/api/")
-if not db.get(constants.CONFIG_SOCKET_HOST):
-    db.set(constants.CONFIG_SOCKET_HOST, "localhost")
-if not db.get(constants.CONFIG_SOCKET_PORT):
-    db.set(constants.CONFIG_SOCKET_PORT, 5001)
+# image
+if not default.get(constants.CONFIG_IMAGE_DIR):
+    default.set(constants.CONFIG_IMAGE_DIR, "/home/yeti/cam/images")
+if not default.get(constants.CONFIG_IMAGE_PREFIX):
+    default.set(constants.CONFIG_IMAGE_PREFIX, "capture-")
+if not default.get(constants.CONFIG_IMAGE_WIDTH):
+    default.set(constants.CONFIG_IMAGE_WIDTH, 1980)
+if not default.get(constants.CONFIG_IMAGE_HEIGHT):
+    default.set(constants.CONFIG_IMAGE_HEIGHT, 1080)
+if default.get(constants.CONFIG_IMAGE_VFLIP) is None:
+    default.set(constants.CONFIG_IMAGE_VFLIP, False)
+if default.get(constants.CONFIG_IMAGE_HFLIP is None):
+    default.set(constants.CONFIG_IMAGE_HFLIP, False)
+if not default.get(constants.CONFIG_IMAGE_QUALITY):
+    default.set(constants.CONFIG_IMAGE_QUALITY, 85)
+if not default.get(constants.CONFIG_IMAGE_EXPOSURE_MODE):
+    default.set(constants.CONFIG_IMAGE_EXPOSURE_MODE, "auto")
+if not default.get(constants.CONFIG_IMAGE_AWB_MODE):
+    default.set(constants.CONFIG_IMAGE_AWB_MODE, "auto")
 
-#image
-if not db.get(constants.CONFIG_IMAGE_DIR):
-    db.set(constants.CONFIG_IMAGE_DIR, "/home/yeti/cam/images")
-if not db.get(constants.CONFIG_IMAGE_PREFIX):
-    db.set(constants.CONFIG_IMAGE_PREFIX, "capture-")
-if not db.get(constants.CONFIG_IMAGE_WIDTH):
-    db.set(constants.CONFIG_IMAGE_WIDTH, 1980)
-if not db.get(constants.CONFIG_IMAGE_HEIGHT):
-    db.set(constants.CONFIG_IMAGE_HEIGHT, 1080)
-if db.get(constants.CONFIG_IMAGE_VFLIP) is None:
-    db.set(constants.CONFIG_IMAGE_VFLIP, False)
-if db.get(constants.CONFIG_IMAGE_HFLIP is None):
-    db.set(constants.CONFIG_IMAGE_HFLIP, False)
-if not db.get(constants.CONFIG_IMAGE_QUALITY):
-    db.set(constants.CONFIG_IMAGE_QUALITY, 85)
-if not db.get(constants.CONFIG_IMAGE_EXPOSURE_MODE):
-    db.set(constants.CONFIG_IMAGE_EXPOSURE_MODE, "auto")
-if not db.get(constants.CONFIG_IMAGE_AWB_MODE):
-    db.set(constants.CONFIG_IMAGE_AWB_MODE, "auto")
+# motion
+if default.get(constants.CONFIG_MOTION_ENABLED) is None:
+    default.set(constants.CONFIG_MOTION_ENABLED, True)
+if not default.get(constants.CONFIG_MOTION_THRESHOLD):
+    default.set(constants.CONFIG_MOTION_THRESHOLD, 10)
+if not default.get(constants.CONFIG_MOTION_SENSITIVITY):
+    default.set(constants.CONFIG_MOTION_SENSITIVITY, 100)
+if not default.get(constants.CONFIG_MOTION_DELAY_SEC):
+    default.set(constants.CONFIG_MOTION_DELAY_SEC, 60)
+if not default.get(constants.CONFIG_MOTION_THRESHOLD):
+    default.set(constants.CONFIG_MOTION_THRESHOLD, 10)
+if not default.get(constants.CONFIG_MOTION_CAPTURE_THRESHOLD):
+    default.set(constants.CONFIG_MOTION_CAPTURE_THRESHOLD, 3)
+if not default.get(constants.CONFIG_MOTION_EVENT_CAPTURE_TYPE):
+    default.set(constants.CONFIG_MOTION_EVENT_CAPTURE_TYPE, constants.EVENT_TYPE_IMAGE)
+if not default.get(constants.CONFIG_MOTION_PERCENT_CHANGE_MAX):
+    default.set(constants.CONFIG_MOTION_PERCENT_CHANGE_MAX, 40)
 
-#motion
-if db.get(constants.CONFIG_MOTION_ENABLED) is None:
-    db.set(constants.CONFIG_MOTION_ENABLED, True)
-if not db.get(constants.CONFIG_MOTION_THRESHOLD):
-    db.set(constants.CONFIG_MOTION_THRESHOLD, 10)
-if not db.get(constants.CONFIG_MOTION_SENSITIVITY):
-    db.set(constants.CONFIG_MOTION_SENSITIVITY, 100)
-if not db.get(constants.CONFIG_MOTION_DELAY_SEC):
-    db.set(constants.CONFIG_MOTION_DELAY_SEC, 60)
-if not db.get(constants.CONFIG_MOTION_THRESHOLD):
-    db.set(constants.CONFIG_MOTION_THRESHOLD, 10)
-if not db.get(constants.CONFIG_MOTION_CAPTURE_THRESHOLD):
-    db.set(constants.CONFIG_MOTION_CAPTURE_THRESHOLD, 3)
-if not db.get(constants.CONFIG_MOTION_EVENT_CAPTURE_TYPE):
-    db.set(constants.CONFIG_MOTION_EVENT_CAPTURE_TYPE, constants.EVENT_TYPE_IMAGE)
-if not db.get(constants.CONFIG_MOTION_PERCENT_CHANGE_MAX):
-    db.set(constants.CONFIG_MOTION_PERCENT_CHANGE_MAX, 40)
+# capture timer
+if not default.get(constants.CONFIG_TIMER_INTERVAL_MIN):
+    default.set(constants.CONFIG_TIMER_INTERVAL_MIN, 30)
 
-#capture timer
-if not db.get(constants.CONFIG_TIMER_INTERVAL_MIN):
-    db.set(constants.CONFIG_TIMER_INTERVAL_MIN, 30)
+db = {}
+for cam in yeti.getnames():
+    db[cam] = pickledb.load('%s/db/config.db' % yeti.getcamdir(cam), True)
 
 
-def get(key=None, name=None):
+def get(key=None, name=yeti.options.name):
     if key is None:
         with open('%s/db/config.db' % yeti.getcamdir(name), 'r') as configdb:
             configs = configdb.read()
 
         return json.loads(configs)
     else:
-        value = db.get(key)
+        value = db[name].get(key)
         if value == "true":
             return True
         elif value == "false":
             return False
         else:
-            return db.get(key)
+            return db[name].get(key)
 
-def version():
-    return get(constants.CONFIG_VERSION)
 
-def get_status():
-    return get(constants.CONFIG_STATUS)
+def version(name=yeti.options.name):
+    return get(constants.CONFIG_VERSION, name)
 
-def set_status(status):
-    db.set(constants.CONFIG_STATUS, status)
-    db.dump()
 
-def update(configs):
+def get_status(name=yeti.options.name):
+    return get(constants.CONFIG_STATUS, name)
+
+
+def set_status(status, name=yeti.options.name):
+    db[name].set(constants.CONFIG_STATUS, status)
+    db[name].dump()
+
+
+def update(configs, name=yeti.options.name):
     logger.info("Updating configs")
 
     if not configs or configs is None:
         return "No config values have been supplied";
 
-    if configs[constants.CONFIG_VERSION] <= version():
+    if configs[constants.CONFIG_VERSION] <= version(name):
         return "config updated by another user. Please try again"
 
     for key, value in configs.iteritems():
-        db.set(key, value)
+        db[name].set(key, value)
 
-    db.dump()
+    db[name].dump()
 
 
