@@ -1,11 +1,11 @@
-﻿__author__ = 'chris'
-import threading
+﻿import threading
 import time
 import os
 import sys
 import signal
 import logging
 from datetime import datetime
+import yeti
 from yeti.common import constants, config
 from yeti.cam import service, sensors
 import camera_v3 as camera
@@ -13,7 +13,7 @@ import motion
 
 logger = logging.getLogger(__name__)
 
-logger.info("Starting yeticam")
+logger.info("Starting yeticam as " + yeti.options.name)
 
 def send(filename, event, capture_type):
     try:
@@ -41,7 +41,7 @@ def send(filename, event, capture_type):
         logger.exception("An error occurred while attempting to upload to server")
 
 def check_config_updates(*args):
-    logger.info( "Checking for config updates: %s" % args )
+    logger.info("Checking for config updates: %s" % args )
     try:
         server_configs = server.get_config()
 
