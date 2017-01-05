@@ -18,6 +18,7 @@ class Authorize:
             scope='https://www.googleapis.com/auth/drive',
             redirect_uri=callback)
         self.flow.params['access_type'] = 'offline'
+        self.flow.params['approval_prompt'] = 'force'
 
     def start(self):
         return self.flow.step1_get_authorize_url()
