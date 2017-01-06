@@ -12,9 +12,7 @@
   {{ JSGlue.include() }}
   <script type=text/javascript src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
   <script type=text/javascript src="http://cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
-  <script src="//stephband.info/jquery.event.move/js/jquery.event.move.js"></script>
-  <script src="//stephband.info/jquery.event.swipe/js/jquery.event.swipe.js"></script>
-  <script type=text/javascript src="{{ url_for('static', filename='js/unslider-min.js') }}"></script>
+  <script type=text/javascript src="{{ url_for('static', filename='js/dragend.js') }}"></script>
   <script type=text/javascript src="{{ url_for('static', filename='js/jquery.loadTemplate-1.4.4.min.js') }}"></script>
   <script type="text/javascript">
     var socket = io.connect('ws://' + document.domain + ':' + {{config['SOCKET_PORT']}} + '/web');
@@ -22,9 +20,8 @@
 
   <script type=text/javascript src="{{ url_for('static', filename='js/viewer.js') }}"></script>
 
-
   <script id="capture-template" type="text/x-custom-template">
-    <li data-id="name">
+    <div data-id="name" class="dragend-page">
       <div class="row">
         <div class="image-container">
           <img class="capture" data-src="url" />
@@ -35,7 +32,7 @@
           <div class="status">Loading status...</div>
         </div>
       </div>
-    </li>
+    </div>
   </script>
 
   <!-- Mobile Specific Metas
@@ -50,8 +47,6 @@
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/normalize.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/skeleton.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/unslider.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/unslider-dots.css') }}">
 
   <!-- Favicon
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
@@ -76,10 +71,8 @@
         </span>
       </div>
     </div>
-    <div class="cam-slider">
-      <ul id="capture-container">
-        <li>No captures to display</li>
-      </ul>
+    <div id="capture-container">
+      <div>No captures to display</div>
     </div>
   </div>
 

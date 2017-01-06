@@ -13,9 +13,9 @@ function init() {
           $.each(result, function(idx, data) {
             updateImage(data["name"])
             updateStatus(data["name"])
-          });
+          })
 
-          $(".cam-slider").unslider({arrows:false,swipe:true})
+          $("#capture-container").dragend({disableScroll:true});
         }
   });
 
