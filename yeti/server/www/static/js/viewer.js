@@ -11,6 +11,7 @@ function init() {
           $("#capture-container").loadTemplate($("#capture-template"), result)
 
           $.each(result, function(idx, data) {
+            updateImage(data["name"])
             updateStatus(data["name"])
           });
 
@@ -39,11 +40,6 @@ function updateStatus(name) {
       elem.html(status);
     }
   });
-}
-
-function refresh() {
-  updateImage();
-  updateStatus();
 }
 
 function updateImage(name) {
@@ -87,7 +83,7 @@ var alerts = {
   amber: "alert-amber"
 }
 
-function showAlert(message, expire, color) {
+function showAlert(message, color, expire) {
   if (message === undefined)
     return;
 
