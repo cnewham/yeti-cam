@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from flask_restful import Resource, abort, request, reqparse
 from flask import url_for, jsonify
 from werkzeug import exceptions
+import yeti
 from yeti.server import db, processors, rabbitmq
 from yeti.common import constants, config
 
@@ -44,7 +45,7 @@ class CaptureApi(Resource):
                     return {'error':'Unsupported capture type: %s' % uploads.content_type}, 400
 
                 with rabbitmq.EventHandler() as queue:
-                    queue.send("camera_capture", {"event":args["event"]})
+                    queue.send("camera_capture", {"event": args["event"], "name": yeti.options.name})
 
                 return {'filename' : filename}, 201
             else:
@@ -148,7 +149,7 @@ class StatusApi(Resource):
             status_processor.process(status)
 
             with rabbitmq.EventHandler() as queue:
-                queue.send("status_update",status)
+                queue.send("status_update",{"name": yeti.options.name, "status": status})
 
             return 201
         except exceptions.HTTPException:
