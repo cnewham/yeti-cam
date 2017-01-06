@@ -31,6 +31,15 @@ def configure(name=None):
             print ex
             return 500
 
+@app.route('/weather')
+def weather():
+    try:
+        return render_template('weather.html')
+    except Exception as ex:
+            print type(ex)
+            print ex
+            return 500
+
 
 @app.route('/drive/auth')
 def google_drive_auth():
