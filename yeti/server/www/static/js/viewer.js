@@ -15,7 +15,7 @@ function init() {
             updateStatus(data["name"])
           })
 
-          $("#capture-container").dragend({disableScroll:true});
+          $("#capture-container").dragend({});
         }
   });
 
