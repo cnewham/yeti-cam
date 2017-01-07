@@ -5,15 +5,11 @@ from flask_restful import Resource, abort, request, reqparse
 from flask import url_for, jsonify
 from werkzeug import exceptions
 import yeti
-from yeti.server import processors, rabbitmq, app
+from yeti.server import uploads, statuses, rabbitmq, app
 from yeti.common import constants, config
 
 import logging
 logger = logging.getLogger(__name__)
-
-upload_processor = processors.UploadProcessor()
-status_processor = processors.StatusProcessor()
-
 
 class CaptureApi(Resource):
     def __init__(self):
@@ -42,15 +38,15 @@ class CaptureApi(Resource):
             logger.debug("Name: " + name)
 
             args = self.parser.parse_args(request)
-            uploads = request.files['uploads']
+            uploaded = request.files['uploads']
 
-            if uploads and self.allowed_file(uploads.filename):
-                if uploads.content_type in ("image/jpg","image/jpeg"):
-                    filename = upload_processor.process_image(args["event"], uploads, name)
-                elif uploads.content_type == "video/h264":
-                    filename = upload_processor.process_video(args["event"], uploads, name)
+            if uploaded and self.allowed_file(uploaded.filename):
+                if uploaded.content_type in ("image/jpg","image/jpeg"):
+                    filename = uploads.process_image(args["event"], uploaded, name)
+                elif uploaded.content_type == "video/h264":
+                    filename = uploads.process_video(args["event"], uploaded, name)
                 else:
-                    return {'error':'Unsupported capture type: %s' % uploads.content_type}, 400
+                    return {'error':'Unsupported capture type: %s' % uploaded.content_type}, 400
 
                 with rabbitmq.EventHandler() as queue:
                     queue.send("camera_capture", {"event": args["event"], "name": name})
@@ -158,7 +154,7 @@ class StatusApi(Resource):
             logger.debug("Name: " + name)
 
             status = request.json
-            status_processor.process(status, name)
+            statuses.process(status, name)
 
             with rabbitmq.EventHandler() as queue:
                 queue.send("status_update", {"name": name, "status": status})

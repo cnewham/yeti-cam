@@ -4,14 +4,11 @@ from flask_restful import Resource, abort, request, reqparse
 from flask import url_for, jsonify
 from werkzeug import exceptions
 import yeti
-from yeti.server import db, processors, rabbitmq
+from yeti.server import db, uploads, statuses, rabbitmq
 from yeti.common import constants, config
 
 import logging
 logger = logging.getLogger(__name__)
-
-upload_processor = processors.UploadProcessor()
-status_processor = processors.StatusProcessor()
 
 class CaptureApi(Resource):
     def __init__(self):
@@ -34,15 +31,15 @@ class CaptureApi(Resource):
     def post(self):
         try:
             args = self.parser.parse_args(request)
-            uploads = request.files['uploads']
+            uploaded = request.files['uploads']
 
-            if uploads and self.allowed_file(uploads.filename):
-                if uploads.content_type in ("image/jpg","image/jpeg"):
-                    filename = upload_processor.process_image(args["event"], uploads)
-                elif uploads.content_type == "video/h264":
-                    filename = upload_processor.process_video(args["event"], uploads)
+            if uploaded and self.allowed_file(uploaded.filename):
+                if uploaded.content_type in ("image/jpg","image/jpeg"):
+                    filename = uploads.process_image(args["event"], uploaded)
+                elif uploaded.content_type == "video/h264":
+                    filename = uploads.process_video(args["event"], uploaded)
                 else:
-                    return {'error':'Unsupported capture type: %s' % uploads.content_type}, 400
+                    return {'error':'Unsupported capture type: %s' % uploaded.content_type}, 400
 
                 with rabbitmq.EventHandler() as queue:
                     queue.send("camera_capture", {"event": args["event"], "name": yeti.options.name})
@@ -83,7 +80,7 @@ class ImageApi(Resource):
             args = self.parser.parse_args(request)
             upload = request.files['images']
             if upload and self.allowed_file(upload.filename):
-                filename = upload_processor.process_image(args["event"], upload)
+                filename = uploads.process_image(args["event"], upload)
                 return {'filename' : filename}, 201
             else:
                 abort(400)
@@ -146,7 +143,7 @@ class StatusApi(Resource):
     def post(self):
         try:
             status = request.json
-            status_processor.process(status)
+            statuses.process(status)
 
             with rabbitmq.EventHandler() as queue:
                 queue.send("status_update",{"name": yeti.options.name, "status": status})
@@ -163,9 +160,7 @@ class StatusApi(Resource):
 
     def get(self):
         try:
-            statuses = db.dgetall(constants.STATUS)
-
-            return jsonify(statuses)
+            return jsonify(db.dgetall(constants.STATUS))
         except exceptions.HTTPException:
             raise
         except Exception as ex:
