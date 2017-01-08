@@ -173,7 +173,11 @@ class StatusApi(Resource):
 class WeatherApi(Resource):
     def get(self):
         try:
-            return weather.get()
+            parser = reqparse.RequestParser()
+            parser.add_argument('force', type=bool, required=False, default=False)
+            args = parser.parse_args()
+
+            return weather.get(args["force"])
         except exceptions.HTTPException:
             raise
         except Exception as ex:

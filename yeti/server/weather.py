@@ -24,8 +24,12 @@ if not db.get(constants.WEATHER_EXPIRE_MIN):
 def build_url(feature):
     return"http://api.wunderground.com/api/%s/%s/q/pws:%s.json" % (db.get(constants.WEATHER_WU_KEY), feature, db.get(constants.WEATHER_STATION))
 
-
 def refresh():
+    """
+    Refreshes data from WeatherUndergound
+    API Documentation: https://www.wunderground.com/weather/api/d/docs?d=index
+    :return:
+    """
     logger.info("Refreshing data from WeatherUnderground")
 
     try:
@@ -34,12 +38,12 @@ def refresh():
         conditions = json.loads(response.text)
         wu["conditions"] = conditions["current_observation"]
 
-        logger.debug("Request alerts")
+        logger.debug("Requesting alerts")
         response = requests.get(build_url("alerts"))
         alerts = json.loads(response.text)
         wu["alerts"] = alerts["alerts"]
 
-        logger.debug("Request forecast")
+        logger.debug("Requesting forecast")
         response = requests.get(build_url("forecast"))
         forecast = json.loads(response.text)
         wu["forecast"] = forecast["forecast"]["simpleforecast"]["forecastday"]
