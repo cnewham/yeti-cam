@@ -22,9 +22,7 @@ if not db.get(constants.WEATHER_EXPIRE_MIN):
 
 
 def build_url(feature):
-    url = "http://api.wunderground.com/api/%s/%s/q/pws:%s.json" % (db.get(constants.WEATHER_WU_KEY), feature, db.get(constants.WEATHER_STATION))
-    logger.debug("URL: " + url)
-    return url
+    return"http://api.wunderground.com/api/%s/%s/q/pws:%s.json" % (db.get(constants.WEATHER_WU_KEY), feature, db.get(constants.WEATHER_STATION))
 
 
 def refresh():
@@ -46,7 +44,7 @@ def refresh():
         forecast = json.loads(response.text)
         wu["forecast"] = forecast["forecast"]["simpleforecast"]["forecastday"]
 
-        wu["expire"] = datetime.now() + timedelta(minutes=db.get(constants.WEATHER_EXPIRE_MIN))
+        wu["expire"] = (datetime.now() + timedelta(minutes=db.get(constants.WEATHER_EXPIRE_MIN))).isoformat()
     except:
         logger.exception("An error occurred while attempting to access WeatherUndergound API")
         raise
@@ -56,7 +54,7 @@ def get(force=False):
     logger.info("Getting weather data")
 
     # Refresh data if it's the first time, it's expired or the force flag is set
-    if not wu or wu["expire"] <= datetime.now() or force:
+    if not wu or datetime.strptime(wu["expire"], "%Y-%m-%dT%H:%M:%S.%f") <= datetime.now() or force:
         refresh()
 
     return wu

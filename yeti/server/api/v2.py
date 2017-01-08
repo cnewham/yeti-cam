@@ -5,7 +5,7 @@ from flask_restful import Resource, abort, request, reqparse
 from flask import url_for, jsonify
 from werkzeug import exceptions
 import yeti
-from yeti.server import uploads, statuses, rabbitmq, app
+from yeti.server import weather, uploads, statuses, rabbitmq, app
 from yeti.common import constants, config
 
 import logging
@@ -172,5 +172,11 @@ class StatusApi(Resource):
 
 class WeatherApi(Resource):
     def get(self):
-        pass
+        try:
+            return weather.get()
+        except exceptions.HTTPException:
+            raise
+        except Exception as ex:
+            logger.exception("An error occurred while attempting to retrieve weather updates")
+            abort(500)
 
