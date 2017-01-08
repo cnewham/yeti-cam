@@ -8,7 +8,7 @@ from yeti.common import constants
 from yeti.server import drive, motion
 
 logger = logging.getLogger(__name__)
-motion_log = motion.MotionLog()
+
 
 def process_image(event, upload, name=None):
     filename = None
@@ -30,9 +30,10 @@ def process_image(event, upload, name=None):
         logger.exception("An exception occurred during processing image upload for %s" % filename)
 
     if event == constants.EVENT_MOTION:
-        motion_log.add_motion_event(datetime.datetime.now().isoformat())
+        motion.add_motion_event(datetime.datetime.now().isoformat())
 
     return filename
+
 
 def process_video(event, upload, name=None):
     filename = None
@@ -54,6 +55,6 @@ def process_video(event, upload, name=None):
         logger.exception("An exception occurred during processing video upload for %s" % filename)
 
     if event == constants.EVENT_MOTION:
-        motion_log.add_motion_event(datetime.datetime.now().isoformat())
+        motion.add_motion_event(datetime.datetime.now().isoformat())
 
     return filename

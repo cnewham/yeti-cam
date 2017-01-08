@@ -7,7 +7,6 @@ from yeti.server import motion
 
 logger = logging.getLogger(__name__)
 
-motion_log = motion.MotionLog()
 
 def process(status, name=None):
     logger.info("Processing status %s" % status)
@@ -17,7 +16,7 @@ def process(status, name=None):
     db.drem(constants.STATUS)
     db.dcreate(constants.STATUS)
 
-    db.dadd(constants.STATUS, ("Motion Events (24hr)", motion_log.get_motion_events_from(24)))
+    db.dadd(constants.STATUS, ("Motion Events (24hr)", motion.get_motion_events_from(24)))
 
     for key, value in status.iteritems():
         if key == constants.STATUS_EVENT:

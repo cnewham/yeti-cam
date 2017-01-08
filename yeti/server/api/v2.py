@@ -170,3 +170,7 @@ class StatusApi(Resource):
             abort(500)
 
 
+class WeatherApi(Resource):
+    def get(self):
+        pass
+

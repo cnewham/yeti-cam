@@ -68,3 +68,10 @@ MOTION_LOG = 'motion_log'
 GDRIVE_FOLDER = 'gdrive_folder'
 ENABLE_GDRIVE = 'enable_gdrive'
 LAST_CAM_UPDATE = 'last_cam_update'
+
+#WEATHER CONSTANTS
+
+WEATHER_WU_KEY = "wu_key"
+WEATHER_STATION = "station"
+WEATHER_FEATURES = "features"
+WEATHER_EXPIRE_MIN = "expire_min"
