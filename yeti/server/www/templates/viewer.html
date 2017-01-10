@@ -59,16 +59,16 @@
   <div class="container">
     <h6 id="alert-message" class="alert alert-default"></h6>
     <div class="row" style="margin-top: 10%">
-      <div class="twelve columns">
-        <span style="font-size:2em">YETI CAM</span>
-        <span class="u-pull-right" style="padding-top:1em;" id="online-indicator" hidden>
+      <div class="twelve columns u-cf">
+        <div class="u-pull-left" style="font-size:2em">YETI CAM</div>
+        <div class="u-pull-right" style="padding-top:1em;" id="online-indicator" hidden>
           <span class="indicator" style="content: url({{ url_for('static', filename='images/indicator-green.png') }});"></span>
           <span>Online</span>
-        </span>
-        <span class="u-pull-right" style="padding-top:1em;" id="offline-indicator">
+        </div>
+        <div class="u-pull-right" style="padding-top:1em;" id="offline-indicator">
           <span class="indicator" style="content: url({{ url_for('static', filename='images/indicator-grey.png') }});"></span>
           <span>Offline</span>
-        </span>
+        </div>
       </div>
     </div>
     <div id="capture-container">

@@ -1,21 +1,27 @@
-function init() {
+function refreshWeatherData(force) {
 
   $.ajax({
         type: "GET",
-        url: "api/v2/capture",
+        url: "api/v2/weather",
+        data: {"force":force},
         dataType: "json",
         error: function (error) {
           showAlert("An error occurred: " + error.status + " " + error.statusText, color=alerts.red);
         },
         success: function (result) {
-          $("#capture-container").loadTemplate($("#capture-template"), result)
+          $("#conditions-container").loadTemplate($("#conditions-template"), result["conditions"]);
+          $("#forecast-container").loadTemplate($("#forecast-template"), result["forecast"]);
 
-          $.each(result, function(idx, data) {
-            updateImage(data["name"])
-            updateStatus(data["name"])
-          });
 
-          $(".cam-slider").unslider({arrows:false,swipe:true})
+          var alert;
+          $.each(result["alerts"], function(idx, data) {
+             alert += data;
+          })
+
+          showAlert(alert, alerts.red);
+
+          $("#station-id").text = result["conditions"]["station_id"];
+
         }
   });
 
@@ -47,5 +53,5 @@ function showAlert(message, color, expire) {
 }
 
 $(function () {
-  //init();
+  //refreshWeatherData(false)
 });

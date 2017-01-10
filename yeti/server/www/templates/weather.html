@@ -19,18 +19,15 @@
 
   <script type=text/javascript src="{{ url_for('static', filename='js/weather.js') }}"></script>
 
-  <script id="capture-template" type="text/x-custom-template">
-    <li data-id="name">
-      <div class="row">
-        <div class="image-container">
-          <img class="capture" data-src="url" />
-        </div>
-      </div>
-      <div class="row">
-        <div class="column">
-          <div class="status">Loading status...</div>
-        </div>
-      </div>
+  <script id="conditions-template" type="text/x-custom-template">
+    <li>
+      <div data-content="station_id"></div>
+    </li>
+  </script>
+
+  <script id="forecast-template" type="text/x-custom-template">
+    <li>
+      <div data-content="date.weekday"></div>
     </li>
   </script>
 
@@ -61,15 +58,111 @@
     <h6 id="alert-message" class="alert alert-default"></h6>
     <div class="row" style="margin-top: 10%">
       <div class="twelve columns">
-        <span style="font-size:2em">WEATHER</span>
+        <div class="row" style="font-size:2em">WEATHER</div>
       </div>
     </div>
-    <div class="row">
-      <div class="column">
-        <h6>TODO: weather updates</h6>
-        <a href="https://www.wunderground.com/cgi-bin/findweather/getForecast?query=pws:KPACLEAR5">KPACLEAR5</a>
+    <div id="conditions-container">
+      <div class="row" style="padding-top:20px;">
+        <div>KPACLEAR5</div>
+        <div>Last Updated on January 8, 11:09 AM EST</div>
+      </div>
+      <div class="row weather-section" style="margin-top:20px;">
+        <div class="six columns u-max-full-width" style="padding:10px;">
+          <div class="u-pull-left" style="padding:10px 15px 0px 0px">
+            <img src="http://icons.wxug.com/i/c/k/snow.gif" style="width:64px;height:64px"/>
+          </div>
+          <div class="u-pull-left">
+            <div>15&deg; | 4&deg;</div>
+            <h3 style="margin-bottom:0px;">10&deg;</h3>
+            <div>4&deg;</div>
+          </div>
+          <div class="u-pull-right">
+            <div><span class="wu-icon sunrise" title="Sunrise"></span>6:04am</div>
+            <div><span class="wu-icon sunset" title="Sunset"></span>5:45pm</div>
+
+            <div style="margin-top:15px;"><span class="wu-icon moon lastqtr" title="Moon Phase"></span>Last Quarter</div>
+          </div>
+        </div>
+        <div class="six columns condensed" style="padding:10px;" >
+          <table>
+            <tbody>
+              <tr>
+                <td>Precip</td>
+                <td>0.00 in</td>
+              </tr>
+              <tr>
+                <td>Precip Rate</td>
+                <td>0 in/hr</td>
+              </tr>
+              <tr>
+                <td>Humidity</td>
+                <td>46%</td>
+              <tr>
+                <td>Wind</td>
+                <td>2.0 MPH SSW</td>
+              </tr>
+              <tr>
+                <td>Test</td>
+                <td>Baradsfasdfasdf</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
+    <div id="forecast-container" style="margin-top:20px;">
+      <div class="row">
+        <div class="twelve columns">Tuesday</div>
+      </div>
+      <div class="row weather-section">
+        <div class="six columns u-max-full-width" style="padding:10px;">
+          <div class="u-pull-left" style="padding:10px 15px 0px 0px">
+            <img src="http://icons.wxug.com/i/c/k/cloudy.gif" style="width:64px;height:64px"/>
+          </div>
+          <div class="u-pull-left">
+            <div>15&deg; | 4&deg;</div>
+            <h3 style="margin-bottom:0px;">10&deg;</h3>
+            <div>4&deg;</div>
+          </div>
+          <div class="u-pull-right">
+            <div><span class="wu-icon wet" title="chance of precipitation"></span>1.4 in</div>
+            <div><span class="wu-icon snow" title="chance of snow"></span>3 in</div>
+          </div>
+        </div>
+        <div class="six columns condensed" style="padding:10px;" >
+          <table>
+            <tbody>
+              <tr>
+                <td>Precip</td>
+                <td>0.00 in</td>
+              </tr>
+              <tr>
+                <td>Precip Rate</td>
+                <td>0 in/hr</td>
+              </tr>
+              <tr>
+                <td>Humidity</td>
+                <td>46%</td>
+              <tr>
+                <td>Wind</td>
+                <td>2.0 MPH SSW</td>
+              </tr>
+              <tr>
+                <td>Test</td>
+                <td>Baradsfasdfasdf</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:30px;width:130px;height:80px;">
+      <a href="https://www.wunderground.com/personal-weather-station/dashboard?ID=KPACLEAR5" target="_blank">
+        <img src="http://icons.wxug.com/graphics/wu2/logo_130x80.png">
+      </a>
+    </div>
+
   </div>
 
 <!-- End Document

@@ -4,6 +4,7 @@ import pickledb
 from datetime import datetime, timedelta
 import requests, json
 from yeti.common import constants
+import astro
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +25,7 @@ if not db.get(constants.WEATHER_EXPIRE_MIN):
 def build_url(feature):
     return"http://api.wunderground.com/api/%s/%s/q/pws:%s.json" % (db.get(constants.WEATHER_WU_KEY), feature, db.get(constants.WEATHER_STATION))
 
+
 def refresh():
     """
     Refreshes data from WeatherUndergound
@@ -38,6 +40,11 @@ def refresh():
         conditions = json.loads(response.text)
         wu["conditions"] = conditions["current_observation"]
 
+        latitude = wu["conditions"]["observation_location"]["latitude"]
+        longitude = wu["conditions"]["observation_location"]["longitude"]
+
+        wu["conditions"]["astrology"] = astro.tojson(latitude, longitude)
+
         logger.debug("Requesting alerts")
         response = requests.get(build_url("alerts"))
         alerts = json.loads(response.text)
@@ -47,6 +54,10 @@ def refresh():
         response = requests.get(build_url("forecast"))
         forecast = json.loads(response.text)
         wu["forecast"] = forecast["forecast"]["simpleforecast"]["forecastday"]
+
+        for day in wu["forecast"]:
+            astrodate = datetime(day["date"]["year"], day["date"]["month"], day["date"]["day"])
+            day["astrology"] = astro.tojson(latitude, longitude, astrodate)
 
         wu["expire"] = (datetime.now() + timedelta(minutes=db.get(constants.WEATHER_EXPIRE_MIN))).isoformat()
     except:

@@ -340,6 +340,16 @@ th:last-child,
 td:last-child {
   padding-right: 0; }
 
+.condensed th,td {
+  padding: 0px 15px;
+  text-align: left;
+  border-bottom: none; }
+
+.condensed td:first-child {
+  padding-left: 0; }
+
+.condensed table {
+  margin-bottom: 0rem; }
 
 /* Spacing
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
@@ -389,6 +399,12 @@ hr {
   border-width: 0;
   border-top: 1px solid #E1E1E1; }
 
+.alert {
+    position: absolute;
+    background-color: #000000;
+    background-color: rgba(122,124,127, 0.4);
+    top: -20px
+}
 
 .alert-red {
   color: darkred;
@@ -438,12 +454,36 @@ hr {
     height: 48px;
 }
 
-.alert {
-    position: absolute;
-    background-color: #000000;
-    background-color: rgba(122,124,127, 0.4);
-    top: -20px
+.weather-section {
+    background-color:rgba(0, 0, 0, 0.15);
+    padding:5px 5px 5px 5px
 }
+
+.wu-icon {
+    background-image:url("//icons.wxug.com/i/o/sprite-common-vert.png?v=1.21");
+    background-repeat:no-repeat;
+    display:inline-block;
+    vertical-align:middle;
+    width:20px;
+    height:20px;
+    margin-right:5px }
+
+.wu-icon.wet {background-position:0 -397px;width:16px;height:16px}
+.wu-icon.snow {background-position:-2px -733px;width:16px;height:16px}
+.wu-icon.snow.wet {background-position:-2px -750px;width:16px;height:16px}
+
+.wu-icon.sunrise{background-position:0 2px;}
+.wu-icon.sunset{background-position:0 -18px;}
+
+.wu-icon.moon {width:20px;height:20px;}
+.wu-icon.moon.lastqtr{background-position:0px -80px}
+.wu-icon.moon.waningcrescent{background-position:0px -100px}
+.wu-icon.moon.new{background-position:0px -120px}
+.wu-icon.moon.waxingcrescent{background-position:0px -139px}
+.wu-icon.moon.firstqtr{background-position:0px -159px}
+.wu-icon.moon.waninggibbous{background-position:0px -178px}
+.wu-icon.moon.full{background-position:0px -197px}
+.wu-icon.moon.waxinggibbous{background-position:0px -217px}
 
 /* Clearing
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
