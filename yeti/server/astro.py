@@ -14,8 +14,9 @@ def moonphase(now=None):
 
    pos = lunations % dec(1)
 
-   index = (pos * dec(8)) + dec("0.5")
-   index = math.floor(index)
+   print round(pos * 8, 1)
+   index = int(round(pos * 8, 1)) - 1
+
    return {
       0: ("New Moon", "new"),
       1: ("Waxing Crescent", "waxingcrescent"),
@@ -25,7 +26,7 @@ def moonphase(now=None):
       5: ("Waning Gibbous", "waninggibbous"),
       6: ("Last Quarter", "lastqtr"),
       7: ("Waning Crescent", "waningcrescent")
-   }[int(index) & 7], pos
+   }[index], pos
 
 
 def suntimes(latitude, longitude, now=None):
@@ -46,14 +47,14 @@ def tojson(latitude, longitude, now=None):
    if now is None:
       now = datetime.datetime.now()
 
+   now = datetime.datetime.combine(now, datetime.time(23, 59, 59))
+
    moon = moonphase(now)
    sun = suntimes(float(latitude), float(longitude), now)
 
-
-
    astrology = {
       "datetime" : now.isoformat(),
-      "moonphase": {"name": moon[0][0], "code": moon[0][1]},
+      "moonphase": {"name": moon[0][0], "code": moon[0][1], "value": round(float(moon[1]), 2)},
       "sun": {"sunrise": sun[0].strftime("%I:%M %p"), "sunset": sun[1].strftime("%I:%M %p")}
       }
 
@@ -67,7 +68,7 @@ def main():
    sun = suntimes(41.186668, -78.460136)
    print "Sunrise: %s  Sunset: %s" % sun
 
-   print tojson(u'41.186668', -78.460136)
+   print tojson(u'41.186668', -78.460136, datetime.datetime.now() + datetime.timedelta(days=8))
 
 if __name__=="__main__":
    main()

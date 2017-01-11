@@ -45,12 +45,13 @@ function showAlert(message, color, expire) {
 $(function () {
 
 $.addTemplateFormatter({
-    SimpleTimeFormatter : function(value, template) {
-            return value.toUpperCase();
+    MoonPhaseFormatter : function(value, template) {
+            return "age" + Math.floor(parseFloat(value) * 31)
         },
     TempFormatter : function(value, template) {
             return value + "&deg;"
         },
 });
+
   refreshWeatherData(false)
 });

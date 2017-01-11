@@ -475,15 +475,46 @@ hr {
 .wu-icon.sunrise{background-position:0 2px;}
 .wu-icon.sunset{background-position:0 -18px;}
 
-.wu-icon.moon {width:20px;height:20px;}
-.wu-icon.moon.lastqtr{background-position:0px -80px}
-.wu-icon.moon.waningcrescent{background-position:0px -100px}
-.wu-icon.moon.new{background-position:0px -120px}
-.wu-icon.moon.waxingcrescent{background-position:0px -139px}
-.wu-icon.moon.firstqtr{background-position:0px -159px}
-.wu-icon.moon.waninggibbous{background-position:0px -178px}
-.wu-icon.moon.full{background-position:0px -197px}
-.wu-icon.moon.waxinggibbous{background-position:0px -217px}
+.moon {
+    background-image:url("//icons.wxug.com/i/dashboard/MoonPhasesSprite.png");
+    background-repeat:no-repeat;
+    display:inline-block;
+    vertical-align:middle;
+    width:20px;
+    height:20px;
+    margin-right:5px }
+
+.moon.age1{background-position:-0px -0px}
+.moon.age2{background-position:-20px -0px}
+.moon.age3{background-position:-40px -0px}
+.moon.age4{background-position:-60px -0px}
+.moon.age5{background-position:-80px -0px}
+.moon.age6{background-position:-100px -0px}
+.moon.age7{background-position:-120px -0px}
+.moon.age8{background-position:-140px -0px}
+.moon.age9{background-position:-160px -0px}
+.moon.age10{background-position:-180px -0px}
+.moon.age11{background-position:-200px -0px}
+.moon.age12{background-position:-220px -0px}
+.moon.age13{background-position:-240px -0px}
+.moon.age14{background-position:-260px -0px}
+.moon.age15{background-position:-280px -0px}
+.moon.age16{background-position:-300px -0px}
+.moon.age17{background-position:-320px -0px}
+.moon.age18{background-position:-340px -0px}
+.moon.age19{background-position:-360px -0px}
+.moon.age20{background-position:-380px -0px}
+.moon.age21{background-position:-400px -0px}
+.moon.age22{background-position:-420px -0px}
+.moon.age23{background-position:-440px -0px}
+.moon.age24{background-position:-460px -0px}
+.moon.age25{background-position:-480px -0px}
+.moon.age26{background-position:-500px -0px}
+.moon.age27{background-position:-520px -0px}
+.moon.age28{background-position:-540px -0px}
+.moon.age29{background-position:-560px -0px}
+.moon.age30{background-position:-580px -0px}
+.moon.age31{background-position:-600px -0px}
 
 /* Clearing
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
