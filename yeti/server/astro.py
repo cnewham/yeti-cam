@@ -49,10 +49,12 @@ def tojson(latitude, longitude, now=None):
    moon = moonphase(now)
    sun = suntimes(float(latitude), float(longitude), now)
 
+
+
    astrology = {
       "datetime" : now.isoformat(),
       "moonphase": {"name": moon[0][0], "code": moon[0][1]},
-      "sun": {"sunrise": sun[0].isoformat(), "sunset": sun[1].isoformat()}
+      "sun": {"sunrise": sun[0].strftime("%I:%M %p"), "sunset": sun[1].strftime("%I:%M %p")}
       }
 
    return astrology

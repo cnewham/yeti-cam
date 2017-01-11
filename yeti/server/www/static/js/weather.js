@@ -9,18 +9,8 @@ function refreshWeatherData(force) {
           showAlert("An error occurred: " + error.status + " " + error.statusText, color=alerts.red);
         },
         success: function (result) {
-          $("#conditions-container").loadTemplate($("#conditions-template"), result["conditions"]);
-          $("#forecast-container").loadTemplate($("#forecast-template"), result["forecast"]);
-
-
-          var alert;
-          $.each(result["alerts"], function(idx, data) {
-             alert += data;
-          })
-
-          showAlert(alert, alerts.red);
-
-          $("#station-id").text = result["conditions"]["station_id"];
+          $("#conditions-container").loadTemplate($("#conditions-template"), result["conditions"], {append: true});
+          $("#forecast-container").loadTemplate($("#forecast-template"), result["forecast"], {append: true});
 
         }
   });
@@ -53,5 +43,14 @@ function showAlert(message, color, expire) {
 }
 
 $(function () {
-  //refreshWeatherData(false)
+
+$.addTemplateFormatter({
+    SimpleTimeFormatter : function(value, template) {
+            return value.toUpperCase();
+        },
+    TempFormatter : function(value, template) {
+            return value + "&deg;"
+        },
+});
+  refreshWeatherData(false)
 });
