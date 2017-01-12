@@ -3,7 +3,6 @@ function refreshWeatherData(force) {
   $.ajax({
         type: "GET",
         url: "api/v2/weather",
-        data: {"force":force},
         dataType: "json",
         error: function (error) {
           showAlert("An error occurred: " + error.status + " " + error.statusText, color=alerts.red);
@@ -12,6 +11,13 @@ function refreshWeatherData(force) {
           $("#conditions-container").loadTemplate($("#conditions-template"), result["conditions"], {append: true});
           $("#forecast-container").loadTemplate($("#forecast-template"), result["forecast"], {append: true});
 
+          $("#forecast-container .precip-indicator").each(function(index) {
+            value = parseFloat(this.innerText);
+            if (value % 1 === 0) {
+                $(this).prop("hidden", true);
+            }
+
+          });
         }
   });
 

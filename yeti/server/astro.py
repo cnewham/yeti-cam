@@ -14,8 +14,11 @@ def moonphase(now=None):
 
    pos = lunations % dec(1)
 
-   print round(pos * 8, 1)
-   index = int(round(pos * 8, 1)) - 1
+   #print round(pos * 4) / 4
+
+   index = int(math.floor(pos * 8))
+
+   #print index
 
    return {
       0: ("New Moon", "new"),
@@ -68,7 +71,7 @@ def main():
    sun = suntimes(41.186668, -78.460136)
    print "Sunrise: %s  Sunset: %s" % sun
 
-   print tojson(u'41.186668', -78.460136, datetime.datetime.now() + datetime.timedelta(days=8))
+   print tojson(u'41.186668', -78.460136, datetime.datetime.now() + datetime.timedelta(days=14))
 
 if __name__=="__main__":
    main()
