@@ -340,7 +340,7 @@ th:last-child,
 td:last-child {
   padding-right: 0; }
 
-.condensed th,td {
+.condensed th,.condensed td  {
   padding: 0px 15px;
   text-align: left;
   border-bottom: none; }
