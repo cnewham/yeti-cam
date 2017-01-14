@@ -16,8 +16,9 @@ function refreshWeatherData(force) {
             if (value % 1 === 0) {
                 $(this).prop("hidden", true);
             }
-
           });
+
+          $("#loading").hide();
         }
   });
 

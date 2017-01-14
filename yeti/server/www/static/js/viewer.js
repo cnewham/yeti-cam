@@ -130,3 +130,7 @@ $(function () {
     console.log('Socket connected...');
   });
 });
+
+$(window).on("load", function() {
+    $("#loading").hide();
+});
