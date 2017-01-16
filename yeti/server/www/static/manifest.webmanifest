@@ -1,0 +1,14 @@
+{
+  "name": "YETI CAM",
+  "icons": [
+    {
+      "src": "images/bigfoot-logo-192.png",
+      "sizes": "192x192"
+    }
+  ],
+  "lang": "en-US",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#9B9B9B"
+}
