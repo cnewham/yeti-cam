@@ -20,21 +20,6 @@
 
   <script type=text/javascript src="{{ url_for('static', filename='js/viewer.js') }}"></script>
 
-  <script id="capture-template" type="text/x-custom-template">
-    <div data-id="name" class="dragend-page">
-      <div class="row">
-        <div class="image-container">
-          <img class="capture" data-src="url" />
-        </div>
-      </div>
-      <div class="row">
-        <div class="column">
-          <div class="status">Loading status...</div>
-        </div>
-      </div>
-    </div>
-  </script>
-
   <!-- Mobile Specific Metas
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -85,7 +70,21 @@
       </div>
     </div>
     <div id="capture-container">
-      <div>No captures to display</div>
+      <script id="capture-template" type="text/x-custom-template">
+        <div data-id="name" class="dragend-page">
+          <div class="row">
+            <div class="image-container">
+              <a data-href="name" data-format="ConfigUrlFormatter" data-format-target="href"><span class="config-icon u-pull-right" style="background: url('{{ url_for('static', filename='images/settings.png') }}') no-repeat center center;"></span></a>
+              <img class="capture" data-src="url" />
+            </div>
+          </div>
+          <div class="row">
+            <div class="column">
+              <div class="status">Loading status...</div>
+            </div>
+          </div>
+        </div>
+      </script>
     </div>
     <div id="loading" style="background: url('{{ url_for('static', filename='images/loading.gif') }}') no-repeat center center"></div>
   </div>

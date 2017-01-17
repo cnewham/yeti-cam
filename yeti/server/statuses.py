@@ -2,6 +2,7 @@ import logging
 import yeti
 import pickledb
 import datetime
+from flask import url_for
 from yeti.common import constants
 from yeti.server import motion
 
@@ -16,7 +17,9 @@ def process(status, name=None):
     db.drem(constants.STATUS)
     db.dcreate(constants.STATUS)
 
-    db.dadd(constants.STATUS, ("Motion Events (24hr)", motion.get_motion_events_from(24)))
+    events = motion.get_motion_events_from(24)
+    if events > 0:
+        db.dadd(constants.STATUS, ("Motion Events (24hr)", events))
 
     for key, value in status.iteritems():
         if key == constants.STATUS_EVENT:
@@ -28,7 +31,11 @@ def process(status, name=None):
         elif key == constants.STATUS_INDOOR_TEMP:
             db.dadd(constants.STATUS, ("Indoor Temp", "%.2f%sF, %.2f%%" % (value[constants.STATUS_TEMP], unichr(176), value[constants.STATUS_HUMIDITY])))
         elif key == constants.STATUS_OUTDOOR_TEMP:
-            db.dadd(constants.STATUS, ("Outdoor Temp", "%.2f%sF, %.2f%%" % (value[constants.STATUS_TEMP], unichr(176), value[constants.STATUS_HUMIDITY])))
+            db.dadd(constants.STATUS, ("Outdoor Temp", "<a href='%s'>%.2f%sF, %.2f%%</a>"
+                                       % (url_for('weather'),
+                                          value[constants.STATUS_TEMP],
+                                          unichr(176),
+                                          value[constants.STATUS_HUMIDITY])))
         else:
             db.dadd(constants.STATUS, (key, value))
 

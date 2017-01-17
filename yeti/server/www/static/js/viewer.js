@@ -103,6 +103,12 @@ function showAlert(message, color, expire) {
 }
 
 $(function () {
+  $.addTemplateFormatter({
+    ConfigUrlFormatter : function(value, template) {
+        return Flask.url_for("configure", { "name":value });
+    }
+  });
+
   init();
 
   socket.on('status_update', function (data) {

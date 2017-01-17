@@ -31,6 +31,7 @@ def configure(name=None):
             print ex
             return 500
 
+
 @app.route('/weather')
 def weather():
     try:

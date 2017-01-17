@@ -393,6 +393,15 @@ form {
 
 /* Misc
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
+a {
+    text-decoration:none;
+    color:#892828;
+}
+
+a:hover {
+    color:#B23434;
+}
+
 hr {
   margin-top: 3rem;
   margin-bottom: 3.5rem;
@@ -452,6 +461,20 @@ hr {
     left: 0;
     width: 48px;
     height: 48px;
+}
+
+.config-icon {
+    width: 32px;
+    height: 32px;
+    opacity:.5;
+    padding:5px;
+    background-size:auto;
+    position:absolute;
+}
+
+.config-icon:hover {
+    opacity:.75;
+    cursor: pointer;
 }
 
 .weather-section {
