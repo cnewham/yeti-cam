@@ -22,7 +22,8 @@ def moonphase(now=None):
         isphase = True
         pos = quarter
 
-    index = (pos * dec(4)) + dec("0.5")
+    index = (pos * dec(4))
+
     index = math.floor(index)
 
     index = int(index) & 3
@@ -80,5 +81,5 @@ def tojson(latitude, longitude, now=None):
 
 
 if __name__ == "__main__":
-    for i in range(0,30):
+    for i in range(-5,20):
         print tojson(u'41.186668', -78.460136, datetime.datetime.now() + datetime.timedelta(days=i))

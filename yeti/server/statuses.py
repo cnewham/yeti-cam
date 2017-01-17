@@ -19,7 +19,7 @@ def process(status, name=None):
 
     events = motion.get_motion_events_from(24)
     if events > 0:
-        db.dadd(constants.STATUS, ("Motion Events (24hr)", events))
+        db.dadd(constants.STATUS, ("Motion Events", events))
 
     for key, value in status.iteritems():
         if key == constants.STATUS_EVENT:
