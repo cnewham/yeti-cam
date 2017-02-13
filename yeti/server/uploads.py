@@ -30,7 +30,7 @@ def process_image(event, upload, name=None):
         logger.exception("An exception occurred during processing image upload for %s" % filename)
 
     if event == constants.EVENT_MOTION:
-        motion.add_motion_event(datetime.datetime.now().isoformat())
+        motion.add_motion_event(datetime.datetime.now().isoformat(), name)
 
     return filename
 
@@ -55,6 +55,6 @@ def process_video(event, upload, name=None):
         logger.exception("An exception occurred during processing video upload for %s" % filename)
 
     if event == constants.EVENT_MOTION:
-        motion.add_motion_event(datetime.datetime.now().isoformat())
+        motion.add_motion_event(datetime.datetime.now().isoformat(), name)
 
     return filename
