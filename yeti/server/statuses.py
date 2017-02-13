@@ -17,7 +17,7 @@ def process(status, name=None):
     db.drem(constants.STATUS)
     db.dcreate(constants.STATUS)
 
-    events = motion.get_motion_events_from(24)
+    events = motion.get_motion_events_from(24, name)
     if events > 0:
         db.dadd(constants.STATUS, ("Motion Events", events))
 

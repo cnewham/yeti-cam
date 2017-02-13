@@ -9,26 +9,32 @@ logger = logging.getLogger(__name__)
 
 db = pickledb.load(yeti.createcamdir('db') + '/motion.db', True)
 
-if not db.get(constants.MOTION_LOG):
-    db.lcreate(constants.MOTION_LOG)
+
+def add_motion_event(event_time, name=yeti.options.name):
+    if not db.get(name):
+        db.lcreate(name)
+
+    db.ladd(name, event_time)
 
 
-def add_motion_event(event_time):
-    db.ladd(constants.MOTION_LOG, event_time)
+def get_motion_events_from(hours, name=yeti.options.name):
+    if not db.get(name):
+        db.lcreate(name)
 
-
-def get_motion_events_from(hours):
     total = 0
-    for idx, event in enumerate(db.lgetall(constants.MOTION_LOG)):
+    for idx, event in enumerate(db.lgetall(name)):
         event_date = datetime.strptime(event, "%Y-%m-%dT%H:%M:%S.%f")
         delta_date = datetime.now() - timedelta(hours=hours)
         if event_date >= delta_date:
             total += 1
         else:
-            db.lpop(constants.MOTION_LOG, idx)
+            db.lpop(name, idx)
 
     return total
 
 
-def get_all_motion_events():
-    return db.lgetall(constants.MOTION_LOG)
+def get_all_motion_events(name=yeti.options.name):
+    if not db.get(name):
+        db.lcreate(name)
+
+    return db.lgetall(name)
