@@ -59,6 +59,20 @@
     <div class="row" style="margin-top: 10%">
       <div class="twelve columns u-cf">
         <div class="u-pull-left" style="font-size:2em">YETI CAM</div>
+        <div id="conditions-container">
+          <script id="conditions-template" type="text/x-custom-template">
+              <a href="/weather">
+                <div style="padding-top:10px;">
+                  <div class="u-pull-left" style="padding-left: 20px;">
+                    <img data-src="icon_url" style="width:24px;height:24px"/>
+                  </div>
+                  <div class="u-pull-left" style="padding-left:10px;">
+                    <h6 data-content="temp_f" data-format="TempFormatter"></h6>
+                  </div>
+                </div>
+            </a>
+          </script>
+        </div>
         <div class="u-pull-right" style="padding-top:1em;" id="online-indicator" hidden>
           <span class="indicator" style="content: url({{ url_for('static', filename='images/indicator-green.png') }});"></span>
           <span>Online</span>

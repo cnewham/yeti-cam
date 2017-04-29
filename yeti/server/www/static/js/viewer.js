@@ -19,6 +19,22 @@ function init() {
         }
   });
 
+  refreshWeatherData(false);
+
+}
+
+function refreshWeatherData(force) {
+  $.ajax({
+        type: "GET",
+        url: "api/v2/weather",
+        dataType: "json",
+        error: function (error) {
+          showAlert("An error occurred: " + error.status + " " + error.statusText, color=alerts.red);
+        },
+        success: function (result) {
+          $("#conditions-container").loadTemplate($("#conditions-template"), result["conditions"], {append: true});
+        }
+  });
 }
 
 function updateStatus(name) {
@@ -134,6 +150,15 @@ $(function () {
 
   socket.on('connect', function () {
     console.log('Socket connected...');
+  });
+
+  $.addTemplateFormatter({
+    MoonPhaseFormatter : function(value, template) {
+            return "age" + Math.floor(parseFloat(value) * 31)
+        },
+    TempFormatter : function(value, template) {
+            return value + "&deg;"
+        },
   });
 });
 
