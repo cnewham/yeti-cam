@@ -1,12 +1,12 @@
 ﻿__author__ = 'chris'
-import threading, time, io, os, shutil
-from datetime import datetime, timedelta
+import threading, time, io, os
+from datetime import datetime
 import picamera
-import motion
 from yeti.common import config, constants
 
 import logging
 logger = logging.getLogger(__name__)
+
 
 class YetiPiCamera:
     """
@@ -31,10 +31,10 @@ class YetiPiCamera:
             filename = get_filename(config.get(constants.CONFIG_IMAGE_DIR), "recording-", "h264")
             temp = "%s.temp" % filename
 
-            #Split the recording into the output file for the after motion data
+            # Split the recording into the output file for the after motion data
             self.camera.split_recording(temp)
 
-            #Write before motion buffer into file            
+            # Write before motion buffer into file
             with io.open(filename, 'wb') as output:
                 with self.buffer.lock:
                     for frame in self.buffer.frames:
@@ -50,11 +50,11 @@ class YetiPiCamera:
                     self.buffer.seek(0)
                     self.buffer.truncate()
 
-            #split the recording back into the circular stream
+            # split the recording back into the circular stream
             self.camera.wait_recording(seconds)
             self.camera.split_recording(self.buffer)
 
-            #stitch the 2 streams together and remove the temp file
+            # stitch the 2 streams together and remove the temp file
             with io.open(filename, 'ab') as output:
                 with io.open(temp, 'rb') as t:
                     output.write(t.read())
@@ -78,10 +78,6 @@ class YetiPiCamera:
     def start(self):
         logger.info("Starting capture")
 
-        sensitivity = config.get(constants.CONFIG_MOTION_SENSITIVITY)
-        threshold = config.get(constants.CONFIG_MOTION_THRESHOLD)
-        percent_change_max = config.get(constants.CONFIG_MOTION_PERCENT_CHANGE_MAX)
-
         self.camera.resolution = (config.get(constants.CONFIG_IMAGE_WIDTH),config.get(constants.CONFIG_IMAGE_HEIGHT))
         self.camera.framerate = 2
 
@@ -94,9 +90,7 @@ class YetiPiCamera:
         self.camera.led = False
 
         if self.motion_enabled:
-            analyzer = motion.SimpleGaussMotionDetector(self.camera, self.handler, sensitivity, threshold, percent_change_max = percent_change_max)
             self.camera.start_recording(self.buffer, format='h264')
-            self.camera.start_recording(analyzer, format='rgb', splitter_port=2, resize=(320,240))
 
     def wait(self, seconds=1.0):
         if self.motion_enabled:
@@ -104,12 +98,10 @@ class YetiPiCamera:
         else:
             time.sleep(seconds)
 
-
     def stop(self):
         logger.info("Stopping capture")
 
         if self.motion_enabled:
-            self.camera.stop_recording(splitter_port=2)
             self.camera.stop_recording()
 
     def close(self):
@@ -119,9 +111,11 @@ class YetiPiCamera:
 
     def __enter__(self):
         return self
+
     def __exit__(self, exc_type, exc_value, exc_tb):
         self.camera.close()
-        
+
+
 class CaptureHandler:
     """
     Handles picamera instance and manages events that are requested.
@@ -215,6 +209,7 @@ class CaptureHandler:
     def restart(self):
         self.stop()
         self.start()
+
 
 def get_filename(path, prefix, ext="jpg"):
     if not os.path.exists(path):

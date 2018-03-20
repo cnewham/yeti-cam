@@ -1,0 +1,12 @@
+[Unit]
+Description=yeticam Service
+After=network.target
+ 
+[Service]
+Type=simple
+WorkingDirectory=/home/yeti
+ExecStart=/usr/bin/python /home/yeti/cam.py -name south
+Restart=always
+ 
+[Install]
+WantedBy=multi-user.target

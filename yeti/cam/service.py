@@ -17,13 +17,13 @@ class YetiService:
     def post_image(self, image, event):
         logger.info("Posting Image: %s" % image)
         multiple_files = [('uploads', (image, open(image, 'rb'), 'image/jpg'))]
-        r = requests.post(self.baseUrl + "capture/" + yeti.options.name, files=multiple_files, data={"event":event})
+        r = requests.post(self.baseUrl + "capture/" + yeti.options.name, files=multiple_files, data={"event": event})
         logger.info("StatusCode: %s, Text: %s" % (r.status_code, r.text))
 
     def post_video(self, video, event):
         logger.info("Posting Video: %s" % video)
         multiple_files = [('uploads', (video, open(video, 'rb'), 'video/h264'))]
-        r = requests.post(self.baseUrl + "capture/" + yeti.options.name, files=multiple_files, data={"event":event})
+        r = requests.post(self.baseUrl + "capture/" + yeti.options.name, files=multiple_files, data={"event": event})
         logger.info("StatusCode: %s, Text: %s" % (r.status_code, r.text))
 
     def post_status(self, status):
@@ -88,5 +88,6 @@ class YetiSocket:
 
     def __enter__(self):
         return self
+
     def __exit__(self, exc_type, exc_value, exc_tb):
         self.disconnect()

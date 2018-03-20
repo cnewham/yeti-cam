@@ -17,14 +17,14 @@ except RuntimeError:
 db = pickledb.load(yeti.createcamdir('db') + '/sensors.db', True)
 
 if not db.get(constants.SENSORS_TEMP):
-    #default temp sensor locations
+    # default temp sensor locations
     logger.debug("adding default temp sensor config")
     db.dcreate(constants.SENSORS_TEMP)
     db.dadd(constants.SENSORS_TEMP, (constants.STATUS_INDOOR_TEMP, 4)) #{name : gpio}
     db.dadd(constants.SENSORS_TEMP, (constants.STATUS_OUTDOOR_TEMP, 17)) #{name : gpio}
 
 if not db.get(constants.SENSORS_MOTION):
-    #default motion sensor locations
+    # default motion sensor locations
     logger.debug("adding default motion sensor config")
     db.lcreate(constants.SENSORS_MOTION)
 
@@ -53,18 +53,20 @@ class GpioInputEvent(object):
             self.deactivated(channel)
 
     def activated(self, channel):
-        #overridable: called when a channel goes active
+        # overridable: called when a channel goes active
         pass
 
     def deactivated(self, channel):
-        #overridable: called when a channel goes inactive
+        # overridable: called when a channel goes inactive
         pass
 
     def __enter__(self):
         return self
+
     def __exit__(self, exc_type, exc_value, exc_tb):
         logger.debug("Cleaning up channels")
         GPIO.cleanup(self.channels)
+
 
 class Motion(GpioInputEvent):
     def __init__(self, callback):
@@ -81,7 +83,7 @@ class Motion(GpioInputEvent):
         else:
             self.motion_detected[channel] = True
             if self.callback:
-                self.callback(True) #send callback the first time a channel starts detecting motion
+                self.callback(True)  # send callback the first time a channel starts detecting motion
 
     def deactivated(self, channel):
         logger.debug("Motion Channel %s has been deactivated" % channel)
@@ -90,7 +92,8 @@ class Motion(GpioInputEvent):
 
         if not any(self.motion_detected.values()):
             if self.callback:
-                self.callback(False) #send callback after the last channel stops detecting motion
+                self.callback(False)  # send callback after the last channel stops detecting motion
+
 
 class Temperature:
     readings = {}
@@ -112,7 +115,7 @@ class Temperature:
         logger.info("Starting temperature/humidity sensors")
         sensor = 22
 
-        #Initialize readings with -1 value
+        # Initialize readings with -1 value
         for name in db.dkeys(constants.SENSORS_TEMP):
             self.readings[name] = {}
 

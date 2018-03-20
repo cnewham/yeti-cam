@@ -15,13 +15,14 @@ logger = logging.getLogger(__name__)
 
 logger.info("Starting yeticam as " + yeti.options.name)
 
+
 def send(filename, event, capture_type):
     try:
         logger.info("Sending image with event %s" % event)
         status = {}
         status[constants.STATUS_EVENT] = event
 
-        #read temperature/humidity values
+        # read temperature/humidity values
         for key, value in temp.read().iteritems():
             if value != {}:
                 status[key] = value
@@ -40,6 +41,7 @@ def send(filename, event, capture_type):
     except Exception:
         logger.exception("An error occurred while attempting to upload to server")
 
+
 def check_config_updates(*args):
     logger.info("Checking for config updates: %s" % args )
     try:
@@ -55,7 +57,7 @@ def check_config_updates(*args):
             config.set_status(constants.CONFIG_STATUS_UPDATED)
             server.send_config_status(config.get_status())
 
-            #restart capture to load the most recent configs
+            # restart capture to load the most recent configs
             capture.restart()
             socket.config_updated(config.get_status())
 
@@ -64,8 +66,9 @@ def check_config_updates(*args):
     except Exception as ex:
         logger.exception("Could not update configs from the server")
 
+
 def capture_timer_image():
-    time.sleep(5) #Sleep for 5 seconds on startup then take the first picture
+    time.sleep(5) # Sleep for 5 seconds on startup then take the first picture
     while True:
         logger.info("Capturing timer image: %i min" % config.get(constants.CONFIG_TIMER_INTERVAL_MIN))
 
@@ -76,6 +79,7 @@ def capture_timer_image():
 
         time.sleep(config.get(constants.CONFIG_TIMER_INTERVAL_MIN) * constants.SECONDS2MIN)
 
+
 def capture_manual_image(*args):
     logger.info("Capturing manual image: %s" % args)
 
@@ -85,6 +89,7 @@ def capture_manual_image(*args):
         logger.info("Manual image was triggered but the camera was already in use")
 
     socket.manual_capture_result(success)
+
 
 def capture_motion_image(detected):
     logger.info("Motion sensor change: %s" % detected)
@@ -98,7 +103,7 @@ def capture_motion_image(detected):
         logger.info("Manual image was triggered but the camera was already in use")
 
 
-#Initialize
+# Initialize
 motion_events = motion.MotionEvents()
 motion_sensors = sensors.Motion(capture_motion_image)
 
@@ -108,15 +113,16 @@ server = service.YetiService(config.get(constants.CONFIG_SERVER))
 socket = service.YetiSocket(config.get(constants.CONFIG_SOCKET_HOST), config.get(constants.CONFIG_SOCKET_PORT),
                             config_update_callback=check_config_updates, manual_capture_callback=capture_manual_image)
 
-#check for config updates from the server
-check_config_updates({"version":"current"})
+# check for config updates from the server
+check_config_updates({"version": "current"})
 
-#start all threads and run until a stop signal is detected
+# start all threads and run until a stop signal is detected
 capture.start()
 
 timer_capture_thread = threading.Thread(target=capture_timer_image)
 timer_capture_thread.daemon = True
 timer_capture_thread.start()
+
 
 def signal_handler(signal, frame):
     logger.warning("Stop signal detected...")
