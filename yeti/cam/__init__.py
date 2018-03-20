@@ -43,8 +43,10 @@ def send(filename, event, capture_type):
 
 
 def check_config_updates(*args):
-    logger.info("Checking for config updates: %s" % args )
+    logger.info("Checking for config updates: %s" % args)
     try:
+        # TODO: Check args.name against yeti.options.name to see if the config request was for this instance
+
         server_configs = server.get_config()
 
         if server_configs is None or server_configs[constants.CONFIG_VERSION] < config.get(constants.CONFIG_VERSION):
@@ -100,7 +102,7 @@ def capture_motion_image(detected):
         return
 
     if not success:
-        logger.info("Manual image was triggered but the camera was already in use")
+        logger.info("Motion image was triggered but the camera was already in use")
 
 
 # Initialize
@@ -114,7 +116,7 @@ socket = service.YetiSocket(config.get(constants.CONFIG_SOCKET_HOST), config.get
                             config_update_callback=check_config_updates, manual_capture_callback=capture_manual_image)
 
 # check for config updates from the server
-check_config_updates({"version": "current"})
+check_config_updates({"version": "current", "name": yeti.options.name})
 
 # start all threads and run until a stop signal is detected
 capture.start()
@@ -122,6 +124,9 @@ capture.start()
 timer_capture_thread = threading.Thread(target=capture_timer_image)
 timer_capture_thread.daemon = True
 timer_capture_thread.start()
+
+# tell server that we're good to go
+socket.hello()
 
 
 def signal_handler(signal, frame):

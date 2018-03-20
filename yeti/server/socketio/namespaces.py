@@ -1,27 +1,27 @@
 ﻿from flask_socketio import Namespace, emit, send
+from flask import request
 
 import logging
 logger = logging.getLogger(__name__)
 
-online = False
+online = {}
+
 
 class Cam(Namespace):
     def on_connect(self):
-        global online
-        logger.info("Camera client connected")
-        online = True
-        emit('config_update', {})
-        emit('camera_status', {'connected': True }, namespace='/web', broadcast=True)
+        logger.info("Camera (%s) client connected" % request.sid)
 
     def on_disconnect(self):
         global online
-        logger.info("Camera client disconnected")
-        online = False
-        emit('camera_status', {'connected': False }, namespace='/web', broadcast=True)
+        logger.info("Camera (%s) client disconnected" % request.sid)
+        del online[request.sid]
+        emit('camera_status', online, namespace='/web', broadcast=True)
 
-    def on_alert(self, data):
-        #TODO: Do stuff on the server when there's an alert
-        emit('alert', data, namespace='/web', broadcast=True)
+    def on_hello(self, name):
+        global online
+        online[request.sid] = name
+        logger.info("Camera %s (%s) said hello" % (name, request.sid))
+        emit('camera_status', online, namespace='/web', broadcast=True)
 
     def on_config_updated(self, data):
         emit('config_updated', data, namespace='/web', broadcast=True)
@@ -29,10 +29,11 @@ class Cam(Namespace):
     def on_manual_capture_result(self, data):
         emit('manual_capture_result', data, namespace='/web', broadcast=True)
 
+
 class Web(Namespace):
     def on_connect(self):
         logger.info("Web client connected")
-        emit('camera_status', {'connected': online })
+        emit('camera_status', {'connected': online})
 
     def on_disconnect(self):
         logger.info("Web client disconnected")

@@ -11,6 +11,7 @@ from yeti.common import constants, config
 import logging
 logger = logging.getLogger(__name__)
 
+
 class CaptureApi(Resource):
     def __init__(self):
         self.parser = reqparse.RequestParser()

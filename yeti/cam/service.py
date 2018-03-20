@@ -67,17 +67,17 @@ class YetiSocket:
 
             self.io.wait()
 
-    def alert(self, data):
-        logger.info("Sending alert to server: %s" % data)
-        self.cam.emit("alert", data)
-
     def config_updated(self, status):
         logger.info("Sending config updated result: %s" % status)
         self.cam.emit("config_updated", {"status":status})
 
     def manual_capture_result(self, result):
         logger.info("Sending manual capture result: %s" % result)
-        self.cam.emit("manual_capture_result", {"result":result})
+        self.cam.emit("manual_capture_result", {"result": result})
+
+    def hello(self):
+        logger.info("Sending hello")
+        self.cam.emit("hello", yeti.options.name)
 
     def connect(self):
         self.cam.connect()

@@ -7,6 +7,7 @@ from yeti.common import config, constants
 import logging
 logger = logging.getLogger(__name__)
 
+
 class MotionEvents:
     def __init__(self):
         self.motion_events = 0
@@ -14,19 +15,19 @@ class MotionEvents:
 
     def enabled(self):
         if not config.get(constants.CONFIG_MOTION_ENABLED):
-            return False #motion disabled in configuration
+            return False  # motion disabled in configuration
 
         if self.last_motion_event is None or self.exceeds_motion_capture_delay():
             self.motion_events = 1
             self.last_motion_event = datetime.now()
-            return True #doesn't exceed motion capture delay
+            return True  # doesn't exceed motion capture delay
         elif self.motion_events + 1 <= config.get(constants.CONFIG_MOTION_CAPTURE_THRESHOLD):
             self.motion_events += 1
             self.last_motion_event = datetime.now()
-            return True #still within motion capture threshold
+            return True  # still within motion capture threshold
         else:
             logger.warning("Motion capture threshold exceeded")
-            return False #exceeds motion capture threshold
+            return False  # exceeds motion capture threshold
 
     def exceeds_motion_capture_delay(self):
         if self.last_motion_event is not None:
@@ -34,6 +35,7 @@ class MotionEvents:
             return delta_date > self.last_motion_event
         else:
             return True
+
 
 class SimpleGaussMotionDetector(picamera.array.PiRGBAnalysis):
     """
@@ -46,7 +48,7 @@ class SimpleGaussMotionDetector(picamera.array.PiRGBAnalysis):
         self.handler = handler
         self.sensitivity = (sensitivity/255.0) ** 2 * 100
         self.threshold = (threshold/255.0) * 100
-        self.alpha = (18/255.0) ** 3 #learning rate
+        self.alpha = (18/255.0) ** 3  # learning rate
         self.delay = delay
         self.last = datetime.now()
         self.background = None
@@ -138,6 +140,7 @@ class SADMotionDetector(picamera.array.PiMotionAnalysis):
 
             self.handler.motion_detected()
             self.last = datetime.now()
+
 
 def get_filename(path, prefix, ext="jpg"):
     now = datetime.now()

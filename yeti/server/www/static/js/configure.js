@@ -77,7 +77,7 @@ function saveConfig(config) {
             getConfig();
             $("#config input[type=submit]").prop("disabled", false);
 
-            socket.emit("config_update", {"version":config["version"]})
+            socket.emit("config_update", {"name", name, "version":config["version"]})
         }
     });
 };
