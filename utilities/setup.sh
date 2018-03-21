@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
 
+# Install python components
+
+sudo apt-get update
+sudo apt-get install build-essential python-dev
+
 # Install 3rd party python packages
 
-sudo pip install ...
+sudo pip install pickledb socketIO-client adafruit_python_dht picamera
 
 # Set permissions
 

@@ -125,9 +125,6 @@ timer_capture_thread = threading.Thread(target=capture_timer_image)
 timer_capture_thread.daemon = True
 timer_capture_thread.start()
 
-# tell server that we're good to go
-socket.hello()
-
 
 def signal_handler(signal, frame):
     logger.warning("Stop signal detected...")

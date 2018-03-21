@@ -15,7 +15,7 @@ if not default.get(constants.CONFIG_STATUS):
 if not default.get(constants.CONFIG_CHECK_INTERVAL_MIN):
     default.set(constants.CONFIG_CHECK_INTERVAL_MIN, 60)
 if not default.get(constants.CONFIG_SERVER):
-    default.set(constants.CONFIG_SERVER, "http://localhost:5000/api/")
+    default.set(constants.CONFIG_SERVER, "http://localhost:5000/api/v2/")
 if not default.get(constants.CONFIG_SOCKET_HOST):
     default.set(constants.CONFIG_SOCKET_HOST, "localhost")
 if not default.get(constants.CONFIG_SOCKET_PORT):

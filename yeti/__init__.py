@@ -9,7 +9,7 @@ options = parser.parse_args()
 
 
 def createcamdir(path=None):
-    temp = "%s/cams/%s" % (os.path.dirname(os.getcwd()), options.name)
+    temp = "%s/cams/%s" % (os.getcwd(), options.name)
 
     if path:
         temp += "/%s" % path
@@ -24,7 +24,7 @@ def createcamdir(path=None):
 
 
 def camdirexists(name):
-    return os.path.exists("%s/cams/%s" % (os.path.dirname(os.getcwd()), name))
+    return os.path.exists("%s/cams/%s" % (os.getcwd(), name))
 
 
 def getcamdir(name=None):
@@ -32,13 +32,13 @@ def getcamdir(name=None):
         raise NameError('%s cam does not exist' % name)
 
     if name:
-        return "%s/cams/%s" % (os.path.dirname(os.getcwd()), name)
+        return "%s/cams/%s" % (os.getcwd(), name)
     else:
-        return "%s/cams/%s" % (os.path.dirname(os.getcwd()), options.name)
+        return "%s/cams/%s" % (os.getcwd(), options.name)
 
 
 def getnames():
-    directory = "%s/cams" % os.path.dirname(os.getcwd())
+    directory = "%s/cams" % os.getcwd()
 
     return next(os.walk(directory))[1]
 
