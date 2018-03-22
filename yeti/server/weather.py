@@ -39,7 +39,12 @@ def refresh():
     """
     try:
         logger.debug("Requesting conditions")
-        response = requests.get(build_url("conditions"))
+        api = build_url("conditions");
+        response = requests.get(api)
+
+        if not response.text:
+            raise ValueError("response was empty when attempting to access WU API: %s" % api)
+
         conditions = json.loads(response.text)
         wu["conditions"] = conditions["current_observation"]
 

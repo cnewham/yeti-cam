@@ -3,7 +3,8 @@ import requests
 import yeti
 from yeti.common import config
 import threading
-from socketIO_client import SocketIO, LoggingNamespace
+from socketIO_client import SocketIO
+from socketIO_client.namespaces import LoggingSocketIONamespace
 
 import logging
 logger = logging.getLogger(__name__)
@@ -49,6 +50,16 @@ class YetiService:
         logger.info("StatusCode: %s, Text: %s" % (r.status_code, r.text))
 
 
+class CamNamespace(LoggingSocketIONamespace):
+    def on_connect(self):
+        self.emit("hello", yeti.options.name)
+        super(LoggingSocketIONamespace, self).on_connect()
+
+    def on_reconnect(self):
+        self.emit("hello", yeti.options.name)
+        super(LoggingSocketIONamespace, self).on_reconnect()
+
+
 class YetiSocket:
     def __init__(self, host='localhost', port=5001, config_update_callback=None, manual_capture_callback=None):
         self.cam = None
@@ -60,15 +71,13 @@ class YetiSocket:
 
     def _worker(self, host, port, config_update_callback, manual_capture_callback):
         self.io = SocketIO(host, port)
-        self.cam = self.io.define(LoggingNamespace, '/cam')
+        self.cam = self.io.define(CamNamespace, '/cam')
 
         if config_update_callback:
             self.cam.on('config_update', config_update_callback)
 
         if manual_capture_callback:
             self.cam.on('manual_capture', manual_capture_callback)
-
-        self.hello()
 
         self.io.wait()
 
@@ -79,13 +88,6 @@ class YetiSocket:
     def manual_capture_result(self, result):
         logger.info("Sending manual capture result: %s" % result)
         self.cam.emit("manual_capture_result", {"result": result})
-
-    def hello(self):
-        logger.info("Sending hello")
-        if self.cam:
-            self.cam.emit("hello", yeti.options.name)
-        else:
-            logger.error("Socket connection not established. Cannot send hello")
 
     def connect(self):
         if self.cam:

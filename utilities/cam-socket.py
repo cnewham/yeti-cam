@@ -1,19 +1,31 @@
 ﻿import threading as threading
 import time
-from socketIO_client import SocketIO, LoggingNamespace
+from socketIO_client import SocketIO
+from socketIO_client.namespaces import LoggingSocketIONamespace
+
+
+class CamNamespace(LoggingSocketIONamespace):
+    def on_connect(self):
+        self.emit("hello", "test")
+        super(LoggingSocketIONamespace, self).on_connect()
+
+    def on_reconnect(self):
+        self.emit("hello", "test")
+        super(LoggingSocketIONamespace, self).on_reconnect()
 
 
 class YetiSocket:
     def __init__(self, host='localhost', port=5001, config_update_callback=None, manual_capture_callback=None):
-        self._thread = threading.Thread(target=self._worker, args=(host, port, config_update_callback, manual_capture_callback))
-        self._thread.daemon = True
-        self._thread.start()
         self.cam = None
         self.io = None
 
+        self._thread = threading.Thread(target=self._worker, args=(host, port, config_update_callback, manual_capture_callback))
+        self._thread.daemon = True
+        self._thread.start()
+
     def _worker(self, host, port, config_update_callback, manual_capture_callback):
         self.io = SocketIO(host, port)
-        self.cam = self.io.define(LoggingNamespace, '/cam')
+        self.cam = self.io.define(CamNamespace, '/cam')
 
         if config_update_callback:
             self.cam.on('config_update', config_update_callback)
@@ -31,18 +43,16 @@ class YetiSocket:
         print "Sending manual capture result: %s" % result
         self.cam.emit("manual_capture_result", {"result": result})
 
-    def hello(self):
-        print "Sending hello"
-        if self.cam:
-            self.cam.emit("hello", "test")
-
     def connect(self):
         if self.cam:
             self.cam.connect()
+        else:
+            print "Socket connection not established. Cannot connect"
 
     def disconnect(self):
-        self.cam.disconnect()
-        self.io.disconnect()
+        if self.cam and self.io:
+            self.cam.disconnect()
+            self.io.disconnect()
 
     def __enter__(self):
         return self
@@ -50,12 +60,9 @@ class YetiSocket:
     def __exit__(self, exc_type, exc_value, exc_tb):
         self.disconnect()
 
+
 if __name__ == '__main__':
     socket = YetiSocket()
 
-    time.sleep(1)
-
-    socket.hello()
-
-    time.sleep(30)
+    time.sleep(5)
     socket.disconnect()

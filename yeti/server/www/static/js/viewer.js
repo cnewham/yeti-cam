@@ -144,6 +144,8 @@ $(function () {
   });
 
   socket.on('camera_status', function (data) {
+
+    console.log(data);
     toggleOnlineStatus(data.connected);
     toggleManualCapture(data.connected);
   });

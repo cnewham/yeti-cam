@@ -128,6 +128,7 @@ timer_capture_thread.start()
 
 def signal_handler(signal, frame):
     logger.warning("Stop signal detected...")
+    socket.disconnect()
     capture.stop()
     sys.exit(0)
 

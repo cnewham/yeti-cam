@@ -1,10 +1,9 @@
-﻿from flask_socketio import Namespace, emit, send
+﻿from yeti.server import online as cams
+from flask_socketio import Namespace, emit, send
 from flask import request
 
 import logging
 logger = logging.getLogger(__name__)
-
-online = {}
 
 
 class Cam(Namespace):
@@ -12,16 +11,18 @@ class Cam(Namespace):
         logger.info("Camera (%s) client connected" % request.sid)
 
     def on_disconnect(self):
-        global online
-        logger.info("Camera (%s) client disconnected" % request.sid)
-        del online[request.sid]
-        emit('camera_status', online, namespace='/web', broadcast=True)
+        cams.remove(request.sid)
+        emit('camera_status', cams.get(), namespace='/web', broadcast=True)
 
     def on_hello(self, name):
-        global online
-        online[request.sid] = name
-        logger.info("Camera %s (%s) said hello" % (name, request.sid))
-        emit('camera_status', online, namespace='/web', broadcast=True)
+        logger.info("Camera (%s) [%s] said hello" % (request.sid, name))
+        cams.add(request.sid, name)
+        emit('camera_status', cams.get(), namespace='/web', broadcast=True)
+
+    def on_goodbye(self, name):
+        logger.info("Camera (%s) [%s] said goodbye" % (request.sid, name))
+        cams.remove(request.sid)
+        emit('camera_status', cams.get(), namespace='/web', broadcast=True)
 
     def on_config_updated(self, data):
         emit('config_updated', data, namespace='/web', broadcast=True)
@@ -33,7 +34,7 @@ class Cam(Namespace):
 class Web(Namespace):
     def on_connect(self):
         logger.info("Web client connected")
-        emit('camera_status', {'connected': online})
+        emit('camera_status', cams.get())
 
     def on_disconnect(self):
         logger.info("Web client disconnected")
