@@ -11,17 +11,13 @@ class Cam(Namespace):
         logger.info("Camera (%s) client connected" % request.sid)
 
     def on_disconnect(self):
-        cams.remove(request.sid)
+        cams.update(request.sid, False)
         emit('camera_status', cams.get(), namespace='/web', broadcast=True)
+        cams.remove(request.sid)
 
     def on_hello(self, name):
         logger.info("Camera (%s) [%s] said hello" % (request.sid, name))
         cams.add(request.sid, name)
-        emit('camera_status', cams.get(), namespace='/web', broadcast=True)
-
-    def on_goodbye(self, name):
-        logger.info("Camera (%s) [%s] said goodbye" % (request.sid, name))
-        cams.remove(request.sid)
         emit('camera_status', cams.get(), namespace='/web', broadcast=True)
 
     def on_config_updated(self, data):

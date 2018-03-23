@@ -8,13 +8,21 @@ online = {}
 
 
 def add(sid, name):
-    logger.info("Camera (%s) connected: %s" % (name, sid))
+    logger.info("Camera (%s) - %s - added" % (name, sid))
     global online
-    online[sid] = name
+
+    online[sid] = {"name": name, "connected": True}
+
+
+def update(sid, connected):
+    logger.info("Updating camera status (%s) - connected: %s" % (sid, connected))
+
+    if sid in online:
+        online[sid]["connected"] = connected
 
 
 def remove(sid):
-    logger.info("Camera disconnected: (%s)" % sid)
+    logger.info("Removing camera (%s)" % sid)
     global online
 
     if sid in online:

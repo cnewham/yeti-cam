@@ -1,26 +1,7 @@
-function init() {
-
-  $.ajax({
-        type: "GET",
-        url: "api/v2/capture",
-        dataType: "json",
-        error: function (error) {
-          showAlert("An error occurred: " + error.status + " " + error.statusText, color=alerts.red);
-        },
-        success: function (result) {
-          $("#capture-container").loadTemplate($("#capture-template"), result)
-
-          $.each(result, function(idx, data) {
-            updateImage(data["name"])
-            updateStatus(data["name"])
-          })
-
-          $("#capture-container").dragend({});
-        }
-  });
-
-  refreshWeatherData(false);
-
+var alerts = {
+  red: "alert-red",
+  green: "alert-green",
+  amber: "alert-amber"
 }
 
 function refreshWeatherData(force) {
@@ -65,38 +46,14 @@ function updateImage(name) {
   newImage.attr("src", current + "?" + new Date().getTime());
 }
 
-function toggleOnlineStatus(isOnline) {
-  if (isOnline) {
-    $("#online-indicator").prop("hidden", false);
-    $("#offline-indicator").prop("hidden", true);
+function toggleOnlineStatus(cam) {
+  if (cam.connected) {
+    $("#" + cam.name + " .online").prop("hidden", false);
+    $("#" + cam.name + " .offline").prop("hidden", true);
   } else {
-    $("#online-indicator").prop("hidden", true);
-    $("#offline-indicator").prop("hidden", false);
+    $("#" + cam.name + " .online").prop("hidden", true);
+    $("#" + cam.name + " .offline").prop("hidden", false);
   }
-}
-
-
-function toggleManualCapture(isEnabled) {
-  button = $("#manual-capture");
-  if (isEnabled) {
-    button.removeClass('camera-disabled').addClass('camera-enabled');
-
-    button.unbind('click');
-    button.click(function() {
-      socket.emit('manual_capture', {});
-      toggleManualCapture(false);
-    });
-  }
-  else {
-    button.removeClass('camera-enabled').addClass('camera-disabled');
-    button.unbind('click');
-  }
-}
-
-var alerts = {
-  red: "alert-red",
-  green: "alert-green",
-  amber: "alert-amber"
 }
 
 function showAlert(message, color, expire) {
@@ -118,36 +75,47 @@ function showAlert(message, color, expire) {
 
 }
 
+function init() {
+
+  $.ajax({
+        type: "GET",
+        url: "api/v2/capture",
+        dataType: "json",
+        error: function (error) {
+          showAlert("An error occurred: " + error.status + " " + error.statusText, color=alerts.red);
+        },
+        success: function (result) {
+          $("#capture-container").loadTemplate($("#capture-template"), result)
+
+          $.each(result, function(idx, data) {
+            updateImage(data["name"])
+            updateStatus(data["name"])
+          })
+
+          $("#capture-container").dragend({});
+        }
+  });
+
+  refreshWeatherData(false);
+
+}
+
 $(function () {
-  $.addTemplateFormatter({
-    ConfigUrlFormatter : function(value, template) {
-        return Flask.url_for("configure", { "name":value });
-    }
+
+  socket.on('status_update', function (cam) {
+    updateStatus(cam.name);
   });
 
-  init();
-
-  socket.on('status_update', function (data) {
-    updateStatus(data.name);
+  socket.on('camera_capture', function (cam) {
+    updateImage(cam.name);
   });
 
-  socket.on('camera_capture', function (data) {
-    updateImage(data.name);
-    toggleManualCapture(true);
-  });
+  socket.on('camera_status', function (cams) {
+    console.log(cams);
 
-  socket.on('manual_capture_result', function (data){
-    if (data.result)
-      showAlert("Manual capture request successful", 5000, alerts.green);
-    else
-      showAlert("Manual capture request failed. Camera busy", 5000, alerts.amber);
-  });
-
-  socket.on('camera_status', function (data) {
-
-    console.log(data);
-    toggleOnlineStatus(data.connected);
-    toggleManualCapture(data.connected);
+    $.each(cams, function(idx, cam) {
+        toggleOnlineStatus(cam);
+    });
   });
 
   socket.on('connect', function () {
@@ -155,13 +123,18 @@ $(function () {
   });
 
   $.addTemplateFormatter({
+    ConfigUrlFormatter : function(value, template) {
+            return Flask.url_for("configure", { "name":value });
+        },
     MoonPhaseFormatter : function(value, template) {
             return "age" + Math.floor(parseFloat(value) * 31)
         },
     TempFormatter : function(value, template) {
             return value + "&deg;"
-        },
+        }
   });
+
+    init();
 });
 
 $(window).on("load", function() {

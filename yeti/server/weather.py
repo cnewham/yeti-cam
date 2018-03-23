@@ -38,6 +38,8 @@ def refresh():
     :return:
     """
     try:
+        wu_icon_set = "i"
+
         logger.debug("Requesting conditions")
         api = build_url("conditions");
         response = requests.get(api)
@@ -53,6 +55,9 @@ def refresh():
 
         wu["conditions"]["astrology"] = astro.tojson(latitude, longitude)
 
+        # Change icon set
+        wu["conditions"]["icon_url"] = wu["conditions"]["icon_url"].replace("/k/", "/%s/" % wu_icon_set)
+
         # logger.debug("Requesting alerts")
         # response = requests.get(build_url("alerts"))
         # alerts = json.loads(response.text)
@@ -66,6 +71,7 @@ def refresh():
         for day in wu["forecast"]:
             astrodate = datetime(day["date"]["year"], day["date"]["month"], day["date"]["day"])
             day["astrology"] = astro.tojson(latitude, longitude, astrodate)
+            day["icon_url"] = day["icon_url"].replace("/k/", "/%s/" % wu_icon_set)
 
         wu["expire"] = (datetime.now() + timedelta(minutes=db.get(constants.WEATHER_EXPIRE_MIN))).isoformat()
 

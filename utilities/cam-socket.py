@@ -64,5 +64,5 @@ class YetiSocket:
 if __name__ == '__main__':
     socket = YetiSocket()
 
-    time.sleep(5)
+    time.sleep(10)
     socket.disconnect()
