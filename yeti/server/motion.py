@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 def add_motion_event(event_time, name=yeti.options.name):
-    db = pickledb.load(yeti.get_resource("db/motion.db"), True)
+    db = pickledb.load(yeti.get_resource("motion.db"), True)
 
     if not db.get(name):
         db.lcreate(name)
@@ -18,7 +18,7 @@ def add_motion_event(event_time, name=yeti.options.name):
 
 
 def get_motion_events_from(hours, name=yeti.options.name):
-    db = pickledb.load(yeti.get_resource("db/motion.db"), True)
+    db = pickledb.load(yeti.get_resource("motion.db"), True)
 
     if not db.get(name):
         db.lcreate(name)
@@ -36,7 +36,7 @@ def get_motion_events_from(hours, name=yeti.options.name):
 
 
 def get_all_motion_events(name=yeti.options.name):
-    db = pickledb.load(yeti.get_resource("db/motion.db"), True)
+    db = pickledb.load(yeti.get_resource("motion.db"), True)
 
     if not db.get(name):
         db.lcreate(name)

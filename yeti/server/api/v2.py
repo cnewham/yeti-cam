@@ -61,7 +61,7 @@ class CaptureApi(Resource):
             logger.exception("%s: An error occurred while attempting to receive uploaded image" % name)
             abort(500)
 
-    def allowed_file(self,filename):
+    def allowed_file(self, filename):
         return '.' in filename and filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
 
 

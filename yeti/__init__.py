@@ -51,8 +51,8 @@ def get_cam_resource(name=options.name, path=None, dir_only=False):
     return resource
 
 
-def resource_exists(name=options.name, path=None):
-    return os.path.exists(get_cam_resource(name, path))
+def resource_exists(path):
+    return os.path.exists(path)
 
 
 def get_registered_cams():
