@@ -14,8 +14,11 @@ def process_image(event, upload, name=None):
     filename = None
 
     try:
-        uploaddir = '%s/uploads' % yeti.getcamdir(name)
-        db = pickledb.load('%s/db/server.db' % yeti.getcamdir(name), True)
+        if not yeti.resource_exists(yeti.get_cam_resource(name, "db/server.db")):
+            yeti.server.initialize(name)
+
+        uploaddir = yeti.get_cam_resource(name, "uploads", True)
+        db = pickledb.load(yeti.get_cam_resource(name, "db/server.db"), True)
 
         filename = "%s-%s" % (event,  os.path.basename(upload.filename))
         logger.info("Processing %s event for image %s" % (event, filename))
@@ -39,8 +42,11 @@ def process_video(event, upload, name=None):
     filename = None
 
     try:
-        uploaddir = '%s/uploads' % yeti.getcamdir(name)
-        db = pickledb.load('%s/db/server.db' % yeti.getcamdir(name), True)
+        if not yeti.resource_exists(yeti.get_cam_resource(name, "db/server.db")):
+            yeti.server.initialize(name)
+
+        uploaddir = yeti.get_cam_resource(name, "uploads")
+        db = pickledb.load(yeti.get_cam_resource(name, "db/server.db"), True)
 
         filename = "%s-%s" % (event, os.path.basename(upload.filename))
         logger.info("Processing %s event for video %s" % (event, filename))

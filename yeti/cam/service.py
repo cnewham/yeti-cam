@@ -19,35 +19,36 @@ class YetiService:
         logger.info("Posting Image: %s" % image)
         multiple_files = [('uploads', (image, open(image, 'rb'), 'image/jpg'))]
         r = requests.post(self.baseUrl + "capture/" + yeti.options.name, files=multiple_files, data={"event": event})
-        logger.info("StatusCode: %s, Text: %s" % (r.status_code, r.text))
+        r.raise_for_status()
 
     def post_video(self, video, event):
         logger.info("Posting Video: %s" % video)
         multiple_files = [('uploads', (video, open(video, 'rb'), 'video/h264'))]
         r = requests.post(self.baseUrl + "capture/" + yeti.options.name, files=multiple_files, data={"event": event})
-        logger.info("StatusCode: %s, Text: %s" % (r.status_code, r.text))
+        r.raise_for_status()
 
     def post_status(self, status):
         logger.info("Posting Status: %s" % json.dumps(status))
         r = requests.post(self.baseUrl + "status/" + yeti.options.name, json=status)
-        logger.info("StatusCode: %s, Text: %s" % (r.status_code, r.text))
+        r.raise_for_status()
 
     def get_config(self):
         logger.info("Getting Config")
         r = requests.get(self.baseUrl + "config/" + yeti.options.name)
-        logger.info("StatusCode: %s" % r.status_code)
-        configs = json.loads(r.text)
+        r.raise_for_status()
+
+        configs = r.json()
         return configs
 
     def send_config(self):
         logger.info("Updating server configs")
         r = requests.put(self.baseUrl + "config/" + yeti.options.name, json=config.get())
-        logger.info("StatusCode: %s, Text: %s" % (r.status_code, r.text))
+        r.raise_for_status()
 
     def send_config_status(self, status):
         logger.info("Updating server config status")
         r = requests.patch(self.baseUrl + "config/" + yeti.options.name, json={'status': status})
-        logger.info("StatusCode: %s, Text: %s" % (r.status_code, r.text))
+        r.raise_for_status()
 
 
 class CamNamespace(LoggingSocketIONamespace):

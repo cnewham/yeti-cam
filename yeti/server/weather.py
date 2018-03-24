@@ -8,10 +8,10 @@ import astro
 
 logger = logging.getLogger(__name__)
 
-db = pickledb.load(yeti.createcamdir('db') + '/weather.db', True)
+db = pickledb.load(yeti.get_resource("weather.db"), True)
 
 try:
-    with open('wu.json', 'r') as data_file:
+    with open(yeti.get_resource("wu.json"), 'r') as data_file:
         wu = json.load(data_file)
 except IOError:
     wu = {}

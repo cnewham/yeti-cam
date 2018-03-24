@@ -4,7 +4,7 @@ from flask_restful import Resource, abort, request, reqparse
 from flask import url_for, jsonify
 from werkzeug import exceptions
 import yeti
-from yeti.server import db, uploads, statuses, rabbitmq
+from yeti.server import uploads, statuses, rabbitmq
 from yeti.common import constants, config
 
 import logging

@@ -1,7 +1,6 @@
-﻿import os
-import yeti
+﻿import yeti
 from yeti.server import drive
-from yeti.server import app, db
+from yeti.server import app
 from flask import render_template, send_from_directory, url_for, request, redirect
 
 import logging
@@ -65,7 +64,7 @@ def google_drive_auth():
 @app.route('/uploads/<path:name>/<path:filename>')
 def upload_folder(name, filename):
     try:
-        directory = yeti.getcamdir(name) + "/uploads"
+        directory = yeti.get_cam_resource(name, "uploads")
         return send_from_directory(directory, filename)
     except Exception as ex:
         print type(ex)

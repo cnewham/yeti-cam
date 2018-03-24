@@ -4,7 +4,7 @@ import yeti
 import logging
 import logging.handlers
 
-LOG_DIR = yeti.createcamdir('logs')
+LOG_DIR = yeti.get_cam_resource(path='logs', dir_only=True)
 LOG_LEVEL = logging.INFO
 LOG_FILENAME = "%s/yeticam.log" % LOG_DIR
 

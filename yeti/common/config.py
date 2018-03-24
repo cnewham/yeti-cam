@@ -6,16 +6,22 @@ from yeti.common import constants
 import logging
 logger = logging.getLogger(__name__)
 
-default = pickledb.load(yeti.createcamdir('db') + '/config.db', True)
+default = pickledb.load(yeti.get_cam_resource(path="db/config.db"), True)
+
 # server/config
+
+if not default.get(constants.CONFIG_SERVER):
+    if yeti.options.server is not None:
+        default.set(constants.CONFIG_SERVER, yeti.options.server)
+    else:
+        default.set(constants.CONFIG_SERVER, "http://localhost:5000/api/v2/")
+
 if not default.get(constants.CONFIG_VERSION):
     default.set(constants.CONFIG_VERSION, 0)
 if not default.get(constants.CONFIG_STATUS):
     default.set(constants.CONFIG_STATUS, constants.CONFIG_STATUS_NEW)
 if not default.get(constants.CONFIG_CHECK_INTERVAL_MIN):
     default.set(constants.CONFIG_CHECK_INTERVAL_MIN, 60)
-if not default.get(constants.CONFIG_SERVER):
-    default.set(constants.CONFIG_SERVER, "http://localhost:5000/api/v2/")
 if not default.get(constants.CONFIG_SOCKET_HOST):
     default.set(constants.CONFIG_SOCKET_HOST, "localhost")
 if not default.get(constants.CONFIG_SOCKET_PORT):
@@ -64,13 +70,13 @@ if not default.get(constants.CONFIG_TIMER_INTERVAL_MIN):
     default.set(constants.CONFIG_TIMER_INTERVAL_MIN, 30)
 
 db = {}
-for cam in yeti.getnames():
-    db[cam] = pickledb.load('%s/db/config.db' % yeti.getcamdir(cam), True)
+for cam in yeti.get_registered_cams():
+    db[cam] = pickledb.load(yeti.get_cam_resource(cam, "db/config.db"), True)
 
 
 def get(key=None, name=yeti.options.name):
     if key is None:
-        with open('%s/db/config.db' % yeti.getcamdir(name), 'r') as configdb:
+        with open(yeti.get_cam_resource(name, "db/config.db"), 'r+') as configdb:
             configs = configdb.read()
 
         return json.loads(configs)
@@ -100,11 +106,11 @@ def set_status(status, name=yeti.options.name):
 def update(configs, name=yeti.options.name):
     logger.info("Updating configs")
 
-    if not configs or configs is None:
-        return "No config values have been supplied";
+    if name not in db:
+        db[name] = pickledb.load(yeti.get_cam_resource(name, "db/config.db"), True)
 
-    if configs[constants.CONFIG_VERSION] <= version(name):
-        return "config updated by another user. Please try again"
+    if not configs or configs is None:
+        raise ValueError("No config values have been supplied")
 
     for key, value in configs.iteritems():
         db[name].set(key, value)

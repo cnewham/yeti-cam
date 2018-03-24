@@ -4,43 +4,62 @@ import errno
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--name", help="The unique name of the yeti-cam camera", default="primary")
+parser.add_argument("--server", help="The server to download initial config")
 
 options = parser.parse_args()
 
 
-def createcamdir(path=None):
-    temp = "%s/cams/%s" % (os.getcwd(), options.name)
+def get_resource(path=None, dir_only=False):
+    resource = "%s/cams" % os.getcwd()
 
-    if path:
-        temp += "/%s" % path
+    if path is not None:
+        if path[:1] == "/":
+            resource += path
+        else:
+            resource += "/%s" % path
 
-    try:
-        os.makedirs(temp)
-    except OSError as exception:
-        if exception.errno != errno.EEXIST:
-            raise
+        try:
+            if dir_only:
+                os.makedirs(resource)
+            else:
+                os.makedirs(os.path.dirname(resource))
+        except OSError as exception:
+            if exception.errno != errno.EEXIST:
+                raise
 
-    return temp
-
-
-def camdirexists(name):
-    return os.path.exists("%s/cams/%s" % (os.getcwd(), name))
-
-
-def getcamdir(name=None):
-    if name and not camdirexists(name):
-        raise NameError('%s cam does not exist' % name)
-
-    if name:
-        return "%s/cams/%s" % (os.getcwd(), name)
-    else:
-        return "%s/cams/%s" % (os.getcwd(), options.name)
+    return resource
 
 
-def getnames():
+def get_cam_resource(name=options.name, path=None, dir_only=False):
+    resource = "%s/cams/%s" % (os.getcwd(), name)
+
+    if path is not None:
+        if path[:1] == "/":
+            resource += path
+        else:
+            resource += "/%s" % path
+
+        try:
+            if dir_only:
+                os.makedirs(resource)
+            else:
+                os.makedirs(os.path.dirname(resource))
+        except OSError as exception:
+            if exception.errno != errno.EEXIST:
+                raise
+
+    return resource
+
+
+def resource_exists(name=options.name, path=None):
+    return os.path.exists(get_cam_resource(name, path))
+
+
+def get_registered_cams():
     directory = "%s/cams" % os.getcwd()
 
     return next(os.walk(directory))[1]
 
 
-print createcamdir()
+def cam_is_registered(name):
+    return os.path.exists("%s/cams/%s" % (os.getcwd(), name))

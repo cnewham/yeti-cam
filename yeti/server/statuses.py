@@ -4,6 +4,7 @@ import pickledb
 import datetime
 from flask import url_for
 from yeti.common import constants
+import yeti.server
 from yeti.server import motion
 
 logger = logging.getLogger(__name__)
@@ -12,7 +13,10 @@ logger = logging.getLogger(__name__)
 def process(status, name=None):
     logger.info("Processing status %s" % status)
 
-    db = pickledb.load('%s/db/server.db' % yeti.getcamdir(name), True)
+    if not yeti.resource_exists(yeti.get_cam_resource(name, "db/server.db")):
+        yeti.server.initialize(name)
+
+    db = pickledb.load(yeti.get_cam_resource(name, "db/server.db"), True)
 
     db.drem(constants.STATUS)
     db.dcreate(constants.STATUS)
@@ -39,4 +43,4 @@ def process(status, name=None):
         else:
             db.dadd(constants.STATUS, (key, value))
 
-    db.dump() #persist
+    db.dump()  # persist

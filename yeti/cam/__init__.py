@@ -10,6 +10,7 @@ from yeti.common import constants, config
 from yeti.cam import service, sensors
 import camera_v3 as camera
 import motion
+from requests.exceptions import HTTPError
 
 logger = logging.getLogger(__name__)
 
@@ -42,10 +43,12 @@ def send(filename, event, capture_type):
         logger.exception("An error occurred while attempting to upload to server")
 
 
-def check_config_updates(*args):
-    logger.info("Checking for config updates: %s" % args)
+def check_config_updates(request):
+    logger.info("Checking for config updates: %s" % request)
     try:
-        # TODO: Check args.name against yeti.options.name to see if the config request was for this instance
+        if not request["name"] == yeti.options.name:
+            logger.info("Config request (%s) not for me, ignoring" % request["name"])
+            return
 
         server_configs = server.get_config()
 
@@ -63,6 +66,15 @@ def check_config_updates(*args):
             capture.restart()
             socket.config_updated(config.get_status())
 
+    except HTTPError as ex:
+        logger.exception(ex)
+
+        if ex.response is not None and ex.response.status_code == 404:
+            try:
+                logger.info("Attempting to send updated config to server")
+                server.send_config()
+            except HTTPError as ex:
+                logger.exception(ex)
     except ValueError:
         logger.exception("Could not parse response from server")
     except Exception as ex:
