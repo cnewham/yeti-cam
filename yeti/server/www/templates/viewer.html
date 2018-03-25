@@ -18,6 +18,8 @@
   		var socket = io.connect('ws://' + document.domain + ':' + {{config['SOCKET_PORT']}} + '/web');
   	</script>
 
+	<script type=text/javascript src="{{ url_for('static', filename='js/alerts.js') }}"></script>
+	<script type=text/javascript src="{{ url_for('static', filename='js/weather.js') }}"></script>
   	<script type=text/javascript src="{{ url_for('static', filename='js/viewer.js') }}"></script>
 
   <!-- Mobile Specific Metas
@@ -58,20 +60,20 @@
   		<h6 id="alert-message" class="alert alert-default"></h6>
   		<div class="row" style="margin-top: 10%">
             <div class="three columns" style="font-size:2em">YETI CAM</div>
-            <div class="nine columns">
-                <div class="u-pull-right" style="padding-top:17px;">
-                    <span class="icon" style="content: url({{ url_for('static', filename='images/cabin-icon.png') }});"></span>
-                    <span>45&deg;</span>
-                </div>
-                <div id="conditions-container" class="u-pull-right">
-                    <script id="conditions-template" type="text/x-custom-template">
-                        <a href="/weather">
-                            <img data-src="icon_url" class="conditions-icon"/>
-                            <span data-content="temp_f" data-format="TempFormatter"></span>
-                        </a>
-                    </script>
-                </div>
-            </div>
+			<div class="nine columns" style="padding-top:8px;">
+				<div class="u-pull-right" style="padding-top:8px;">
+					<div class="icon" style="content: url({{ url_for('static', filename='images/cabin-icon.png') }});"></div>
+					<div style="display:inline;padding-left:3px;">45&deg;</div>
+				</div>
+				<div id="conditions-container" class="u-pull-right" style="padding-right:15px;">
+					<script id="conditions-template" type="text/x-custom-template">
+						<a href="/weather" class="u-pull-right">
+							<div data-class="icon" class="wu wu-32 wu-black" data-format="IconFormatter" data-format-target="class"></div>
+							<div style="display:inline;vertical-align:40%;" data-content="temp_f" data-format="TempFormatter"></div>
+						</a>
+					</script>
+				</div>
+			</div>
         </div>
   		<div id="capture-container">
   			<script id="capture-template" type="text/x-custom-template">

@@ -1,23 +1,3 @@
-var alerts = {
-  red: "alert-red",
-  green: "alert-green",
-  amber: "alert-amber"
-}
-
-function refreshWeatherData(force) {
-  $.ajax({
-        type: "GET",
-        url: "api/v2/weather",
-        dataType: "json",
-        error: function (error) {
-          showAlert("An error occurred: " + error.status + " " + error.statusText, color=alerts.red);
-        },
-        success: function (result) {
-          $("#conditions-container").loadTemplate($("#conditions-template"), result["conditions"], {append: true});
-        }
-  });
-}
-
 function updateStatus(name) {
   $.ajax({
     type: "GET",
@@ -56,25 +36,6 @@ function toggleOnlineStatus(cam) {
   }
 }
 
-function showAlert(message, color, expire) {
-  if (message === undefined)
-    return;
-
-  if (color === undefined)
-    color = "alert-default";
-
-  alert = $("#alert-message");
-
-  alert.text(message);
-  alert.removeClass().addClass("alert").addClass(color);
-
-  if (expire === undefined)
-    alert.fadeIn(200);
-  else
-    alert.fadeIn(200).delay(expire).fadeOut(400);
-
-}
-
 function init() {
 
   $.ajax({
@@ -95,9 +56,6 @@ function init() {
           $("#capture-container").dragend({});
         }
   });
-
-  refreshWeatherData(false);
-
 }
 
 $(function () {
@@ -125,12 +83,6 @@ $(function () {
   $.addTemplateFormatter({
     ConfigUrlFormatter : function(value, template) {
             return Flask.url_for("configure", { "name":value });
-        },
-    MoonPhaseFormatter : function(value, template) {
-            return "age" + Math.floor(parseFloat(value) * 31)
-        },
-    TempFormatter : function(value, template) {
-            return value + "&deg;"
         }
   });
 

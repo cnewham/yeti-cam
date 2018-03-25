@@ -1,3 +1,5 @@
+var sunset;
+
 function refreshWeatherData(force) {
 
   $.ajax({
@@ -8,15 +10,25 @@ function refreshWeatherData(force) {
           showAlert("An error occurred: " + error.status + " " + error.statusText, color=alerts.red);
         },
         success: function (result) {
-          $("#conditions-container").loadTemplate($("#conditions-template"), result["conditions"], {append: true});
-          $("#forecast-container").loadTemplate($("#forecast-template"), result["forecast"], {append: true});
+          sunset = Date.parse(result["conditions"]["astrology"]["sun"]["sunset"]);
 
-          $("#forecast-container .precip-indicator").each(function(index) {
-            value = parseFloat(this.innerText);
-            if (value % 1 === 0) {
-                $(this).prop("hidden", true);
-            }
-          });
+          var conditions = $("#conditions-container");
+          var forecast = $("#forecast-container");
+
+          if (conditions.length) {
+            conditions.loadTemplate($("#conditions-template"), result["conditions"], {append: true});
+          }
+
+          if (forecast.length) {
+            forecast.loadTemplate($("#forecast-template"), result["forecast"], {append: true});
+
+            $("#forecast-container .precip-indicator").each(function(index) {
+                value = parseFloat(this.innerText);
+                if (value % 1 === 0) {
+                    $(this).prop("hidden", true);
+                }
+              });
+          }
 
           $("#loading").hide();
         }
@@ -24,41 +36,27 @@ function refreshWeatherData(force) {
 
 }
 
-var alerts = {
-  red: "alert-red",
-  green: "alert-green",
-  amber: "alert-amber"
-}
-
-function showAlert(message, color, expire) {
-  if (message === undefined)
-    return;
-
-  if (color === undefined)
-    color = "alert-default";
-
-  alert = $("#alert-message");
-
-  alert.text(message);
-  alert.removeClass().addClass("alert").addClass(color);
-
-  if (expire === undefined)
-    alert.fadeIn(200);
-  else
-    alert.fadeIn(200).delay(expire).fadeOut(400);
-
-}
-
 $(function () {
 
-$.addTemplateFormatter({
-    MoonPhaseFormatter : function(value, template) {
-            return "age" + Math.floor(parseFloat(value) * 31)
-        },
-    TempFormatter : function(value, template) {
-            return value + "&deg;"
-        },
-});
+    $.addTemplateFormatter({
+        MoonPhaseFormatter : function(value, template) {
+                return "age" + Math.floor(parseFloat(value) * 31);
+            },
+        TempFormatter : function(value, template) {
+                return value + "&deg;";
+            },
+        SimpleTimeFormatter : function(value, template) {
+                return moment(value).format("LT");
+            },
+        IconFormatter : function(value, template) {
+                var condition = "wu-" + value;
 
-  refreshWeatherData(false)
+                if (Date.now() >= sunset)
+                    condition += " wu-night";
+
+                return condition;
+            }
+    });
+
+    refreshWeatherData(false)
 });

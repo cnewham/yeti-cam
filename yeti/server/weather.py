@@ -41,7 +41,7 @@ def refresh():
         wu_icon_set = "i"
 
         logger.debug("Requesting conditions")
-        api = build_url("conditions");
+        api = build_url("conditions")
         response = requests.get(api)
 
         if not response.text:
