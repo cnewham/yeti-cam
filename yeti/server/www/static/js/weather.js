@@ -48,10 +48,10 @@ $(function () {
         SimpleTimeFormatter : function(value, template) {
                 return moment(value).format("LT");
             },
-        IconFormatter : function(value, template) {
+        IconFormatter : function(value, showNight) {
                 var condition = "wu-" + value;
 
-                if (Date.now() >= sunset)
+                if (showNight && Date.now() >= sunset)
                     condition += " wu-night";
 
                 return condition;

@@ -6,21 +6,21 @@
 
     switch (status) {
         case "MODIFIED":
-            yellow.prop("hidden", false);
-            red.prop("hidden", true);
-            green.prop("hidden", true);
+            yellow.show();
+            red.hide();
+            green.hide();
             statusText.text("Pending camera");
             break;
         case "UPDATED":
-            yellow.prop("hidden", true);
-            red.prop("hidden", true);
-            green.prop("hidden", false);
+            yellow.hide();
+            red.hide();
+            green.show();
             statusText.text("Camera updated");
             break;
         default:
-            yellow.prop("hidden", true);
-            red.prop("hidden", false);
-            green.prop("hidden", true);
+            yellow.hide();
+            red.show();
+            green.hide();
             statusText.text("Camera config status unavailable. Current server config version: " + result["version"]);
             break;
     }

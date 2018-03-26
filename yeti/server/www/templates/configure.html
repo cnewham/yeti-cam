@@ -42,10 +42,13 @@
     <div class="container">
         <div class="row" style="margin-top: 10%">
             <div class="twelve columns">
-                <span id="indicator-red" class="indicator icon" style="content: url({{ url_for('static', filename='images/indicator-red.png') }});"></span>
-                <span id="indicator-yellow" class="indicator icon" style="content: url({{ url_for('static', filename='images/indicator-yellow.png') }});"></span>
-                <span id="indicator-green" class="indicator icon u-pull-left" style="content: url({{ url_for('static', filename='images/indicator-green.png') }});"></span>
-                <h4>CONFIGURE [{{ name }}]</h4>
+                <h4>CONFIGURE [{{ name }}]
+                    <span>
+                        <div id="indicator-red" class="icon" style="content: url({{ url_for('static', filename='images/indicator-red.png') }});"></div>
+                        <div id="indicator-yellow" class="icon" style="content: url({{ url_for('static', filename='images/indicator-yellow.png') }});"></div>
+                        <div id="indicator-green" class="icon" style="content: url({{ url_for('static', filename='images/indicator-green.png') }});"></div>
+                    </span>
+                </h4>
             </div>
         </div>
         
