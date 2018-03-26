@@ -59,20 +59,20 @@
   	<div class="container">
   		<h6 id="alert-message" class="alert alert-default"></h6>
   		<div class="row" style="margin-top: 10%">
-            <div class="three columns" style="font-size:2em">YETI CAM</div>
-			<div class="nine columns" style="padding-top:8px;">
-				<div class="u-pull-right" style="padding-top:8px;">
-					<div class="icon" style="content: url({{ url_for('static', filename='images/cabin-icon.png') }});"></div>
-					<div style="display:inline;padding-left:3px;">45&deg;</div>
-				</div>
-				<div id="conditions-container" class="u-pull-right" style="padding-right:15px;">
+			<div class="twelve columns">
+            	<span style="font-size:2em">YETI CAM</span>
+				<span id="conditions-container" class="u-pull-right" style="padding-right:15px;padding-top:7px">
 					<script id="conditions-template" type="text/x-custom-template">
 						<a href="/weather" class="u-pull-right">
 							<div data-class="icon" class="wu wu-32 wu-black" data-format="IconFormatter" data-format-options="true" data-format-target="class"></div>
-							<div style="display:inline;vertical-align:40%;" data-content="temp_f" data-format="TempFormatter"></div>
+							<div data-content="temp_f" data-format="TempFormatter" style="display:inline-block;vertical-align:40%;"></div>
 						</a>
+						<div class="u-pull-right" style="padding:6px 2px 0px 0px;">
+							<div class="icon" style="content: url({{ url_for('static', filename='images/cabin-icon.png') }});"></div>
+							<div data-content="indoor_temp_f" data-format="TempFormatter" style="display:inline-block;padding:0px 7px"></div>
+						</div>
 					</script>
-				</div>
+				</span>
 			</div>
         </div>
   		<div id="capture-container">
@@ -88,12 +88,10 @@
 
                             <div class="online indicator overlay" style="right:0;" hidden>
                                 <span class="icon" style="content: url({{ url_for('static', filename='images/indicator-green.png') }});"></span>
-                                <span>Online</span>
                             </div>
 
                             <div class="offline indicator overlay" style="right:0;">
                                 <span class="icon" style="content: url({{ url_for('static', filename='images/indicator-grey.png') }});"></span>
-                                <span>Offline</span>
                             </div>
 
                             <img class="capture" data-src="url" />

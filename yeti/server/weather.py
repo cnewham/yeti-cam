@@ -19,6 +19,12 @@ except IOError:
 if not db.get(constants.WEATHER_WU_KEY):
     db.set(constants.WEATHER_WU_KEY, "NA")
 
+if not db.get(constants.WEATHER_AMBIENT_APP_KEY):
+    db.set(constants.WEATHER_AMBIENT_APP_KEY, "NA")
+
+if not db.get(constants.WEATHER_AMBIENT_API_KEY):
+    db.set(constants.WEATHER_AMBIENT_API_KEY, "NA")
+
 if not db.get(constants.WEATHER_STATION):
     db.set(constants.WEATHER_STATION, "KPACLEAR5")
 
@@ -26,9 +32,14 @@ if not db.get(constants.WEATHER_EXPIRE_MIN):
     db.set(constants.WEATHER_EXPIRE_MIN, 10)
 
 
-def build_url(feature):
+def build_weather_underground_url(feature):
     return "http://api.wunderground.com/api/%s/%s/q/pws:%s.json" % (
         db.get(constants.WEATHER_WU_KEY), feature, db.get(constants.WEATHER_STATION))
+
+
+def build_ambient_weather_url():
+    return "https://api.ambientweather.net/v1/devices?applicationKey=%s&apiKey=%s" % (
+        db.get(constants.WEATHER_AMBIENT_APP_KEY), db.get(constants.WEATHER_AMBIENT_API_KEY))
 
 
 def refresh():
@@ -41,8 +52,7 @@ def refresh():
         wu_icon_set = "i"
 
         logger.debug("Requesting conditions")
-        api = build_url("conditions")
-        response = requests.get(api)
+        response = requests.get(build_weather_underground_url("conditions"))
 
         if not response.text:
             raise ValueError("response was empty when attempting to access WU API: %s" % api)
@@ -58,13 +68,8 @@ def refresh():
         # Change icon set
         wu["conditions"]["icon_url"] = wu["conditions"]["icon_url"].replace("/k/", "/%s/" % wu_icon_set)
 
-        # logger.debug("Requesting alerts")
-        # response = requests.get(build_url("alerts"))
-        # alerts = json.loads(response.text)
-        # wu["alerts"] = alerts["alerts"]
-
         logger.debug("Requesting forecast")
-        response = requests.get(build_url("forecast"))
+        response = requests.get(build_weather_underground_url("forecast"))
         forecast = json.loads(response.text)
         wu["forecast"] = forecast["forecast"]["simpleforecast"]["forecastday"]
 
@@ -72,6 +77,12 @@ def refresh():
             astrodate = datetime(day["date"]["year"], day["date"]["month"], day["date"]["day"])
             day["astrology"] = astro.tojson(latitude, longitude, astrodate)
             day["icon_url"] = day["icon_url"].replace("/k/", "/%s/" % wu_icon_set)
+
+        response = requests.get(build_ambient_weather_url())
+        ambient = json.loads(response.text)
+
+        if len(ambient) > 0:
+            wu["conditions"]["indoor_temp_f"] = ambient[0]["lastData"]["tempinf"]
 
         wu["expire"] = (datetime.now() + timedelta(minutes=db.get(constants.WEATHER_EXPIRE_MIN))).isoformat()
 
