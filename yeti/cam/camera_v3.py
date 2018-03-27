@@ -2,7 +2,7 @@
 import threading, time, io, os
 from datetime import datetime
 import picamera
-from yeti.common import config, constants
+from yeti.common import config, constants, threaded
 
 import logging
 logger = logging.getLogger(__name__)
@@ -131,9 +131,9 @@ class CaptureHandler:
         self.running = False
         self.working = False
         self.callback = callback
-        self.t = None
 
-    def _worker(self):
+    @threaded
+    def start(self):
         if self.running:
             logger.warn("Camera already running")
             return
@@ -194,10 +194,6 @@ class CaptureHandler:
 
         self.event = event, event_type
         return True
-
-    def start(self):
-        self.t = threading.Thread(target=self._worker)
-        self.t.start()
 
     def stop(self):
         if self.running:

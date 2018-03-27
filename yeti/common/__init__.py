@@ -1,5 +1,5 @@
 ﻿__author__ = 'chris'
-import os
+from threading import Thread
 import yeti
 import logging
 import logging.handlers
@@ -21,3 +21,13 @@ handler.setFormatter(formatter)
 logging.getLogger('').addHandler(handler)
 
 
+def threaded(daemon=False):
+    def threaded_internal(fn):
+        def wrapper(*args, **kwargs):
+            thread = Thread(target=fn, args=args, kwargs=kwargs)
+            thread.daemon = daemon
+            thread.start()
+            return thread
+
+        return wrapper
+    return threaded_internal

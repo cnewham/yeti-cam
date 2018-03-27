@@ -56,6 +56,8 @@ function init() {
           $("#capture-container").dragend({});
         }
   });
+
+   refreshWeatherData(false)
 }
 
 $(function () {

@@ -8,7 +8,7 @@ mkdir -p _dist/yeti/cam
 mkdir -p _dist/yeti/common
 
 echo "Copying setup"
-cp -a utilities/{setup.sh,yeticam.service} _dist/
+cp -a utilities/{setup.sh,yeticam.service,yeticam.environment} _dist/
 
 echo "Copying application"
 cp -a yeti/common/*.py _dist/yeti/common/

@@ -3,10 +3,15 @@ import argparse
 import errno
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--name", help="The unique name of the yeti-cam camera", default="primary")
+parser.add_argument("--name", help="The unique name of the yeti-cam camera")
 parser.add_argument("--server", help="The server to download initial config")
 
 options = parser.parse_args()
+
+if options.name is None and "YETICAM" in os.environ:
+    options.name = os.environ["YETICAM"]
+else:
+    options.name = "primary"
 
 
 def get_resource(path=None, dir_only=False):

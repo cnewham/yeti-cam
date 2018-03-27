@@ -1,19 +1,16 @@
-﻿import threading
-import time
+﻿import time
 import os
-import sys
-import signal
 import logging
 from datetime import datetime
 import yeti
-from yeti.common import constants, config
+from yeti.common import constants, config, threaded
+from yeti.common.shutdown import ShutdownSignalHandler
 from yeti.cam import service, sensors
 import camera_v3 as camera
 import motion
 from requests.exceptions import HTTPError
 
 logger = logging.getLogger(__name__)
-
 logger.info("Starting yeticam as " + yeti.options.name)
 
 
@@ -81,19 +78,6 @@ def check_config_updates(request):
         logger.exception("Could not update configs from the server")
 
 
-def capture_timer_image():
-    time.sleep(5) # Sleep for 5 seconds on startup then take the first picture
-    while True:
-        logger.info("Capturing timer image: %i min" % config.get(constants.CONFIG_TIMER_INTERVAL_MIN))
-
-        success = capture.request()
-
-        if not success:
-            logger.info("Timer image was triggered but the camera was already in use")
-
-        time.sleep(config.get(constants.CONFIG_TIMER_INTERVAL_MIN) * constants.SECONDS2MIN)
-
-
 def capture_manual_image(*args):
     logger.info("Capturing manual image: %s" % args)
 
@@ -130,19 +114,25 @@ socket = service.YetiSocket(config.get(constants.CONFIG_SOCKET_HOST), config.get
 # check for config updates from the server
 check_config_updates({"version": "current", "name": yeti.options.name})
 
-# start all threads and run until a stop signal is detected
+# start capture thread and run until shutdown routine
 capture.start()
 
-timer_capture_thread = threading.Thread(target=capture_timer_image)
-timer_capture_thread.daemon = True
-timer_capture_thread.start()
+
+# start timer capture
+@threaded(True)
+def capture_timer_image():
+    time.sleep(5)  # Sleep for 5 seconds on startup then take the first picture
+    while True:
+        logger.info("Capturing timer image: %i min" % config.get(constants.CONFIG_TIMER_INTERVAL_MIN))
+
+        success = capture.request()
+
+        if not success:
+            logger.info("Timer image was triggered but the camera was already in use")
+
+        time.sleep(config.get(constants.CONFIG_TIMER_INTERVAL_MIN) * constants.SECONDS2MIN)
 
 
-def signal_handler(signal, frame):
-    logger.warning("Stop signal detected...")
-    socket.disconnect()
-    capture.stop()
-    sys.exit(0)
-
-signal.signal(signal.SIGINT, signal_handler)
-
+# shutdown routine
+shutdown = ShutdownSignalHandler([socket.disconnect, capture.stop])
+shutdown.listen()

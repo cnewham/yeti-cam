@@ -1,12 +1,6 @@
 #!/usr/bin/env python
 
-import sys, time
+import sys
 sys.path.insert(0, '/home/yeti/cam/')
 
 import yeti.cam
-
-try:
-    while True:
-        time.sleep(.5)
-except KeyboardInterrupt:
-    exit()

@@ -57,6 +57,4 @@ $(function () {
                 return condition;
             }
     });
-
-    refreshWeatherData(false)
 });

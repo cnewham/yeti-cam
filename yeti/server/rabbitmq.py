@@ -5,6 +5,7 @@ import threading
 import logging
 logger = logging.getLogger(__name__)
 
+
 class EventHandler:
     def __init__(self):
         self.connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))

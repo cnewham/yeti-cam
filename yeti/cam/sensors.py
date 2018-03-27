@@ -2,7 +2,7 @@
 import json
 import pickledb
 import yeti
-from yeti.common import constants
+from yeti.common import constants, threaded
 import Adafruit_DHT
 import logging
 logger = logging.getLogger(__name__)
@@ -101,9 +101,7 @@ class Temperature:
     def __init__(self):
         self.pins = db.dgetall(constants.SENSORS_TEMP)
         logger.debug("Temperature: " + json.dumps(self.pins))
-        self.t = threading.Thread(target=self.start)
-        self.t.daemon = True
-        self.t.start()
+        self.start()
 
     def read(self, sensor = None):
         if sensor is None:
@@ -111,6 +109,7 @@ class Temperature:
         else:
             return self.readings[sensor]
 
+    @threaded(True)
     def start(self):
         logger.info("Starting temperature/humidity sensors")
         sensor = 22
@@ -147,8 +146,4 @@ class Temperature:
                     logger.exception("An error occurred while attempting to read temperature sensors")
 
             time.sleep(db.get(constants.SENSORS_READ_INTERVAL_SEC))
-
-    def stop(self):
-        logger.info("Stopping...")
-        self.t.join(3)
 
