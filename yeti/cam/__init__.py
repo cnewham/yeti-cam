@@ -78,6 +78,20 @@ def check_config_updates(request):
         logger.exception("Could not update configs from the server")
 
 
+@threaded(True)
+def capture_timer_image():
+    time.sleep(5)  # Sleep for 5 seconds on startup then take the first picture
+    while True:
+        logger.info("Capturing timer image: %i min" % config.get(constants.CONFIG_TIMER_INTERVAL_MIN))
+
+        success = capture.request()
+
+        if not success:
+            logger.info("Timer image was triggered but the camera was already in use")
+
+        time.sleep(config.get(constants.CONFIG_TIMER_INTERVAL_MIN) * constants.SECONDS2MIN)
+
+
 def capture_manual_image(*args):
     logger.info("Capturing manual image: %s" % args)
 
@@ -117,22 +131,8 @@ check_config_updates({"version": "current", "name": yeti.options.name})
 # start capture thread and run until shutdown routine
 capture.start()
 
-
 # start timer capture
-@threaded(True)
-def capture_timer_image():
-    time.sleep(5)  # Sleep for 5 seconds on startup then take the first picture
-    while True:
-        logger.info("Capturing timer image: %i min" % config.get(constants.CONFIG_TIMER_INTERVAL_MIN))
-
-        success = capture.request()
-
-        if not success:
-            logger.info("Timer image was triggered but the camera was already in use")
-
-        time.sleep(config.get(constants.CONFIG_TIMER_INTERVAL_MIN) * constants.SECONDS2MIN)
-
+capture_timer_image()
 
 # shutdown routine
 shutdown = ShutdownSignalHandler([socket.disconnect, capture.stop])
-shutdown.listen()

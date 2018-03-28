@@ -71,6 +71,8 @@ class YetiSocket:
         self._thread.start()
 
     def _worker(self, host, port, config_update_callback, manual_capture_callback):
+        logger.info("YetiSocket starting: %s/%s" % (host, port))
+
         self.io = SocketIO(host, port)
         self.cam = self.io.define(CamNamespace, '/cam')
 

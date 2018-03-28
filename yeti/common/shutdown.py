@@ -23,8 +23,5 @@ class ShutdownSignalHandler:
         for subscriber in self.subscribers:
             subscriber()
 
+        logger.info("Shutdown complete")
         sys.exit(0)
-
-    # IMPORTANT: must be executed at the end of the main thread or signals from the os will not be caught
-    def listen(self):
-        signal.pause()
