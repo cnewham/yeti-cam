@@ -1,12 +1,10 @@
 ﻿import threading
 import time
 import os
-import sys
-import signal
 import logging
 from datetime import datetime
 import yeti
-from yeti.common import constants, config
+from yeti.common import constants, config, shutdown
 from yeti.cam import service, sensors
 import camera_v3 as camera
 import motion
@@ -138,11 +136,5 @@ timer_capture_thread.daemon = True
 timer_capture_thread.start()
 
 
-def signal_handler(signal, frame):
-    logger.warning("Stop signal detected...")
-    socket.disconnect()
-    capture.stop()
-    sys.exit(0)
-
-signal.signal(signal.SIGINT, signal_handler)
-
+# shutdown routine
+shutdown_handler = shutdown.ShutdownSignalHandler([socket.disconnect, capture.stop])

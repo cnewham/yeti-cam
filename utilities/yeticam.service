@@ -4,8 +4,10 @@ After=network.target
  
 [Service]
 Type=simple
+TimeoutStopSec=5
+EnvironmentFile=/home/yeti/yeticam.environment
 WorkingDirectory=/home/yeti
-ExecStart=/usr/bin/python /home/yeti/cam.py -name south
+ExecStart=/usr/bin/python /home/yeti/cam.py
 Restart=always
  
 [Install]
