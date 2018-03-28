@@ -23,4 +23,5 @@ class ShutdownSignalHandler:
         for subscriber in self.subscribers:
             subscriber()
 
+        logger.info("Shutdown complete")
         sys.exit(0)
