@@ -6,22 +6,25 @@ logger = logging.getLogger(__name__)
 
 
 class ShutdownSignalHandler:
-    def __init__(self, subscribers=None):
-        self.subscribers = subscribers or []
-        signal.signal(signal.SIGINT, self._handler)
-        signal.signal(signal.SIGTERM, self._handler)
+    def __init__(self, handlers=None):
+        self.handlers = handlers or []
+        signal.signal(signal.SIGINT, self._signal_handler)
+        signal.signal(signal.SIGTERM, self._signal_handler)
 
-    def _handler(self, signal, frame):
+    def _signal_handler(self, signal, frame):
         logger.warn("Stop signal detected: %s" % signal)
         self.shutdown()
 
-    def subscribe(self, fn):
-        self.subscribers.append(fn)
+    def handle(self, fn):
+        self.handlers.append(fn)
 
     def shutdown(self):
         logger.warn("Shutting down...")
-        for subscriber in self.subscribers:
-            subscriber()
+        for handler in self.handlers:
+            try:
+                handler()
+            except Exception:
+                logger.exception("Failed to execute shutdown handler function")
 
         logger.info("Shutdown complete")
         sys.exit(0)

@@ -65,7 +65,7 @@ class YetiPiCamera:
 
     def capture(self):
         with self.__lock__:
-            logger.info("Capture image")
+            logger.info("Capturing image")
             filename = get_filename(config.get(constants.CONFIG_IMAGE_DIR), config.get(constants.CONFIG_IMAGE_PREFIX))
             
             self.stop()
@@ -76,7 +76,7 @@ class YetiPiCamera:
             return filename
 
     def start(self):
-        logger.info("Starting capture")
+        logger.info("Setting up camera")
 
         self.camera.resolution = (config.get(constants.CONFIG_IMAGE_WIDTH),config.get(constants.CONFIG_IMAGE_HEIGHT))
         self.camera.framerate = 2
@@ -99,7 +99,7 @@ class YetiPiCamera:
             time.sleep(seconds)
 
     def stop(self):
-        logger.info("Stopping capture")
+        logger.info("Stopping camera")
 
         if self.motion_enabled:
             self.camera.stop_recording()
@@ -138,7 +138,7 @@ class CaptureHandler:
             logger.warn("Camera already running")
             return
 
-        logger.info("Starting camera")
+        logger.info("Starting capture thread")
         self.event = None
         self.running = True
         self.stopping = False
