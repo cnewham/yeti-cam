@@ -147,6 +147,12 @@
             </div>
             <div id="motion_settings">
                 <div class="row">
+                    <label class="three columns">
+                        <input type="checkbox" id="motion_nightly_schedule" name="motion_nightly_schedule">
+                        <span class="label-body">Night Only</span>
+                    </label>
+                </div>
+                <div class="row">
                     <div class="three columns">
                         <label for="motion_capture_threshold">Capture Count</label>
                         <input class="u-full-width" type="number" id="motion_capture_threshold" name="motion_capture_threshold">
@@ -180,7 +186,6 @@
                     </div>
                 </div>
             </div>
-
             <!--Server configurations-->
             <div class="row" style="margin-top: 5%">
                 <h5>Server</h5>

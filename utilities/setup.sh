@@ -23,4 +23,4 @@ sudo systemctl start yeticam.service
 
 # Add crontab to reboot daily at 2:09am (minutes staggered so multiple cams aren't sending on the same cadence)
 
-#sudo crontab -l | { cat; echo "9 2 0 0 0 reboot"; } | crontab -
+# 0 2 * * * /sbin/shutdown -r +9

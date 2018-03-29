@@ -20,8 +20,7 @@ if not db.get(constants.SENSORS_TEMP):
     # default temp sensor locations
     logger.debug("adding default temp sensor config")
     db.dcreate(constants.SENSORS_TEMP)
-    db.dadd(constants.SENSORS_TEMP, (constants.STATUS_INDOOR_TEMP, 4)) #{name : gpio}
-    db.dadd(constants.SENSORS_TEMP, (constants.STATUS_OUTDOOR_TEMP, 17)) #{name : gpio}
+    # db.dadd(constants.SENSORS_TEMP, (constants.STATUS_INDOOR_TEMP, 4)) #{name : gpio}
 
 if not db.get(constants.SENSORS_MOTION):
     # default motion sensor locations
@@ -103,7 +102,7 @@ class Temperature:
         logger.debug("Temperature: " + json.dumps(self.pins))
         self.start()
 
-    def read(self, sensor = None):
+    def read(self, sensor=None):
         if sensor is None:
             return self.readings
         else:

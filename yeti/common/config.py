@@ -64,6 +64,8 @@ if not default.get(constants.CONFIG_MOTION_EVENT_CAPTURE_TYPE):
     default.set(constants.CONFIG_MOTION_EVENT_CAPTURE_TYPE, constants.EVENT_TYPE_IMAGE)
 if not default.get(constants.CONFIG_MOTION_PERCENT_CHANGE_MAX):
     default.set(constants.CONFIG_MOTION_PERCENT_CHANGE_MAX, 40)
+if default.get(constants.CONFIG_MOTION_NIGHTLY_SCHEDULE) is None:
+    default.set(constants.CONFIG_MOTION_NIGHTLY_SCHEDULE, False)
 
 # capture timer
 if not default.get(constants.CONFIG_TIMER_INTERVAL_MIN):

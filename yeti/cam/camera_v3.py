@@ -132,7 +132,7 @@ class CaptureHandler:
         self.working = False
         self.callback = callback
 
-    @threaded
+    @threaded(False)
     def start(self):
         if self.running:
             logger.warn("Camera already running")
