@@ -48,7 +48,7 @@ def moonphase(now=None):
         return interm[index], pos
 
 
-def suntimes(latitude, longitude, now=None):
+def suntimes(latitude=41.186668, longitude=-78.460136, now=None):
     if now is None:
         now = datetime.datetime.now()
 

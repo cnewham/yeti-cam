@@ -2,7 +2,7 @@
 import picamera
 import picamera.array
 import numpy as np
-from yeti.common import config, constants
+from yeti.common import config, constants, astro
 
 import logging
 logger = logging.getLogger(__name__)
@@ -12,10 +12,13 @@ class MotionEvents:
     def __init__(self):
         self.motion_events = 0
         self.last_motion_event = None
+        self.sunrise, self.sunset = astro.suntimes()
 
     def enabled(self):
         if not config.get(constants.CONFIG_MOTION_ENABLED):
             return False  # motion disabled in configuration
+        elif config.get(constants.CONFIG_MOTION_NIGHTLY_SCHEDULE) and not self.is_night_time():
+            return False  # night schedule is enabled, but it's not nighttime
 
         if self.last_motion_event is None or self.exceeds_motion_capture_delay():
             self.motion_events = 1
@@ -35,6 +38,10 @@ class MotionEvents:
             return delta_date > self.last_motion_event
         else:
             return True
+
+    def is_night_time(self):
+        now = datetime.now()
+        return self.sunset <= now <= self.sunrise
 
 
 class SimpleGaussMotionDetector(picamera.array.PiRGBAnalysis):
