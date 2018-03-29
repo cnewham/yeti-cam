@@ -41,7 +41,7 @@ class MotionEvents:
 
     def is_night_time(self):
         now = datetime.now()
-        return self.sunset <= now <= self.sunrise
+        return now.time() <= self.sunrise.time() or now.time() >= self.sunset.time()
 
 
 class SimpleGaussMotionDetector(picamera.array.PiRGBAnalysis):
