@@ -15,6 +15,11 @@ def initialize(name=None):
 
     if name is None:
         db = pickledb.load(yeti.get_resource(path="server.db"), True)
+        if not db.get('SERVER_NAME'):
+            db.set('SERVER_NAME', 'localhost')
+
+        if not db.get('SOCKET_PORT'):
+            db.set('SOCKET_PORT', 5001)
     else:
         db = pickledb.load(yeti.get_cam_resource(name, path="db/server.db"), True)
         if not db.get('UPLOAD_FOLDER'):
@@ -22,12 +27,6 @@ def initialize(name=None):
 
         if not db.get('CAM_LOG_FOLDER'):
             db.set('CAM_LOG_FOLDER', yeti.get_cam_resource(name, path="logs", dir_only=True))
-
-    if not db.get('SERVER_NAME'):
-        db.set('SERVER_NAME', 'localhost')
-
-    if not db.get('SOCKET_PORT'):
-        db.set('SOCKET_PORT', 5001)
 
     if not db.get(constants.GDRIVE_FOLDER):
         db.set(constants.GDRIVE_FOLDER, '')
