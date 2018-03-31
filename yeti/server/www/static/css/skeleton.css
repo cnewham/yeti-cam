@@ -443,6 +443,10 @@ hr {
     padding: 5px;
 }
 
+.inline div {
+    display: inline-block;
+}
+
 .icon {
     width: 16px;
     height: 16px;

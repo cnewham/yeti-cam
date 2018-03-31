@@ -59,20 +59,29 @@
   	<div class="container">
   		<h6 id="alert-message" class="alert alert-default"></h6>
   		<div class="row" style="margin-top: 10%">
-			<div class="twelve columns">
-            	<span style="font-size:2em">YETI CAM</span>
-				<span id="conditions-container" class="u-pull-right" style="padding-right:15px;padding-top:7px">
+			<div class="twelve columns inline">
+            	<div style="font-size:2em">YETI CAM</div>
+				<div id="conditions-container" class="u-pull-right">
 					<script id="conditions-template" type="text/x-custom-template">
-						<a href="/weather" class="u-pull-right">
-							<div data-class="icon" class="wu wu-32 wu-black" data-format="IconFormatter" data-format-options="true" data-format-target="class"></div>
-							<div data-content="temp_f" data-format="TempFormatter" style="display:inline-block;vertical-align:40%;"></div>
+						<a href="/weather">
+							<div>
+								<div data-class="icon" class="wu wu-32 wu-black" style="position:relative;top:7px;left:5px;" data-format="IconFormatter" data-format-options="true" data-format-target="class"></div>
+								<div data-content="temp_f" data-format="TempFormatter" data-format-options="true"></div>
+							</div>
 						</a>
-						<div class="u-pull-right" style="padding:6px 2px 0px 0px;">
-							<div class="icon" style="content: url({{ url_for('static', filename='images/cabin-icon.png') }});"></div>
-							<div data-content="indoor_temp_f" data-format="TempFormatter" style="display:inline-block;padding:0px 7px"></div>
+						<div>
+							<div>
+								<div class="icon" style="content: url({{ url_for('static', filename='images/cabin-icon.png') }});position:relative;top:1px;"></div>
+								<div data-content="indoor_temp_f" data-format="TempFormatter" data-format-options="true"></div>
+							</div>
+							<span>|</span>
+							<div>
+								<div data-content="indoor_humidity"></div>
+								<span style="position:relative;left:0;">%</span>
+							</div>
 						</div>
 					</script>
-				</span>
+				</div>
 			</div>
         </div>
   		<div id="capture-container" hidden>

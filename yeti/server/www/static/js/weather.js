@@ -44,8 +44,13 @@ $(function () {
         MoonPhaseFormatter : function(value, template) {
                 return "age" + Math.floor(parseFloat(value) * 31);
             },
-        TempFormatter : function(value, template) {
-                return value + "&deg;";
+        TempFormatter : function(value, round) {
+                temp = parseFloat(value);
+
+                if (round)
+                    return Math.round(temp) + "&deg;";
+                else
+                    return temp + "&deg;";
             },
         SimpleTimeFormatter : function(value, template) {
                 return moment(value).format("LT");

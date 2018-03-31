@@ -85,6 +85,7 @@ def refresh():
 
         if len(ambient) > 0:
             wu["conditions"]["indoor_temp_f"] = ambient[0]["lastData"]["tempinf"]
+            wu["conditions"]["indoor_humidity"] = ambient[0]["lastData"]["humidityin"]
 
         wu["expire"] = (datetime.now() + timedelta(minutes=db.get(constants.WEATHER_EXPIRE_MIN))).isoformat()
 
