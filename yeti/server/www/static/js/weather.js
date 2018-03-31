@@ -1,6 +1,6 @@
 var sunset;
 
-function refreshWeatherData(force) {
+function refreshWeatherData(force, callback) {
 
   $.ajax({
         type: "GET",
@@ -30,7 +30,9 @@ function refreshWeatherData(force) {
               });
           }
 
-          $("#loading").hide();
+          if (callback) {
+            callback();
+          }
         }
   });
 

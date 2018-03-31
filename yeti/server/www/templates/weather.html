@@ -22,7 +22,9 @@
   <script type=text/javascript src="{{ url_for('static', filename='js/weather.js') }}"></script>
 
   <script type="text/javascript">
-    refreshWeatherData(false);
+      refreshWeatherData(false, function() {
+        $("#loading").hide();
+      });
   </script>
 
   <!-- Mobile Specific Metas

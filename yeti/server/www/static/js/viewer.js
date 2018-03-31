@@ -53,11 +53,17 @@ function init() {
             updateStatus(data["name"])
           })
 
-          $("#capture-container").dragend({});
+          $("img.capture").one("load", function() {
+            $("#capture-container").show();
+            $("#capture-container").dragend({});
+          });
+
+          refreshWeatherData(false, function() {
+            $("#conditions-container").show();
+          });
         }
   });
 
-   refreshWeatherData(false)
 }
 
 $(function () {

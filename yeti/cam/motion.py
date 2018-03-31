@@ -16,8 +16,10 @@ class MotionEvents:
 
     def enabled(self):
         if not config.get(constants.CONFIG_MOTION_ENABLED):
+            logger.debug("Motion disabled in configuration")
             return False  # motion disabled in configuration
         elif config.get(constants.CONFIG_MOTION_NIGHTLY_SCHEDULE) and not self.is_night_time():
+            logger.debug("Motion disabled because it's not nighttime")
             return False  # night schedule is enabled, but it's not nighttime
 
         if self.last_motion_event is None or self.exceeds_motion_capture_delay():
