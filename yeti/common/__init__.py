@@ -1,10 +1,20 @@
-﻿__author__ = 'chris'
+﻿import os
+import errno
 from threading import Thread
 import yeti
-import logging
 import logging.handlers
 
-LOG_DIR = yeti.get_cam_resource(path='logs', dir_only=True)
+if "LOG_DIR" in os.environ:
+    LOG_DIR = os.environ["LOG_DIR"]
+
+    try:
+        os.makedirs(LOG_DIR)
+    except OSError as exception:
+        if exception.errno != errno.EEXIST:
+            raise
+else:
+    LOG_DIR = yeti.get_cam_resource(path='logs', dir_only=True)
+
 LOG_LEVEL = logging.INFO
 LOG_FILENAME = "%s/yeticam.log" % LOG_DIR
 
