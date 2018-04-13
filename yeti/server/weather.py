@@ -15,7 +15,7 @@ db = pickledb.load(yeti.get_resource("weather.db"), True)
 try:
     with open(yeti.get_resource("wu.json"), 'r') as data_file:
         wu = json.load(data_file)
-except IOError:
+except Exception:
     wu = {}
 
 if not db.get(constants.WEATHER_WU_KEY):
