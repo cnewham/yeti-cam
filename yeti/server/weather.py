@@ -89,7 +89,7 @@ def refresh():
 
         wu["expire"] = (datetime.now() + timedelta(minutes=db.get(constants.WEATHER_EXPIRE_MIN))).isoformat()
 
-        with open(yeti.get_resource("wu.json"), 'r') as data_file:
+        with open(yeti.get_resource("wu.json"), 'r+') as data_file:
             json.dump(wu, data_file)
     except:
         logger.exception("An error occurred while attempting to access WeatherUndergound API")
