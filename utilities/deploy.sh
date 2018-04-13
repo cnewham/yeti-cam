@@ -17,7 +17,13 @@ cp -a yeti/*.py _dist/yeti/
 cp -a cam.py _dist/
 
 echo "Sending to device"
-scp -r _dist/* $DEST
+scp -r _dist/* ${DEST}
+
+echo "Packaging dist"
+tar -czvf dist/release.tar.gz _dist/
+
+#echo "Sending to server"
+#scp dist/release.tar.gz ${DEST}
 
 echo "Cleaning up"
 rm -r _dist
