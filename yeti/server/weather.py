@@ -13,8 +13,8 @@ logger = logging.getLogger(__name__)
 db = pickledb.load(yeti.get_resource("weather.db"), True)
 
 try:
-    with open(yeti.get_resource("wu.json"), 'r') as data_file:
-        wu = json.load(data_file)
+    with open(yeti.get_resource("wu.json"), 'r') as input:
+        wu = json.load(input)
 except Exception:
     wu = {}
 
@@ -89,8 +89,8 @@ def refresh():
 
         wu["expire"] = (datetime.now() + timedelta(minutes=db.get(constants.WEATHER_EXPIRE_MIN))).isoformat()
 
-        with open(yeti.get_resource("wu.json"), 'r+') as data_file:
-            json.dump(wu, data_file)
+        with open(yeti.get_resource("wu.json"), 'w') as output:
+            json.dump(wu, output)
     except:
         logger.exception("An error occurred while attempting to access WeatherUndergound API")
         raise
