@@ -10,7 +10,7 @@ from yeti.server import motion
 logger = logging.getLogger(__name__)
 
 
-def process(status, name=None):
+def process(status, name=yeti.options.name):
     logger.info("Processing status %s" % status)
 
     if not yeti.resource_exists(yeti.get_cam_resource(name, "db/server.db")):

@@ -10,7 +10,7 @@ from yeti.server import drive, motion
 logger = logging.getLogger(__name__)
 
 
-def process_image(event, upload, name=None):
+def process_image(event, upload, name=yeti.options.name):
     filename = None
 
     try:
@@ -38,7 +38,7 @@ def process_image(event, upload, name=None):
     return filename
 
 
-def process_video(event, upload, name=None):
+def process_video(event, upload, name=yeti.options.name):
     filename = None
 
     try:
