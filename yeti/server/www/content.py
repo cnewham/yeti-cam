@@ -71,4 +71,4 @@ def upload_folder(name, filename):
 @app.route('/dist/<path:version>')
 def dist(version):
     directory = "%s/dist" % os.getcwd()
-    return send_from_directory(directory, version)
+    return send_from_directory(directory, "%s.tar.gz" % version)
