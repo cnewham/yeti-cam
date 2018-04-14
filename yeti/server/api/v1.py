@@ -4,7 +4,7 @@ from flask_restful import Resource, abort, request, reqparse
 from flask import url_for, jsonify
 from werkzeug import exceptions
 import yeti
-from yeti.server import uploads, statuses, rabbitmq
+from yeti.server import uploads, statuses, rabbitmq, app
 from yeti.common import constants, config
 
 import logging
@@ -54,7 +54,7 @@ class CaptureApi(Resource):
             abort(500)
 
     def allowed_file(self,filename):
-        return '.' in filename and filename.rsplit('.', 1)[1] in db.get('ALLOWED_EXTENSIONS')
+        return '.' in filename and filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
 
 #Depreciated
 class ImageApi(Resource):
@@ -91,7 +91,7 @@ class ImageApi(Resource):
             abort(500)
 
     def allowed_file(self,filename):
-        return '.' in filename and filename.rsplit('.', 1)[1] in db.get('ALLOWED_EXTENSIONS')
+        return '.' in filename and filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
 
 class ConfigApi(Resource):
     def put(self):
