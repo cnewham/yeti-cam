@@ -46,9 +46,20 @@ function init() {
           showAlert("An error occurred: " + error.status + " " + error.statusText, color=alerts.red);
         },
         success: function (result) {
-          $("#capture-container").loadTemplate($("#capture-template"), result)
+
+          var cams = [];
 
           $.each(result, function(idx, data) {
+            if (!data["hidden"]) {
+                cams.push(data);
+            }
+          });
+
+          cams.sort(function (a,b) { return a.order - b.order })
+
+          $("#capture-container").loadTemplate($("#capture-template"), cams)
+
+          $.each(cams, function(idx, data) {
             updateImage(data["name"])
             updateStatus(data["name"])
           })

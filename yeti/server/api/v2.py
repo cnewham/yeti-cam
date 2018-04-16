@@ -5,7 +5,7 @@ from flask_restful import Resource, abort, request, reqparse
 from flask import url_for, jsonify
 from werkzeug import exceptions
 import yeti
-from yeti.server import weather, uploads, statuses, rabbitmq, app
+from yeti.server import weather, uploads, statuses, rabbitmq, app, cams
 from yeti.common import constants, config
 
 import logging
@@ -25,7 +25,7 @@ class CaptureApi(Resource):
             response = []
             if not name:
                 for cam in yeti.get_registered_cams():
-                    response.append({"name": cam, "url": url_for("upload_folder", name=cam, filename="current.jpg")})
+                    response.append(self.build_cam_properties(cam))
             else:
                 response.append({"name": name, "url": url_for("upload_folder", name=name, filename="current.jpg")})
 
@@ -63,6 +63,15 @@ class CaptureApi(Resource):
 
     def allowed_file(self, filename):
         return '.' in filename and filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
+
+    def build_cam_properties(self, name):
+        cam = {"name": name, "url": url_for("upload_folder", name=name, filename="current.jpg")}
+        properties = cams.get(name)
+
+        for prop, value in properties.iteritems():
+            cam[prop] = value
+
+        return cam
 
 
 class ConfigApi(Resource):
@@ -171,3 +180,27 @@ class WeatherApi(Resource):
             logger.exception("An error occurred while attempting to retrieve weather updates")
             abort(500)
 
+
+class CamsApi(Resource):
+    def get(self):
+        try:
+            return jsonify(cams.get())
+        except exceptions.HTTPException:
+            raise
+        except Exception:
+            logger.exception("An error occurred while attempting to send cams")
+            abort(500)
+
+    def put(self):
+        try:
+            cams.update(request.json)
+            return 205
+
+        except exceptions.HTTPException:
+            raise
+        except ValueError:
+            logger.exception("Invalid cam object")
+            abort(400)
+        except Exception:
+            logger.exception("An error occurred while attempting to update cams")
+            abort(500)
