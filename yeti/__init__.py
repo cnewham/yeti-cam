@@ -8,10 +8,11 @@ parser.add_argument("--server", help="The server to download initial config")
 
 options = parser.parse_args()
 
-if options.name is None and "YETICAM" in os.environ:
-    options.name = os.environ["YETICAM"]
-else:
-    options.name = "primary"
+if options.name is None:
+    if "YETICAM" in os.environ:
+        options.name = os.environ["YETICAM"]
+    else:
+        options.name = "primary"
 
 
 def get_resource(path=None, dir_only=False):

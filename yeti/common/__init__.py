@@ -15,12 +15,16 @@ if "LOG_DIR" in os.environ:
 else:
     LOG_DIR = yeti.get_cam_resource(path='logs', dir_only=True)
 
-LOG_LEVEL = logging.INFO
+LOG_LEVEL = logging.DEBUG
 LOG_FILENAME = "%s/yeticam.log" % LOG_DIR
 
 #configure logging
 logging.basicConfig(level=LOG_LEVEL,
                     format="%(name)-12s: %(levelname)-8s %(message)s")
+
+logging.getLogger("socketIO-client").setLevel(logging.WARNING)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+logging.getLogger("engineio").setLevel(logging.WARNING)
 
 handler = logging.handlers.RotatingFileHandler(
               LOG_FILENAME, maxBytes=500000, backupCount=5)

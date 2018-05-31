@@ -43,7 +43,7 @@ class GpioInputEvent(object):
 
         for channel in channels:
             logger.debug("adding event handler for channel %s" % channel)
-            GPIO.add_event_detect(channel, GPIO.BOTH, callback=self._callback, bouncetime=200)
+            GPIO.add_event_detect(channel, GPIO.BOTH, callback=self._callback, bouncetime=500)
 
     def _callback(self, channel):
         if GPIO.input(channel):
@@ -52,11 +52,11 @@ class GpioInputEvent(object):
             self.deactivated(channel)
 
     def activated(self, channel):
-        # overridable: called when a channel goes active
+        # overridable: called when a channel goes high
         pass
 
     def deactivated(self, channel):
-        # overridable: called when a channel goes inactive
+        # overridable: called when a channel goes low
         pass
 
     def __enter__(self):

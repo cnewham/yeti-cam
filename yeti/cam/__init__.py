@@ -51,9 +51,16 @@ def check_config_updates(request):
 
         if server_configs is None or server_configs[constants.CONFIG_VERSION] < config.get(constants.CONFIG_VERSION):
             logger.info("Server config out of date, sending updated cam config")
+            logger.debug("Server config version: %s, local config version %s" %
+                         (server_configs[constants.CONFIG_VERSION], config.get(constants.CONFIG_VERSION)))
+
             server.send_config()
+            server.send_config_status(config.get_status())
+
         elif server_configs[constants.CONFIG_VERSION] > config.get(constants.CONFIG_VERSION):
             logger.info("Cam config updating from server")
+            logger.debug("Server config version: %s, local config version %s" %
+                         (server_configs[constants.CONFIG_VERSION], config.get(constants.CONFIG_VERSION)))
 
             config.update(server_configs)
             config.set_status(constants.CONFIG_STATUS_UPDATED)
@@ -74,7 +81,7 @@ def check_config_updates(request):
                 logger.exception(ex)
     except ValueError:
         logger.exception("Could not parse response from server")
-    except Exception as ex:
+    except Exception:
         logger.exception("Could not update configs from the server")
 
 
@@ -114,6 +121,12 @@ def capture_motion_image(detected):
     if not success:
         logger.info("Motion image was triggered but the camera was already in use")
 
+# option to pull down initial config from server
+if yeti.options.server is not None:
+    logger.warn("Manual override of server. using: %s" % yeti.options.server)
+    url = yeti.options.server
+else:
+    url = config.get(constants.CONFIG_SERVER)
 
 # Initialize
 motion_events = motion.MotionEvents()
@@ -121,7 +134,7 @@ motion_sensors = sensors.Motion(capture_motion_image)
 
 capture = camera.CaptureHandler(send)
 temp = sensors.Temperature()
-server = service.YetiService(config.get(constants.CONFIG_SERVER))
+server = service.YetiService(url)
 socket = service.YetiSocket(config.get(constants.CONFIG_SOCKET_HOST), config.get(constants.CONFIG_SOCKET_PORT),
                             config_update_callback=check_config_updates, manual_capture_callback=capture_manual_image)
 
@@ -136,3 +149,4 @@ capture_timer_image()
 
 # shutdown routine
 shutdown = ShutdownSignalHandler([socket.disconnect, capture.stop])
+

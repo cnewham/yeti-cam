@@ -87,10 +87,18 @@ class YetiSocket:
 
     def config_updated(self, status):
         logger.info("Sending config updated result: %s" % status)
+        if self.cam is None:
+            logger.warn("Socket not connected")
+            return
+
         self.cam.emit("config_updated", {"status":status})
 
     def manual_capture_result(self, result):
         logger.info("Sending manual capture result: %s" % result)
+        if self.cam is None:
+            logger.warn("Socket not connected")
+            return
+
         self.cam.emit("manual_capture_result", {"result": result})
 
     def connect(self):
@@ -100,8 +108,12 @@ class YetiSocket:
             logger.error("Socket connection not established. Cannot connect")
 
     def disconnect(self):
-        if self.cam and self.io:
+        if self.cam:
+            logger.debug("Unregistering cam namespace")
             self.cam.disconnect()
+
+        if self.io:
+            logger.debug("Disconnecting socket")
             self.io.disconnect()
 
     def __enter__(self):

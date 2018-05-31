@@ -132,7 +132,7 @@ class CaptureHandler:
         self.working = False
         self.callback = callback
 
-    @threaded(False)
+    @threaded(True)
     def start(self):
         if self.running:
             logger.warn("Camera already running")
@@ -140,11 +140,11 @@ class CaptureHandler:
 
         logger.info("Starting capture thread")
         self.event = None
-        self.running = True
         self.stopping = False
 
         with YetiPiCamera(picamera.PiCamera(), self) as camera:
             try:
+                self.running = True
                 camera.start()
 
                 while not self.stopping:
@@ -173,8 +173,6 @@ class CaptureHandler:
             except Exception:
                 logger.exception("Camera failure has occurred")
             finally:
-                logger.info("Stopping camera")
-                camera.close()
                 self.running = False
 
     def motion_detected(self):
@@ -197,10 +195,13 @@ class CaptureHandler:
 
     def stop(self):
         if self.running:
+            logger.debug("Stopping camera")
             self.stopping = True
 
             while self.running:
                 time.sleep(.5)
+
+        logger.debug("Camera stopped")
 
     def restart(self):
         self.stop()
