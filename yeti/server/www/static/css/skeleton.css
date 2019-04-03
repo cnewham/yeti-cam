@@ -415,12 +415,22 @@ hr {
     top: -20px
 }
 
+
+
 .alert-red {
   color: darkred;
 }
 
+li.alert-red > a {
+  color: af1111;
+}
+
 .alert-amber {
   color: #FFA700;
+}
+
+li.alert-amber > a {
+  color: #ce850e;
 }
 
 .alert-green {
@@ -429,6 +439,10 @@ hr {
 
 .alert-default {
   color: #000000;
+}
+
+li.alert-default > a {
+  color: #423f3f;
 }
 
 .image-container {
@@ -726,6 +740,32 @@ hr {
 .wu-256.wu-sunny { background-position: -1069px -271px; }
 .wu-256.wu-tstorms { background-position: -1069px -537px; }
 .wu-256.wu-unknown { background-position: -1069px -803px; }
+
+
+/*! Darksky converted icons */
+.wu-32.clear-day { background-position: -47px -47px; }
+.wu-32.clear-night { background-position: -47px -47px; }
+.wu-32.cloudy { background-position: -89px -47px; }
+.wu-32.fog { background-position: -5px -89px; }
+.wu-32.partly-cloudy-day { background-position: -47px -131px;}
+.wu-32.partly-cloudy-night { background-position: -47px -131px;}
+.wu-32.rain { background-position: -89px -131px; }
+.wu-32.sleet { background-position: -131px -131px; }
+.wu-32.snow { background-position: -173px -5px; }
+.wu-32.wind { background-position: -47px -89px; }
+.wu-32.unknown { background-position: -173px -131px; }
+
+.wu-64.clear-day { background-position: -79px -79px; }
+.wu-64.clear-night { background-position: -79px -79px; }
+.wu-64.cloudy { background-position: -153px -79px; }
+.wu-64.fog { background-position: -5px -153px; }
+.wu-64.wind { background-position: -79px -153px; }
+.wu-64.partly-cloudy-day { background-position: -79px -227px; }
+.wu-64.partly-cloudy-night { background-position: -79px -227px; }
+.wu-64.rain { background-position: -153px -227px; }
+.wu-64.sleet { background-position: -227px -227px; }
+.wu-64.snow { background-position: -301px -5px; }
+.wu-64.unknown { background-position: -301px -227px; }
 
 
 /* Clearing

@@ -5,7 +5,7 @@ import math, decimal, datetime
 dec = decimal.Decimal
 
 
-def moonphase(now=None):
+def calculate_moonphase(now=None):
     if now is None:
         now = datetime.datetime.now()
 
@@ -15,6 +15,11 @@ def moonphase(now=None):
 
     pos = lunations % dec(1)
 
+    return moonphase(pos)
+
+
+def moonphase(position):
+    pos = dec(position)
     quarter = dec(round(pos * 4) / 4)
     isphase = False
 
@@ -48,7 +53,7 @@ def moonphase(now=None):
         return interm[index], pos
 
 
-def suntimes(latitude=41.186668, longitude=-78.460136, now=None):
+def suntimes(latitude, longitude, now=None):
     if now is None:
         now = datetime.datetime.now()
 
@@ -68,7 +73,7 @@ def tojson(latitude, longitude, now=None):
 
     now = datetime.datetime.combine(now, datetime.time(21, 00, 00))
 
-    moon = moonphase(now)
+    moon = calculate_moonphase(now)
     sun = suntimes(float(latitude), float(longitude), now)
 
     astrology = {

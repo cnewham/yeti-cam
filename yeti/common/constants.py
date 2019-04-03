@@ -72,9 +72,11 @@ LAST_CAM_UPDATE = 'last_cam_update'
 
 #WEATHER CONSTANTS
 
+WEATHER_LOCATION = "weather_location"
 WEATHER_WU_KEY = "wu_key"
 WEATHER_AMBIENT_APP_KEY = "ambient_app_key"
 WEATHER_AMBIENT_API_KEY = "ambient_api_key"
 WEATHER_STATION = "station"
 WEATHER_FEATURES = "features"
 WEATHER_EXPIRE_MIN = "expire_min"
+WEATHER_DARKSKY_API_KEY = "darksky_api_key"

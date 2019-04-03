@@ -52,6 +52,7 @@
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <div class="container">
     <h6 id="alert-message" class="alert alert-default"></h6>
+
     <div class="row" style="margin-top: 10%">
       <div class="twelve columns">
         <div class="u-pull-left" style="font-size:2em">WEATHER</div>
@@ -59,15 +60,27 @@
           <a href="https://www.wunderground.com/personal-weather-station/dashboard?ID=KPACLEAR5" target="_blank">
             <img src="http://icons.wxug.com/graphics/wu2/logo_130x80.png">
           </a>
+          <img src="https://darksky.net/dev/img/attribution/poweredby.png">
         </div>
       </div>
     </div>
+
+    <div class="row">
+      <div class="ten columns">
+          <div id="alerts-container">
+            <script id="alerts-template" type="text/x-custom-template">
+              <div>
+                <li data-class="severity" data-format-target="class" data-format="AlertFormatter">
+                  <a data-href="uri" target="_blank"><span data-content="title"></span></a>
+                </li>
+              </div>
+            </script>
+          </div>
+      </div>
+    </div>
+
     <div id="conditions-container">
       <script id="conditions-template" type="text/x-custom-template">
-        <div class="row" style="padding-top:20px;">
-          <div data-content="station_id"></div>
-          <div data-content="observation_time"></div>
-        </div>
         <div class="weather-section" style="margin-top:20px;">
           <div class="row">
             <div class="six columns u-max-full-width" style="padding:10px;">
@@ -75,8 +88,8 @@
                 <div data-class="icon" class="wu wu-64 wu-black" data-format="IconFormatter" data-format-options="true" data-format-target="class"></div>
               </div>
               <div class="u-pull-left">
-                <h3 data-content="temp_f" data-format="TempFormatter" style="margin-bottom:0px;"></h3>
-                <div data-content="feelslike_f" data-format="TempFormatter"></div>
+                <h3 data-content="temp" data-format="TempFormatter" style="margin-bottom:0px;"></h3>
+                <div data-content="apparentTemp" data-format="TempFormatter"></div>
               </div>
               <div class="u-pull-right">
                 <div style="margin-bottom:10px;" data-content="weather"></div>
@@ -89,18 +102,18 @@
                 <tbody>
                   <tr>
                     <td>Precip</td>
-                    <td><span data-content="precip_today_in"></span>&nbsp;in</td>
+                    <td><span data-content="precipitation.daily"></span>&nbsp;in</td>
                   </tr>
                   <tr>
                     <td>Precip Rate</td>
-                    <td><span data-content="precip_1hr_in"></span>&nbsp;in/hr</td>
+                    <td><span data-content="precipitation.hourly"></span>&nbsp;in/hr</td>
                   </tr>
                   <tr>
                     <td>Humidity</td>
-                    <td data-content="relative_humidity"></td>
+                    <td><span data-content="humidity"></span><span>%</span></td>
                   <tr>
                     <td>Wind</td>
-                    <td><span data-content="wind_mph"></span>&nbsp;mph&nbsp;<span data-content="wind_dir"></span></td>
+                    <td><span data-content="wind.speed"></span>&nbsp;mph&nbsp;<span data-content="wind.direction"></span></td>
                   </tr>
                 </tbody>
               </table>
@@ -112,21 +125,24 @@
     <div id="forecast-container" style="margin-top:50px;margin-bottom:30px;">
       <script id="forecast-template" type="text/x-custom-template">
         <div class="row" style="margin-top:10px;">
-          <div data-content="date.weekday" class="twelve columns"></div>
+          <div data-content="date" data-format="WeekdayFormatter" class="two columns"></div>
+          <div data-content="summary" class="ten columns" style="font-style: italic;"></div>
         </div>
         <div class="weather-section">
           <div class="row">
             <div class="six columns u-max-full-width" style="padding:10px;">
               <div class="u-pull-left" style="padding:10px 15px 0px 0px">
-                <div data-class="icon" class="wu wu-64 wu-black" data-format="IconFormatter" data-format-target="class"></div>
+                <div data-class="icon" class="wu wu-64 wu-black" data-format="IconFormatter" data-format-target="class" data-format-options="true"></div>
               </div>
               <div class="u-pull-left">
-                <h5><span data-content="low.fahrenheit" data-format="TempFormatter"></span> | <span data-content="high.fahrenheit" data-format="TempFormatter"></span></h5>
+                <h5><span data-content="temp.low" data-format="TempFormatter" data-format-options="true"></span> | <span data-content="temp.high" data-format="TempFormatter" data-format-options="true"></span></h5>
                 <div data-content="conditions" style="margin-bottom:10px;"></div>
               </div>
               <div class="u-pull-right" style="padding-right:12px;">
-                <div class="precip-indicator"><span class="wu-icon wet" title="chance of precipitation"></span><span data-content="qpf_allday.in"></span></div>
-                <div class="precip-indicator"><span class="wu-icon snow" title="chance of snow"></span><span data-content="snow_allday.in"></span></div>
+                <div class="precip-indicator">
+                  <span data-class="precipitation.type" data-format="PrecipitationIconFormatter" data-format-target="class" title="chance of precipitation"></span>
+                  <span data-content="precipitation.accumulation" data-format="PrecipitationFormatter"></span>
+                </div>
               </div>
             </div>
             <div class="six columns condensed" style="padding:10px;" >
@@ -134,15 +150,15 @@
                 <tbody>
                   <tr>
                     <td>Chance of Precip</td>
-                    <td><span data-content="pop"></span>%</td>
+                    <td><span data-content="precipitation.probability" data-format="PercentageFormatter"></span></td>
                   </tr>
                   <tr>
                     <td>Average Wind</td>
-                    <td><span data-content="avewind.mph"></span>&nbsp;mph&nbsp;<span data-content="avewind.dir"></span></td>
+                    <td><span data-content="wind.speed"></span>&nbsp;mph&nbsp;<span data-content="wind.dir"></span></td>
                   </tr>
                   <tr>
                     <td>Humidity</td>
-                    <td><span data-content="avehumidity"></span>%</td>
+                    <td><span data-content="humidity" data-format="PercentageFormatter"></span></td>
                 </tbody>
               </table>
             </div>

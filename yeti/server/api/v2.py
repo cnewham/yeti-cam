@@ -5,7 +5,7 @@ from flask_restful import Resource, abort, request, reqparse
 from flask import url_for, jsonify
 from werkzeug import exceptions
 import yeti
-from yeti.server import weather, uploads, statuses, rabbitmq, app, cams
+from yeti.server import weather_v2 as weather, uploads, statuses, rabbitmq, app, cams
 from yeti.common import constants, config
 
 import logging

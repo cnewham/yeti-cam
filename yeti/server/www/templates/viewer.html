@@ -66,17 +66,17 @@
 						<a href="/weather">
 							<div>
 								<div data-class="icon" class="wu wu-32 wu-black" style="position:relative;top:5px;left:3px;" data-format="IconFormatter" data-format-options="true" data-format-target="class"></div>
-								<div data-content="temp_f" data-format="TempFormatter" data-format-options="true"></div>
+								<div data-content="temp" data-format="TempFormatter" data-format-options="true"></div>
 							</div>
 						</a>
 						<div>
 							<div>
 								<div class="icon" style="content: url({{ url_for('static', filename='images/cabin-icon.png') }});position:relative;top:1px;"></div>
-								<div data-content="indoor_temp_f" data-format="TempFormatter" data-format-options="true"></div>
+								<div data-content="indoor.temp" data-format="TempFormatter" data-format-options="true"></div>
 							</div>
 							<span>|</span>
 							<div>
-								<div data-content="indoor_humidity"></div>
+								<div data-content="indoor.humidity"></div>
 								<span>%</span>
 							</div>
 						</div>
