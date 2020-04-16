@@ -5,11 +5,20 @@ from flask_restful import Resource, abort, request, reqparse
 from flask import url_for, jsonify
 from werkzeug import exceptions
 import yeti
-from yeti.server import weather_v2 as weather, uploads, statuses, rabbitmq, app, cams
+from yeti.server import weather_v2 as weather, uploads, statuses, rabbitmq, app, cams, moultrie
 from yeti.common import constants, config
 
 import logging
 logger = logging.getLogger(__name__)
+
+
+class MoultrieCaptureApi(Resource):
+    def get(self):
+        try:
+            return jsonify(moultrie.get_latest_pics())
+        except Exception:
+            logger.exception("An error occurred while attempting to retrieve moultrie pics")
+            abort(400)
 
 
 class CaptureApi(Resource):
@@ -26,6 +35,11 @@ class CaptureApi(Resource):
             if not name:
                 for cam in yeti.get_registered_cams():
                     response.append(self.build_cam_properties(cam))
+                try:
+                    moultrie_pics = moultrie.get_latest_pics()
+                    response.append({"name": "moultrie", "url": moultrie_pics[0]["imageUrl"]})
+                except Exception:
+                    logger.exception("Could not retrieve moultrie data")
             else:
                 response.append({"name": name, "url": url_for("upload_folder", name=name, filename="current.jpg")})
 
@@ -139,6 +153,9 @@ class StatusApi(Resource):
                 for cam in yeti.get_registered_cams():
                     response.append({"name": cam, "url": url_for("statusapi.v2", name=cam)})
             else:
+                if not yeti.cam_is_registered(name):
+                    abort(404)
+
                 db = pickledb.load(yeti.get_cam_resource(name, "db/server.db"), True)
                 response = db.dgetall(constants.STATUS)
 

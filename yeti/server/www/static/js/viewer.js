@@ -1,10 +1,16 @@
 function updateStatus(name) {
+  if (name == "moultrie") {
+    return
+  }
+
   $.ajax({
     type: "GET",
     url: "api/v2/status/" + name,
     dataType: "json",
     error: function (error) {
-      showAlert("An error occurred: " + error.status + " " + error.statusText, color=alerts.red);
+      if (error.status != 404) {
+        showAlert("An error occurred: " + error.status + " " + error.statusText, color=alerts.red);
+      }
     },
     success: function (result) {
       status = "<table style='width:100%'>";
@@ -26,6 +32,11 @@ function updateImage(name) {
   newImage.attr("src", current + "?" + new Date().getTime());
 }
 
+function updateMoultrieImage(name, imgUrl) {
+  newImage = $("#" + name + " .capture");
+  newImage.attr("src", imgUrl);
+}
+
 function toggleOnlineStatus(cam) {
   if (cam.connected) {
     $("#" + cam.name + " .online").prop("hidden", false);
@@ -37,7 +48,6 @@ function toggleOnlineStatus(cam) {
 }
 
 function init() {
-
   $.ajax({
         type: "GET",
         url: "api/v2/capture",
@@ -60,7 +70,12 @@ function init() {
           $("#capture-container").loadTemplate($("#capture-template"), cams)
 
           $.each(cams, function(idx, data) {
-            updateImage(data["name"])
+            if (data["name"] == "moultrie") {
+              updateMoultrieImage(data["name"], data["url"])
+            } else {
+              updateImage(data["name"])
+            }
+
             updateStatus(data["name"])
           })
 

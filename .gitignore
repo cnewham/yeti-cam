@@ -10,3 +10,4 @@ env/
 dist
 _dist
 cams/*
+*.sqlite
