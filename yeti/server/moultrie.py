@@ -61,7 +61,7 @@ def get_latest_pics():
     try:
         return retrieve()
     except HTTPError as e:
-        if e.response == 401:
+        if e.response.status_code == 401:
             logger.warn("Token expired")
             login()
             return retrieve()
