@@ -25,6 +25,7 @@ class CaptureApi(Resource):
     def __init__(self):
         self.parser = reqparse.RequestParser()
         self.parser.add_argument("event", type=str, required=True, location="form")
+        self.parser.add_argument("persist", type=int, required=False, location="form", default=1)
 
     def get(self, name=None):
         try:
@@ -35,11 +36,6 @@ class CaptureApi(Resource):
             if not name:
                 for cam in yeti.get_registered_cams():
                     response.append(self.build_cam_properties(cam))
-                try:
-                    moultrie_pics = moultrie.get_latest_pics()
-                    response.append({"name": "moultrie", "url": moultrie_pics[0]["imageUrl"]})
-                except Exception:
-                    logger.exception("Could not retrieve moultrie data")
             else:
                 response.append({"name": name, "url": url_for("upload_folder", name=name, filename="current.jpg")})
 
@@ -54,12 +50,13 @@ class CaptureApi(Resource):
 
             args = self.parser.parse_args(request)
             uploaded = request.files['uploads']
+            persist = bool(args["persist"])
 
             if uploaded and self.allowed_file(uploaded.filename):
                 if uploaded.content_type in ("image/jpg","image/jpeg"):
-                    filename = uploads.process_image(args["event"], uploaded, name)
+                    filename = uploads.process_image(args["event"], uploaded, name, persist)
                 elif uploaded.content_type == "video/h264":
-                    filename = uploads.process_video(args["event"], uploaded, name)
+                    filename = uploads.process_video(args["event"], uploaded, name, persist)
                 else:
                     return {'error':'Unsupported capture type: %s' % uploaded.content_type}, 400
 

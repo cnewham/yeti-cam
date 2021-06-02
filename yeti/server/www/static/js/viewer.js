@@ -1,8 +1,4 @@
 function updateStatus(name) {
-  if (name == "moultrie") {
-    return
-  }
-
   $.ajax({
     type: "GET",
     url: "api/v2/status/" + name,
@@ -30,11 +26,6 @@ function updateImage(name) {
 
   newImage = $("#" + name + " .capture");
   newImage.attr("src", current + "?" + new Date().getTime());
-}
-
-function updateMoultrieImage(name, imgUrl) {
-  newImage = $("#" + name + " .capture");
-  newImage.attr("src", imgUrl);
 }
 
 function toggleOnlineStatus(cam) {
@@ -70,12 +61,7 @@ function init() {
           $("#capture-container").loadTemplate($("#capture-template"), cams)
 
           $.each(cams, function(idx, data) {
-            if (data["name"] == "moultrie") {
-              updateMoultrieImage(data["name"], data["url"])
-            } else {
-              updateImage(data["name"])
-            }
-
+            updateImage(data["name"])
             updateStatus(data["name"])
           })
 

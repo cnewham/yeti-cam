@@ -10,7 +10,7 @@ from yeti.server import drive, motion
 logger = logging.getLogger(__name__)
 
 
-def process_image(event, upload, name=yeti.options.name):
+def process_image(event, upload, name=yeti.options.name, upload_gdrive=True):
     filename = None
 
     try:
@@ -26,7 +26,7 @@ def process_image(event, upload, name=yeti.options.name):
         upload.save(capture)
         shutil.copy(capture, os.path.join(uploaddir, "current.jpg"))
 
-        if db.get(constants.ENABLE_GDRIVE):
+        if upload_gdrive and db.get(constants.ENABLE_GDRIVE):
             drive.upload(capture, event, db.get(constants.GDRIVE_FOLDER))
             os.remove(capture)
     except:
@@ -38,7 +38,7 @@ def process_image(event, upload, name=yeti.options.name):
     return filename
 
 
-def process_video(event, upload, name=yeti.options.name):
+def process_video(event, upload, name=yeti.options.name, upload_gdrive=True):
     filename = None
 
     try:
@@ -53,7 +53,7 @@ def process_video(event, upload, name=yeti.options.name):
         recording = os.path.join(uploaddir, filename)
         upload.save(recording)
 
-        if db.get(constants.ENABLE_GDRIVE):
+        if upload_gdrive and db.get(constants.ENABLE_GDRIVE):
             drive.upload(recording, event, db.get(constants.GDRIVE_FOLDER))
             os.remove(recording)
 
